@@ -7,13 +7,18 @@ import { cn } from "@/lib/utils"
 import { useSettings } from "@/hooks/useSettings"
 import Toggle from "./Toggle"
 
+import { UserProfile } from "@/lib/db"
+
 interface SettingsPanelProps {
   isOpen: boolean
   onClose: () => void
+  userProfile: UserProfile | null | undefined
+  updateProfileName: (name: string) => Promise<void>
+  clearAllHistory: () => Promise<void>
 }
 
-export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
-  const { preferences, userProfile, updatePreferences, updateProfileName, clearAllHistory } = useSettings()
+export default function SettingsPanel({ isOpen, onClose, userProfile, updateProfileName, clearAllHistory }: SettingsPanelProps) {
+  const { preferences, updatePreferences } = useSettings()
   const [isEditingName, setIsEditingName] = useState(false)
   const [tempName, setTempName] = useState("")
 

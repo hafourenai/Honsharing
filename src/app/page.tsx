@@ -10,10 +10,10 @@ export default function Home() {
 
   if (!isLoaded) return null
 
-  const handleOnboardingComplete = async (name: string, initialMood: string, starterMessage: string) => {
+  const handleOnboardingComplete = async (name: string, initialMood: string) => {
     await saveProfile(name, initialMood)
-    // Send the starter message immediately
-    await sendMessage(starterMessage)
+    // Automatically trigger the first message from the user based on their selected feeling
+    await sendMessage(`Aku lagi merasa ${initialMood}...`)
   }
 
   return (

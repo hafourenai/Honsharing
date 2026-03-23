@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let embedder: any = null;
 
 async function getEmbedder() {
@@ -10,7 +11,10 @@ async function getEmbedder() {
   return embedder;
 }
 
+// Embedding runs locally — no rate limit needed
+
 export async function POST(request: NextRequest) {
+
   try {
     const { text } = await request.json();
 
@@ -23,10 +27,11 @@ export async function POST(request: NextRequest) {
     const embedding = Array.from(output.data) as number[];
 
     return NextResponse.json({ embedding });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Embedding error:", error);
+    const msg = error instanceof Error ? error.message : "Gagal generate embedding";
     return NextResponse.json(
-      { error: error.message || "Gagal generate embedding" },
+      { error: msg },
       { status: 500 }
     );
   }

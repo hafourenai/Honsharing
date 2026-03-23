@@ -34,8 +34,8 @@ export default function ChatBubble({ text, isBot, delay = 0 }: ChatBubbleProps) 
         className={cn(
           "relative max-w-[80%] px-4 py-3 leading-relaxed",
           isBot
-            ? "rounded-[4px_16px_16px_16px] border-[0.5px] border-[#2e264a] bg-honey-bg-bot text-[13px] text-honey-text-bot font-playfair italic"
-            : "rounded-[16px_4px_16px_16px] border-[0.5px] border-[#3d3060] bg-honey-bg-user text-[13px] text-honey-text-user font-jakarta font-medium"
+            ? "rounded-[4px_16px_16px_16px] border-[0.5px] border-[#2e264a] bg-honey-bg-bot text-[13px] text-honey-text-bot font-inter"
+            : "rounded-[16px_4px_16px_16px] border-[0.5px] border-[#3d3060] bg-honey-bg-user text-[13px] text-honey-text-user font-inter font-medium"
         )}
       >
         <div className="whitespace-pre-wrap">{text}</div>

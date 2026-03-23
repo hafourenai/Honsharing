@@ -9,13 +9,17 @@ const MOODS = [
   { id: "kesepian", label: "kesepian" },
   { id: "kecewa", label: "kecewa" },
   { id: "marah", label: "marah" },
-  { id: "hampa", label: "hampa" },
-  { id: "cemas", label: "cemas" },
+  { id: "sedih", label: "sedih" },
+  { id: "galau", label: "galau" },
+  { id: "sakit hati", label: "sakit hati" },
   { id: "bingung", label: "bingung" },
+  { id: "tidak dihargai", label: "tidak dihargai" },
+  { id: "insecure", label: "insecure" },
+  { id: "overthinking", label: "overthinking" }
 ]
 
 interface OnboardingFlowProps {
-  onComplete: (name: string, initialMood: string, starterMessage: string) => void
+  onComplete: (name: string, initialMood: string) => void
 }
 
 export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
@@ -41,18 +45,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     }
   }, [step])
 
-  const handleNext = () => setStep((s) => Math.min(s + 1, 3))
-
-  const handleStart = (starterMessage: string) => {
-    onComplete(name, mood, starterMessage)
-  }
-
-  const getDynamicStarters = () => {
-    if (mood === "kesepian") return ["cerita dong", "aku lagi sepi nih", "butuh teman ngobrol"]
-    if (mood === "cemas") return ["aku overthinking", "ada yang bikin anxious", "pikiran rame banget"]
-    if (mood === "marah") return ["aku kesal banget nih", "mau cerita sesuatu", "lagi frustrasi"]
-    return ["aku butuh teman ngobrol", "hari ini berat banget", "bingung mau mulai dari mana"]
-  }
+  const handleNext = () => setStep((s) => s + 1)
 
   const slideVariants = {
     enter: { opacity: 0, x: 30 },
@@ -168,7 +161,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
             <button
               disabled={!name.trim() || !mood}
-              onClick={handleNext}
+              onClick={() => onComplete(name, mood)}
               className="rounded-full bg-[#4a3d7a] text-[#e2d9f3] px-6 py-3 text-[14px] font-medium disabled:bg-[#16122a] disabled:text-[#5a4f72] transition-colors self-end w-full"
             >
               lanjut &rarr;
@@ -176,45 +169,11 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           </motion.div>
         )}
 
-        {step === 3 && (
-          <motion.div
-            key="step3"
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="flex flex-col items-center text-center max-w-sm w-full"
-          >
-            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full border-[1.5px] border-[#4a3d6a] bg-honey-bg-elevated">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="#9b8ec4" />
-              </svg>
-            </div>
-            
-            <h2 className="font-playfair text-[20px] italic text-[#e2d9f3] mb-10 leading-relaxed px-4">
-              senang kenalan, {name}. aku siap mendengarkan kapanpun kamu butuh.
-            </h2>
-            
-            <div className="flex w-full flex-col gap-3">
-              {getDynamicStarters().map((s, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleStart(s)}
-                  className="rounded-full border border-[#2e264a] bg-[#131020] px-4 py-3 text-[13px] text-[#9b8ec4] transition-colors hover:bg-[#1e1830] hover:text-[#e2d9f3]"
-                >
-                  "{s}"
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
       </AnimatePresence>
 
       {/* Progress Indicator */}
       <div className="absolute bottom-8 flex gap-2">
-        {[1, 2, 3].map((idx) => (
+        {[1, 2].map((idx) => (
           <motion.div
             key={idx}
             initial={false}

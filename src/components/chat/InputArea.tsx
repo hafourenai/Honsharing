@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Plus, Send } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -15,6 +15,12 @@ export default function InputArea({ onSend, disabled }: InputAreaProps) {
   const [isFocused, setIsFocused] = useState(false)
   const [isSending, setIsSending] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (!disabled && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [disabled])
 
   const handleSend = () => {
     if (text.trim() && !disabled) {

@@ -4,8 +4,7 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { Plus, Clock, User, MessageCircle, X, Pencil, Trash2 } from "lucide-react"
-import { Conversation } from "@/lib/db"
-import { useSettings } from "@/hooks/useSettings"
+import { Conversation, UserProfile } from "@/lib/db"
 
 interface SidebarProps {
   conversations: Conversation[]
@@ -17,6 +16,7 @@ interface SidebarProps {
   onRenameChat?: (id: string, newTitle: string) => Promise<void>
   onDeleteChat?: (id: string) => Promise<void>
   onOpenSettings?: () => void
+  userProfile?: UserProfile | null
 }
 
 export default function Sidebar({
@@ -28,9 +28,9 @@ export default function Sidebar({
   onNewChat,
   onRenameChat,
   onDeleteChat,
-  onOpenSettings
+  onOpenSettings,
+  userProfile
 }: SidebarProps) {
-  const { userProfile } = useSettings()
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [renameInput, setRenameInput] = useState("")
   const [deletingId, setDeletingId] = useState<string | null>(null)

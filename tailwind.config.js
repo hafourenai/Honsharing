@@ -29,8 +29,7 @@ module.exports = {
         }
       },
       fontFamily: {
-        playfair: ["var(--font-playfair)", "serif"],
-        jakarta: ["var(--font-jakarta)", "sans-serif"],
+        inter: ["var(--font-inter)", "sans-serif"],
       },
       keyframes: {
         typingBounce: {

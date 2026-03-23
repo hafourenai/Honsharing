@@ -6,7 +6,7 @@ import StatusBar from "./chat/StatusBar"
 import Header from "./chat/Header"
 import ChatBubble from "./chat/ChatBubble"
 import TypingIndicator from "./chat/TypingIndicator"
-import MoodSelector from "./chat/MoodSelector"
+
 import InputArea from "./chat/InputArea"
 import DateDivider from "./chat/DateDivider"
 import Sidebar from "./layout/Sidebar"
@@ -14,7 +14,11 @@ import EmptyState from "./chat/EmptyState"
 import { useConversations } from "@/hooks/useConversations"
 import { motion, AnimatePresence } from "framer-motion"
 import { SettingsProvider, useSettings } from "@/hooks/useSettings"
-import SettingsPanel from "./layout/SettingsPanel"
+import dynamic from "next/dynamic"
+
+const SettingsPanel = dynamic(() => import("./layout/SettingsPanel"), {
+  ssr: false,
+})
 
 export default function ChatWindow() {
   return (
@@ -38,7 +42,8 @@ function ChatContent() {
     renameConversation,
     clearAllConversations,
     sendMessage,
-    saveProfile
+    saveProfile,
+    updateProfileName
   } = useConversations()
 
   const { preferences } = useSettings()
@@ -61,10 +66,6 @@ function ChatContent() {
     sendMessage(text, preferences.language)
   }
 
-  const handleMoodSelect = (mood: string) => {
-    // If no active, maybe create? Or just do nothing until first msg
-  }
-
   return (
     <PhoneShell className="flex-row">
       <Sidebar
@@ -83,6 +84,7 @@ function ChatContent() {
         onRenameChat={renameConversation}
         onDeleteChat={deleteConversation}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        userProfile={userProfile}
       />
       
       <div className="flex-1 flex flex-col relative h-full w-full min-w-0 bg-honey-bg-outer">
@@ -142,7 +144,6 @@ function ChatContent() {
           transition={{ duration: 0.25, delay: 0.1, ease: "easeOut" }}
           className="flex flex-col z-30 shrink-0"
         >
-          {activeConversation && <MoodSelector onSelect={handleMoodSelect} />}
           <div className="relative">
             {/* Soft shadow/gradient to separate input from chat */}
             <div className="absolute left-0 top-[-20px] h-[20px] w-full bg-gradient-to-t from-honey-bg-outer to-transparent pointer-events-none" />
@@ -152,7 +153,13 @@ function ChatContent() {
       </div>
 
       {/* Settings Panel */}
-      <SettingsPanel isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      <SettingsPanel 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+        userProfile={userProfile}
+        updateProfileName={updateProfileName}
+        clearAllHistory={clearAllConversations}
+      />
     </PhoneShell>
   )
 }

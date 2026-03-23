@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { v4 as uuidv4 } from "uuid"
 import { db, Conversation, Message, UserProfile } from "@/lib/db"
-import { isIngested, ingestChunks, ragQuery } from "@/lib/rag/indexeddb-store"
+import { isIngested, ingestChunks, ragQuery, getExistingChunkIds, clearAllChunks } from "@/lib/rag/indexeddb-store"
 
 export function useConversations() {
   const [conversations, setConversations] = useState<Conversation[]>([])
@@ -28,23 +28,39 @@ export function useConversations() {
   }, [])
 
   useEffect(() => {
+
+
     loadData().then(({ convosData }) => {
       if (convosData.length > 0 && !activeId) {
         setActiveId(convosData[0].id)
       }
-    })
+    });
 
     // RAG Initialization
-    isIngested().then((ingested) => {
+    isIngested().then(async (ingested) => {
       if (!ingested) {
+        const existingIds = await getExistingChunkIds()
+        
+        if (existingIds.size < 100) {
+          await clearAllChunks()
+        }
+
         setIngesting(true)
+
         ingestChunks({
           onProgress: (current: number, total: number) => {
             setIngestProgress({ current, total })
           }
-        }).finally(() => {
+        })
+        .catch((err) => {
+          // Error is handled by caller or silently failed for now
+        })
+        .finally(() => {
           setIngesting(false)
         })
+      } else {
+        const existingIds = await getExistingChunkIds()
+
       }
     })
   }, [loadData, activeId])
@@ -89,6 +105,13 @@ export function useConversations() {
     await db.saveUserProfile(profile)
     setUserProfile(profile)
     return profile
+  }
+
+  const updateProfileName = async (newName: string) => {
+    if (!userProfile) return
+    const updated = { ...userProfile, name: newName }
+    setUserProfile(updated)
+    await db.saveUserProfile(updated)
   }
 
   const generateTitle = async (convId: string, message: string) => {
@@ -148,6 +171,7 @@ export function useConversations() {
       const chatHistory = conv.messages.map(m => ({ role: m.role === "bot" ? "assistant" : "user", content: m.content }))
       const { answer } = await ragQuery(text, chatHistory, { 
         mode: language as any,
+        username: userProfile?.name,
         customPrompt: "Balas dengan empati." 
       })
 
@@ -159,11 +183,40 @@ export function useConversations() {
       }
 
       await db.appendMessage(targetId, aiMsg)
-    } catch (e: any) {
+
+      const prefs = await db.getPreferences()
+      if (prefs?.soundNotif) {
+        try {
+          const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+          if (AudioContext) {
+            const audioCtx = new AudioContext();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.type = "sine";
+            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.05);
+            gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+            
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.3);
+          }
+        } catch (err) {
+          console.error("Audio playback failed", err)
+        }
+      }
+    } catch (e: unknown) {
+      const error = e instanceof Error ? e : new Error(String(e))
+      console.error("[SEND MESSAGE ERROR]", error)
       const errMsg: Message = {
         id: uuidv4(),
         role: "bot",
-        content: `Aduh, ada masalah teknis: ${e.message}. Coba lagi ya 🙏`,
+        content: `Aduh, ada masalah teknis: ${error.message}. Coba lagi ya 🙏`,
         timestamp: Date.now(),
       }
       await db.appendMessage(targetId, errMsg)
@@ -191,6 +244,7 @@ export function useConversations() {
     renameConversation,
     clearAllConversations,
     sendMessage,
-    saveProfile
+    saveProfile,
+    updateProfileName
   }
 }
