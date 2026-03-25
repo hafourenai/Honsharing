@@ -40,7 +40,6 @@ export function useConversations() {
 
   const { loading, sendMessage } = useChat({
     activeId,
-    setActiveId,
     userProfile,
     loadData,
     createConversation

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { UserProfile } from "@/lib/db"
 import { cn } from "@/lib/utils"
 
 const MOODS = [

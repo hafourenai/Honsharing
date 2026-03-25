@@ -1,0 +1,58 @@
+﻿
+> honsharing@0.1.0 lint
+> next lint
+
+node.exe : 
+At C:\Program Files\nod
+ejs\npm.ps1:29 char:3
++   & $NODE_EXE 
+$NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (:String) [],    
+ RemoteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+./src/components/layout
+/SettingsPanel.tsx
+5:21  Error: 
+'ArrowRight' is 
+defined but never 
+used.  @typescript-esli
+nt/no-unused-vars
+
+./src/components/layout
+/Sidebar.tsx
+6:16  Error: 'Clock' 
+is defined but never 
+used.  @typescript-esli
+nt/no-unused-vars
+6:23  Error: 'User' is 
+defined but never 
+used.  @typescript-esli
+nt/no-unused-vars
+6:29  Error: 
+'MessageCircle' is 
+defined but never 
+used.  @typescript-esli
+nt/no-unused-vars
+
+./src/components/onboar
+ding/OnboardingFlow.tsx
+5:10  Error: 
+'UserProfile' is 
+defined but never 
+used.  @typescript-esli
+nt/no-unused-vars
+
+info  - Need to 
+disable some ESLint 
+rules? Learn more 
+here: https://nextjs.or
+g/docs/app/api-referenc
+e/config/eslint#disabli
+ng-rules

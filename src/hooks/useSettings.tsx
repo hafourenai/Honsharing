@@ -1,7 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react"
-import { db, UserPreferences, UserProfile } from "@/lib/db"
+import { db, UserPreferences } from "@/lib/db"
 
 interface SettingsContextType {
   preferences: UserPreferences

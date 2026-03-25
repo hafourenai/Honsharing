@@ -47,7 +47,7 @@ export default function EmptyState({ onSuggest }: EmptyStateProps) {
             onClick={() => onSuggest(s)}
             className="rounded-full border border-[#2e264a] bg-[#131020] px-4 py-3 text-[13px] text-[#9b8ec4] transition-colors hover:bg-[#1e1830] hover:text-[#e2d9f3]"
           >
-            "{s}"
+            {`"${s}"`}
           </button>
         ))}
       </motion.div>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Pencil, ArrowRight } from "lucide-react"
+import { X, Pencil } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useSettings } from "@/hooks/useSettings"
 import Toggle from "./Toggle"

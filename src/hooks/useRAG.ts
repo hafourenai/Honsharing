@@ -31,7 +31,7 @@ export function useRAG() {
           setIngesting(false)
         })
       } else {
-        const existingIds = await getExistingChunkIds()
+        // Already ingested
       }
     })
   }, [])

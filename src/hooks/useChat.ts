@@ -7,13 +7,12 @@ import { playNotifSound } from "@/lib/audio/notif"
 
 interface UseChatOptions {
   activeId: string | null
-  setActiveId: (id: string) => void
   userProfile: UserProfile | null | undefined
   loadData: () => Promise<{ convosData: Conversation[]; profileData: UserProfile | null }>
   createConversation: (mood?: string) => Promise<string>
 }
 
-export function useChat({ activeId, setActiveId, userProfile, loadData, createConversation }: UseChatOptions) {
+export function useChat({ activeId, userProfile, loadData, createConversation }: UseChatOptions) {
   const [loading, setLoading] = useState(false)
 
   const generateTitle = async (convId: string, message: string) => {

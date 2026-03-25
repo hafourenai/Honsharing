@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { Plus, Clock, User, MessageCircle, X, Pencil, Trash2 } from "lucide-react"
+import { Plus, X, Pencil, Trash2 } from "lucide-react"
 import { Conversation, UserProfile } from "@/lib/db"
 
 interface SidebarProps {

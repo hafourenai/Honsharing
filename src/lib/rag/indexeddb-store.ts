@@ -1,4 +1,3 @@
-import { Message } from "@/types";
 import { ChatMode } from "@/lib/systemPrompt";
 import { Chunk } from "@/lib/rag/promptBuilder";
 

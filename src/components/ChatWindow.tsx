@@ -42,7 +42,6 @@ function ChatContent() {
     renameConversation,
     clearAllConversations,
     sendMessage,
-    saveProfile,
     updateProfileName
   } = useConversationsContext()
 

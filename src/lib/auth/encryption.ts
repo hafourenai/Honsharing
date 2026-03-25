@@ -4,7 +4,6 @@
  */
 
 const ALGORITHM = "AES-GCM";
-const KEY_NAME = "honsharing-v1-storage-key";
 
 // A deterministic salt for key derivation. In a real app, this might be user-specific.
 const SALT = new TextEncoder().encode("honsharing-deterministic-salt-2026");
