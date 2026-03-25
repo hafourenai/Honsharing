@@ -2,19 +2,14 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { v4 as uuidv4 } from "uuid"
-import { db, Conversation, Message, UserProfile } from "@/lib/db"
-import { isIngested, ingestChunks, ragQuery, getExistingChunkIds, clearAllChunks } from "@/lib/rag/indexeddb-store"
+import { db, Conversation, UserProfile } from "@/lib/db"
+import { useChat } from "./useChat"
 
 export function useConversations() {
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
   const [userProfile, setUserProfile] = useState<UserProfile | null | undefined>(undefined) // undefined = loading
   const [isLoaded, setIsLoaded] = useState(false)
-  const [loading, setLoading] = useState(false) // for chat messages
-  
-  // RAG states
-  const [ingesting, setIngesting] = useState(false)
-  const [ingestProgress, setIngestProgress] = useState({ current: 0, total: 0 })
 
   const loadData = useCallback(async () => {
     const [convosData, profileData] = await Promise.all([
@@ -24,45 +19,15 @@ export function useConversations() {
     setConversations(convosData)
     setUserProfile(profileData || null)
     setIsLoaded(true)
-    return { convosData, profileData }
+    return { convosData, profileData: profileData || null }
   }, [])
 
   useEffect(() => {
-
-
     loadData().then(({ convosData }) => {
       if (convosData.length > 0 && !activeId) {
         setActiveId(convosData[0].id)
       }
     });
-
-    // RAG Initialization
-    isIngested().then(async (ingested) => {
-      if (!ingested) {
-        const existingIds = await getExistingChunkIds()
-        
-        if (existingIds.size < 100) {
-          await clearAllChunks()
-        }
-
-        setIngesting(true)
-
-        ingestChunks({
-          onProgress: (current: number, total: number) => {
-            setIngestProgress({ current, total })
-          }
-        })
-        .catch((err) => {
-          // Error is handled by caller or silently failed for now
-        })
-        .finally(() => {
-          setIngesting(false)
-        })
-      } else {
-        const existingIds = await getExistingChunkIds()
-
-      }
-    })
   }, [loadData, activeId])
 
   const createConversation = async (mood?: string) => {
@@ -72,6 +37,14 @@ export function useConversations() {
     setActiveId(id)
     return id
   }
+
+  const { loading, sendMessage } = useChat({
+    activeId,
+    setActiveId,
+    userProfile,
+    loadData,
+    createConversation
+  })
 
   const selectConversation = (id: string) => {
     setActiveId(id)
@@ -91,14 +64,10 @@ export function useConversations() {
   }
 
   const clearAllConversations = async () => {
-    const convos = await db.getConversations()
-    for (const c of convos) {
-      await db.deleteConversation(c.id)
-    }
+    await db.clearAllConversations()
     await loadData()
     setActiveId(null)
   }
-
 
   const saveProfile = async (name: string, initialMood: string) => {
     const profile: UserProfile = { name, initialMood, onboardedAt: Date.now() }
@@ -114,118 +83,6 @@ export function useConversations() {
     await db.saveUserProfile(updated)
   }
 
-  const generateTitle = async (convId: string, message: string) => {
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemPrompt: "Buat judul percakapan 4-5 kata, lowercase, dari pesan ini. Jangan pakai tanda baca.",
-          messages: [{ role: "user", content: message }]
-        })
-      })
-      
-      if (response.ok) {
-        const data = await response.json()
-        let title = data.reply.trim().toLowerCase().replace(/[.,!?;:'"]/g, "")
-        // Enforce max 5 words
-        const words = title.split(" ")
-        if (words.length > 5) {
-          title = words.slice(0, 5).join(" ")
-        }
-        await db.updateTitle(convId, title)
-        await loadData()
-      }
-    } catch (e) {
-      console.error("Failed to generate title", e)
-    }
-  }
-
-  const sendMessage = async (text: string, language: string = "santai") => {
-    let targetId = activeId
-    if (!targetId) {
-      targetId = await createConversation()
-    }
-
-    const conv = await db.getConversation(targetId)
-    if (!conv) return
-
-    const userMsg: Message = {
-      id: uuidv4(),
-      role: "user",
-      content: text,
-      timestamp: Date.now(),
-    }
-
-    await db.appendMessage(targetId, userMsg)
-    
-    // Auto generate title on first user message if title is default
-    if (conv.messages.length === 0 && conv.title === "percakapan baru") {
-      generateTitle(targetId, text)
-    }
-    
-    await loadData()
-    setLoading(true)
-
-    try {
-      const chatHistory = conv.messages.map(m => ({ role: m.role === "bot" ? "assistant" : "user", content: m.content }))
-      const { answer } = await ragQuery(text, chatHistory, { 
-        mode: language as any,
-        username: userProfile?.name,
-        customPrompt: "Balas dengan empati." 
-      })
-
-      const aiMsg: Message = {
-        id: uuidv4(),
-        role: "bot",
-        content: answer,
-        timestamp: Date.now(),
-      }
-
-      await db.appendMessage(targetId, aiMsg)
-
-      const prefs = await db.getPreferences()
-      if (prefs?.soundNotif) {
-        try {
-          const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-          if (AudioContext) {
-            const audioCtx = new AudioContext();
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            
-            oscillator.type = "sine";
-            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.1);
-            
-            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.05);
-            gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
-            
-            oscillator.start(audioCtx.currentTime);
-            oscillator.stop(audioCtx.currentTime + 0.3);
-          }
-        } catch (err) {
-          console.error("Audio playback failed", err)
-        }
-      }
-    } catch (e: unknown) {
-      const error = e instanceof Error ? e : new Error(String(e))
-      console.error("[SEND MESSAGE ERROR]", error)
-      const errMsg: Message = {
-        id: uuidv4(),
-        role: "bot",
-        content: `Aduh, ada masalah teknis: ${error.message}. Coba lagi ya 🙏`,
-        timestamp: Date.now(),
-      }
-      await db.appendMessage(targetId, errMsg)
-    } finally {
-      await loadData()
-      setLoading(false)
-    }
-  }
-
   const activeConversation = conversations.find(c => c.id === activeId) || null
 
   return {
@@ -235,8 +92,6 @@ export function useConversations() {
     activeConversation,
     isLoaded,
     loading,
-    ingesting,
-    ingestProgress,
     selectConversation,
     setActiveId,
     createConversation,

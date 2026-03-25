@@ -2,17 +2,18 @@
 
 import ChatWindow from "@/components/ChatWindow"
 import OnboardingFlow from "@/components/onboarding/OnboardingFlow"
-import { useConversations } from "@/hooks/useConversations"
+import { ConversationsProvider } from "@/contexts/ConversationsContext"
+import { useConversationsContext } from "@/contexts/ConversationsContext"
 import { motion, AnimatePresence } from "framer-motion"
 
-export default function Home() {
-  const { userProfile, isLoaded, saveProfile, sendMessage } = useConversations()
+function HomeContent() {
+  const { userProfile, isLoaded, saveProfile, sendMessage } = useConversationsContext()
 
   if (!isLoaded) return null
 
   const handleOnboardingComplete = async (name: string, initialMood: string) => {
+    await fetch("/api/auth/session", { method: "POST" })
     await saveProfile(name, initialMood)
-    // Automatically trigger the first message from the user based on their selected feeling
     await sendMessage(`Aku lagi merasa ${initialMood}...`)
   }
 
@@ -42,5 +43,13 @@ export default function Home() {
         </motion.div>
       )}
     </AnimatePresence>
+  )
+}
+
+export default function Home() {
+  return (
+    <ConversationsProvider>
+      <HomeContent />
+    </ConversationsProvider>
   )
 }

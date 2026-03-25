@@ -1,4 +1,42 @@
-import { get, set, update } from "idb-keyval"
+import { get, set } from "idb-keyval"
+import Dexie, { Table } from "dexie"
+import { encryptText, decryptText } from "./auth/encryption"
+
+// ─── Dexie row types (internal) ────────────────────────────────────────────
+
+export interface ConversationRow {
+  id: string
+  title: string
+  createdAt: number
+  updatedAt: number
+  mood?: string
+}
+
+export interface MessageRow {
+  id: string
+  convId: string
+  role: "bot" | "user"
+  content: string
+  timestamp: number
+  tags?: string[]
+}
+
+class HoneyDB extends Dexie {
+  conversations!: Table<ConversationRow>
+  messages!: Table<MessageRow>
+
+  constructor() {
+    super("honeydb")
+    this.version(1).stores({
+      conversations: "id, updatedAt",
+      messages: "id, convId, timestamp",
+    })
+  }
+}
+
+export const honeyDb = new HoneyDB()
+
+// ─── Public interfaces (unchanged — used by hooks & components) ─────────────
 
 export interface Message {
   id: string
@@ -28,83 +66,185 @@ export interface UserPreferences {
   soundNotif: boolean
 }
 
-const STORE_KEY = "honey_conversations"
+// ─── idb-keyval keys (profile & prefs only) ─────────────────────────────────
+
 const PROFILE_KEY = "honey_user_profile"
 const PREFS_KEY = "honey_user_preferences"
 
+// ─── db object ───────────────────────────────────────────────────────────────
+
 export const db = {
   async getConversations(): Promise<Conversation[]> {
-    const convos = await get<Conversation[]>(STORE_KEY)
-    if (!convos) return []
-    return convos.sort((a, b) => b.updatedAt - a.updatedAt)
+    try {
+      const rows = await honeyDb.conversations
+        .orderBy("updatedAt")
+        .reverse()
+        .toArray()
+
+      return await Promise.all(
+        rows.map(async (row) => {
+          const messages = await honeyDb.messages
+            .where("convId")
+            .equals(row.id)
+            .sortBy("timestamp")
+          
+          const decryptedMessages = await Promise.all(messages.map(async m => ({
+            ...m,
+            content: await decryptText(m.content)
+          })))
+
+          return { 
+            ...row, 
+            title: await decryptText(row.title),
+            mood: row.mood ? await decryptText(row.mood) : row.mood,
+            messages: decryptedMessages 
+          }
+        })
+      )
+    } catch (err) {
+      console.error("[db] getConversations failed:", err)
+      return []
+    }
   },
 
   async getConversation(id: string): Promise<Conversation | undefined> {
-    const convos = await this.getConversations()
-    return convos.find((c) => c.id === id)
+    try {
+      const row = await honeyDb.conversations.get(id)
+      if (!row) return undefined
+      const messages = await honeyDb.messages
+        .where("convId")
+        .equals(id)
+        .sortBy("timestamp")
+
+      const decryptedMessages = await Promise.all(messages.map(async m => ({
+        ...m,
+        content: await decryptText(m.content)
+      })))
+
+      return { 
+        ...row, 
+        title: await decryptText(row.title),
+        mood: row.mood ? await decryptText(row.mood) : row.mood,
+        messages: decryptedMessages 
+      }
+    } catch (err) {
+      console.error("[db] getConversation failed:", err)
+      return undefined
+    }
   },
 
   async createConversation(id: string, initialMood?: string): Promise<Conversation> {
-    const newConvo: Conversation = {
+    const newConvo: ConversationRow = {
       id,
-      title: "percakapan baru",
+      title: await encryptText("percakapan baru"),
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      mood: initialMood,
-      messages: [],
+      mood: initialMood ? await encryptText(initialMood) : initialMood,
     }
-
-    await update(STORE_KEY, (val) => {
-      const convos = (val as Conversation[]) || []
-      return [newConvo, ...convos]
-    })
-
-    return newConvo
+    try {
+      await honeyDb.conversations.add(newConvo)
+    } catch (err) {
+      console.error("[db] createConversation failed:", err)
+      throw err
+    }
+    return { ...newConvo, messages: [] }
   },
 
   async appendMessage(convId: string, message: Message): Promise<void> {
-    await update(STORE_KEY, (val) => {
-      const convos = (val as Conversation[]) || []
-      return convos.map((c) => {
-        if (c.id === convId) {
-          return {
-            ...c,
-            updatedAt: Date.now(),
-            messages: [...c.messages, message],
-          }
-        }
-        return c
+    try {
+      await honeyDb.transaction("rw", honeyDb.messages, honeyDb.conversations, async () => {
+        const encryptedMsg = { ...message, content: await encryptText(message.content), convId }
+        await honeyDb.messages.add(encryptedMsg)
+        await honeyDb.conversations.update(convId, { updatedAt: Date.now() })
       })
-    })
+    } catch (err) {
+      console.error("[db] appendMessage failed:", err)
+      throw err
+    }
   },
 
   async updateTitle(convId: string, title: string): Promise<void> {
-    await update(STORE_KEY, (val) => {
-      const convos = (val as Conversation[]) || []
-      return convos.map((c) => (c.id === convId ? { ...c, title, updatedAt: Date.now() } : c))
-    })
+    try {
+      const encryptedTitle = await encryptText(title)
+      await honeyDb.conversations.update(convId, { title: encryptedTitle, updatedAt: Date.now() })
+    } catch (err) {
+      console.error("[db] updateTitle failed:", err)
+      throw err
+    }
   },
 
   async deleteConversation(id: string): Promise<void> {
-    await update(STORE_KEY, (val) => {
-      const convos = (val as Conversation[]) || []
-      return convos.filter((c) => c.id !== id)
-    })
+    try {
+      await honeyDb.transaction("rw", honeyDb.conversations, honeyDb.messages, async () => {
+        await honeyDb.conversations.delete(id)
+        await honeyDb.messages.where("convId").equals(id).delete()
+      })
+    } catch (err) {
+      console.error("[db] deleteConversation failed:", err)
+      throw err
+    }
   },
 
+  async clearAllConversations(): Promise<void> {
+    try {
+      await honeyDb.transaction("rw", honeyDb.conversations, honeyDb.messages, async () => {
+        await honeyDb.conversations.clear()
+        await honeyDb.messages.clear()
+      })
+    } catch (err) {
+      console.error("[db] clearAllConversations failed:", err)
+      throw err
+    }
+  },
+
+  // ── Profile & Preferences — still via idb-keyval (single-record) ──────────
+
   async getUserProfile(): Promise<UserProfile | undefined> {
-    return await get<UserProfile>(PROFILE_KEY)
+    try {
+      const profile = await get<UserProfile>(PROFILE_KEY)
+      if (profile) {
+        return {
+          ...profile,
+          name: await decryptText(profile.name),
+          initialMood: await decryptText(profile.initialMood)
+        }
+      }
+      return undefined
+    } catch (err) {
+      console.error("[db] getUserProfile failed:", err)
+      return undefined
+    }
   },
 
   async saveUserProfile(profile: UserProfile): Promise<void> {
-    await set(PROFILE_KEY, profile)
+    try {
+      const encryptedProfile = {
+        ...profile,
+        name: await encryptText(profile.name),
+        initialMood: await encryptText(profile.initialMood)
+      }
+      await set(PROFILE_KEY, encryptedProfile)
+    } catch (err) {
+      console.error("[db] saveUserProfile failed:", err)
+      throw err
+    }
   },
-  
+
   async getPreferences(): Promise<UserPreferences | undefined> {
-    return await get<UserPreferences>(PREFS_KEY)
+    try {
+      return await get<UserPreferences>(PREFS_KEY)
+    } catch (err) {
+      console.error("[db] getPreferences failed:", err)
+      return undefined
+    }
   },
 
   async savePreferences(prefs: UserPreferences): Promise<void> {
-    await set(PREFS_KEY, prefs)
-  }
+    try {
+      await set(PREFS_KEY, prefs)
+    } catch (err) {
+      console.error("[db] savePreferences failed:", err)
+      throw err
+    }
+  },
 }

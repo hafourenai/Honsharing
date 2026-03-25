@@ -1,26 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
+import { validateRequest } from "@/lib/auth/validateRequest";
+import { z } from "zod";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let embedder: any = null;
+const EmbedRequestSchema = z.object({
+  text: z.string().min(1).max(5000),
+});
 
-async function getEmbedder() {
+import type { FeatureExtractionPipeline } from "@xenova/transformers";
+
+let embedder: FeatureExtractionPipeline | null = null;
+
+async function getEmbedder(): Promise<FeatureExtractionPipeline> {
   if (embedder) return embedder;
 
   const { pipeline } = await import("@xenova/transformers");
-  embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+  embedder = (await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2")) as FeatureExtractionPipeline;
   return embedder;
 }
 
 // Embedding runs locally — no rate limit needed
 
 export async function POST(request: NextRequest) {
+  const auth = await validateRequest();
+  if (!auth.valid) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   try {
-    const { text } = await request.json();
+    const body = await request.json();
+    const parsed = EmbedRequestSchema.safeParse(body);
 
-    if (!text || typeof text !== "string") {
-      return NextResponse.json({ error: "Invalid text input" }, { status: 400 });
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid request", details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
+
+    const { text } = parsed.data;
 
     const pipe = await getEmbedder();
     const output = await pipe(text, { pooling: "mean", normalize: true });

@@ -11,7 +11,7 @@ import InputArea from "./chat/InputArea"
 import DateDivider from "./chat/DateDivider"
 import Sidebar from "./layout/Sidebar"
 import EmptyState from "./chat/EmptyState"
-import { useConversations } from "@/hooks/useConversations"
+import { useConversationsContext } from "@/contexts/ConversationsContext"
 import { motion, AnimatePresence } from "framer-motion"
 import { SettingsProvider, useSettings } from "@/hooks/useSettings"
 import dynamic from "next/dynamic"
@@ -44,7 +44,7 @@ function ChatContent() {
     sendMessage,
     saveProfile,
     updateProfileName
-  } = useConversations()
+  } = useConversationsContext()
 
   const { preferences } = useSettings()
 

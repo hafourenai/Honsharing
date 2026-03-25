@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react"
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react"
 import { db, UserPreferences, UserProfile } from "@/lib/db"
 
 interface SettingsContextType {
@@ -30,20 +30,20 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     loadData()
   }, [loadData])
 
-  const updatePreferences = async (newPrefs: Partial<UserPreferences>) => {
+  const updatePreferences = useCallback(async (newPrefs: Partial<UserPreferences>) => {
     const updated = { ...preferences, ...newPrefs }
     setPreferences(updated)
     await db.savePreferences(updated)
-  }
+  }, [preferences])
+
+  const contextValue = useMemo(() => ({
+    preferences,
+    updatePreferences,
+    isLoaded,
+  }), [preferences, updatePreferences, isLoaded])
 
   return (
-    <SettingsContext.Provider
-      value={{
-        preferences,
-        updatePreferences,
-        isLoaded,
-      }}
-    >
+    <SettingsContext.Provider value={contextValue}>
       {children}
     </SettingsContext.Provider>
   )

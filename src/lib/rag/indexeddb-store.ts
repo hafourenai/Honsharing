@@ -1,37 +1,29 @@
 import { Message } from "@/types";
-import { getBasePrompt, ChatMode } from "@/lib/systemPrompt";
+import { ChatMode } from "@/lib/systemPrompt";
+import { Chunk } from "@/lib/rag/promptBuilder";
+
+export type { Chunk } from "@/lib/rag/promptBuilder";
 
 const DB_NAME = "rag_store";
 const DB_VERSION = 1;
 const STORE_NAME = "chunks";
 
-export interface Chunk {
-  id: string;
-  content: string;
-  response?: string;
-  embedding?: number[];
-  metadata: {
-    source: string;
-    emotion?: string[];
-    intensity?: "low" | "medium" | "high";
-    [key: string]: any;
-  };
-}
+
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
 
-    req.onupgradeneeded = (e: any) => {
-      const db = e.target.result;
+    req.onupgradeneeded = (e: IDBVersionChangeEvent) => {
+      const db = (e.target as IDBOpenDBRequest).result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         const store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
         store.createIndex("source", "metadata.source", { unique: false });
       }
     };
 
-    req.onsuccess = (e: any) => resolve(e.target.result);
-    req.onerror = (e: any) => reject(e.target.error);
+    req.onsuccess = (e: Event) => resolve((e.target as IDBOpenDBRequest).result);
+    req.onerror = (e: Event) => reject((e.target as IDBOpenDBRequest).error);
   });
 }
 
@@ -46,7 +38,7 @@ export async function saveChunks(chunks: Chunk[]): Promise<number> {
 
   return new Promise((resolve, reject) => {
     tx.oncomplete = () => resolve(chunks.length);
-    tx.onerror = (e: any) => reject(e.target.error);
+    tx.onerror = (e: Event) => reject((e.target as IDBTransaction).error);
   });
 }
 
@@ -58,7 +50,7 @@ export async function getAllChunks(): Promise<Chunk[]> {
   return new Promise((resolve, reject) => {
     const req = store.getAll();
     req.onsuccess = () => resolve(req.result);
-    req.onerror = (e: any) => reject(e.target.error);
+    req.onerror = (e: Event) => reject((e.target as IDBRequest).error);
   });
 }
 
@@ -102,8 +94,9 @@ async function embedWithRetry(text: string, retries = 3): Promise<number[]> {
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
       return await embedText(text);
-    } catch (err: any) {
-      const isRateLimit = err?.message?.includes("429") || err?.message?.includes("Terlalu banyak");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      const isRateLimit = message.includes("429") || message.includes("Terlalu banyak");
       if (isRateLimit && attempt < retries - 1) {
         console.warn(`[RAG] Rate limit hit, retrying in ${(attempt + 1) * 5000}ms...`);
         await sleep((attempt + 1) * 5000);
@@ -179,58 +172,79 @@ export async function clearAllChunks(): Promise<void> {
 }
 
 
-export async function retrieve(query: string, topK = 5): Promise<(Chunk & { score: number })[]> {
-  const queryEmbedding = await embedText(query);
-  const allChunks = await getAllChunks();
+import { runSimilarityWorker } from "@/lib/rag/similarity-worker"
 
+export async function retrieve(
+  query: string,
+  topK = 5
+): Promise<(Chunk & { score: number })[]> {
+  const queryEmbedding = await embedText(query)
+  const allChunks = await getAllChunks()
 
-  const scored = allChunks
-    .filter((c) => c.embedding)
-    .map((c) => ({
-      ...c,
-      score: cosineSimilarity(queryEmbedding, c.embedding!),
-    }))
-    .sort((a, b) => b.score - a.score)
-    .filter((c) => c.score > 0.3);
-
-  return scored.slice(0, topK);
-}
-
-
-export function buildSystemPrompt(relevantChunks: Chunk[], mode: ChatMode = 'santai', username?: string): string {
-  const basePrompt = getBasePrompt(mode, username);
-  
-  if (relevantChunks.length === 0) {
-    return basePrompt;
+  try {
+    const scored = await runSimilarityWorker(
+      allChunks,
+      queryEmbedding,
+      topK,
+      0.3
+    )
+    return scored as (Chunk & { score: number })[]
+  } catch (err) {
+    console.warn("[RAG] Worker failed, falling back to main thread:", err)
+    return allChunks
+      .filter((c) => c.embedding)
+      .map((c) => ({
+        ...c,
+        score: cosineSimilarity(queryEmbedding, c.embedding!),
+      }))
+      .sort((a, b) => b.score - a.score)
+      .filter((c) => c.score > 0.3)
+      .slice(0, topK)
   }
-
-  const contextBlock =
-    `\n\n---\nKonteks percakapan yang relevan:\n` +
-    relevantChunks.map((c) =>
-      `User berkata: "${c.content}"\nCara merespons yang tepat: "${c.response || 'Berikan empati yang sesuai.'}"`
-    ).join("\n\n") +
-    `\n\n(PENTING: Gunakan "Cara merespons yang tepat" di atas HANYA sebagai panduan nada dan gaya empati. JANGAN menyalin jawaban tersebut secara persis. Sesuaikan dengan konteks obrolan saat ini.)\n---`;
-
-  return basePrompt + contextBlock;
 }
+
+
 
 // ─── GENERATE: RAG dengan Groq ────────────────────────────────────────────────
 
-export async function ragQuery(userQuery: string, chatHistory: any[] = [], options: { customPrompt?: string, mode?: ChatMode, username?: string } = {}): Promise<{ answer: string; sources: any[] }> {
-  const relevantChunks = await retrieve(userQuery, 5);
+export interface ChatHistoryItem {
+  role: "user" | "assistant"
+  content: string
+}
 
-  const systemPrompt = buildSystemPrompt(relevantChunks, options.mode, options.username)
-    + (options.customPrompt ? " " + options.customPrompt : "");
+interface RagSource {
+  content: string
+  source: string
+  score: string
+}
+
+export async function ragQuery(
+  userQuery: string,
+  chatHistory: ChatHistoryItem[] = [],
+  options: { mode?: ChatMode; username?: string } = {}
+): Promise<{ answer: string; sources: RagSource[] }> {
+  const relevantChunks = await retrieve(userQuery, 5);
 
   const messages = [
     ...chatHistory,
     { role: "user", content: userQuery },
   ];
 
+  const retrievedChunks = relevantChunks.map(({ content, response, metadata }) => ({
+    content,
+    response,
+    metadata,
+  }));
+
   const res = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages, systemPrompt }),
+    body: JSON.stringify({
+      messages,
+      mode: options.mode,
+      username: options.username,
+      retrievedChunks,
+    }),
   });
 
   const data = await res.json();
