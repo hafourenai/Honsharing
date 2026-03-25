@@ -152,8 +152,10 @@ export const db = {
 
   async appendMessage(convId: string, message: Message): Promise<void> {
     try {
+      const encryptedContent = await encryptText(message.content)
+      const encryptedMsg = { ...message, content: encryptedContent, convId }
+      
       await honeyDb.transaction("rw", honeyDb.messages, honeyDb.conversations, async () => {
-        const encryptedMsg = { ...message, content: await encryptText(message.content), convId }
         await honeyDb.messages.add(encryptedMsg)
         await honeyDb.conversations.update(convId, { updatedAt: Date.now() })
       })
