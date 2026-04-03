@@ -8,7 +8,7 @@ interface EmptyStateProps {
 
 export default function EmptyState({ onSuggest }: EmptyStateProps) {
   const suggestions = [
-    "aku lagi inecure",
+    "aku lagi insecure",
     "butuh seseorang untuk diajak ngobrol",
     "nggak tau harus mulai dari mana",
   ]
