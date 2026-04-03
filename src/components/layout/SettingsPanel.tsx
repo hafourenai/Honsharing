@@ -41,7 +41,6 @@ export default function SettingsPanel({ isOpen, onClose, userProfile, updateProf
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -50,7 +49,6 @@ export default function SettingsPanel({ isOpen, onClose, userProfile, updateProf
             className="fixed inset-0 z-[80] bg-black/50 backdrop-blur-[2px]"
           />
 
-          {/* Panel */}
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
@@ -67,7 +65,6 @@ export default function SettingsPanel({ isOpen, onClose, userProfile, updateProf
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
-              {/* Profil Section */}
               <div className="mb-10 flex flex-col items-center">
                 <div className="mb-4 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-[#261e45] text-xl font-bold uppercase text-white shadow-lg">
                   {userProfile?.name?.charAt(0) || "K"}
@@ -98,7 +95,6 @@ export default function SettingsPanel({ isOpen, onClose, userProfile, updateProf
                 <span className="mt-1 text-[10px] text-[#3d3356]">bergabung {joiningDate} hari lalu</span>
               </div>
 
-              {/* Preferensi Section */}
               <div className="mb-8 flex flex-col gap-6">
                 <div className="text-[10px] font-jakarta uppercase tracking-wider text-[#3d3356]">Preferensi Percakapan</div>
                 
@@ -132,7 +128,6 @@ export default function SettingsPanel({ isOpen, onClose, userProfile, updateProf
                   </div>
                 </div>
 
-                {/* Sound Notif */}
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
                     <span className="text-[13px] text-[#e2d9f3]">Suara notifikasi</span>
@@ -145,7 +140,6 @@ export default function SettingsPanel({ isOpen, onClose, userProfile, updateProf
                 </div>
               </div>
 
-              {/* Privasi Section */}
               <div className="mb-10 flex flex-col gap-4">
                 <div className="text-[10px] font-jakarta uppercase tracking-wider text-[#3d3356]">Privasi</div>
                 <button 
@@ -160,7 +154,6 @@ export default function SettingsPanel({ isOpen, onClose, userProfile, updateProf
                 </button>
               </div>
 
-              {/* Tentang Section */}
               <div className="flex flex-col gap-1 border-t border-[#1a1528] pt-6 opacity-60">
                 <span className="text-[11px] text-[#e2d9f3]">Honey v1.0</span>
                 <span className="text-[10px] text-[#3d3356]">dibuat dengan ❤ untuk kamu yang butuh didengarkan</span>

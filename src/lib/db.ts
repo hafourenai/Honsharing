@@ -36,8 +36,6 @@ class HoneyDB extends Dexie {
 
 export const honeyDb = new HoneyDB()
 
-// ─── Public interfaces (unchanged — used by hooks & components) ─────────────
-
 export interface Message {
   id: string
   role: "bot" | "user"
@@ -66,12 +64,9 @@ export interface UserPreferences {
   soundNotif: boolean
 }
 
-// ─── idb-keyval keys (profile & prefs only) ─────────────────────────────────
 
 const PROFILE_KEY = "honey_user_profile"
 const PREFS_KEY = "honey_user_preferences"
-
-// ─── db object ───────────────────────────────────────────────────────────────
 
 export const db = {
   async getConversations(): Promise<Conversation[]> {
@@ -198,8 +193,6 @@ export const db = {
       throw err
     }
   },
-
-  // ── Profile & Preferences — still via idb-keyval (single-record) ──────────
 
   async getUserProfile(): Promise<UserProfile | undefined> {
     try {

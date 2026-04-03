@@ -57,7 +57,7 @@ export function useChat({ activeId, userProfile, loadData, createConversation }:
 
     await db.appendMessage(targetId, userMsg)
     
-    // Auto generate title on first user message if title is default
+    // Auto generate title
     if (conv.messages.length === 0 && conv.title === "percakapan baru") {
       generateTitle(targetId, text)
     }

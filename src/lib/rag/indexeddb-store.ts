@@ -204,7 +204,7 @@ export async function retrieve(
 
 
 
-// ─── GENERATE: RAG dengan Groq ────────────────────────────────────────────────
+// groq
 
 export interface ChatHistoryItem {
   role: "user" | "assistant"

@@ -1,16 +1,8 @@
-/**
- * Standard AES-GCM encryption/decryption using Web Crypto API.
- * This is used to protect sensitive data in IndexedDB.
- */
-
 const ALGORITHM = "AES-GCM";
 
-// A deterministic salt for key derivation. In a real app, this might be user-specific.
 const SALT = new TextEncoder().encode("honsharing-deterministic-salt-2026");
 
 async function getKey(): Promise<CryptoKey> {
-  // Use a fixed secret for derivation as requested ("fixed app secret").
-  // In production, this could be from an environment variable or sessionStorage.
   const secret = "honsharing-internal-app-secret-v1";
   const encoder = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
@@ -47,7 +39,7 @@ export async function encryptText(text: string): Promise<string> {
     encoded
   );
 
-  // Combine IV and ciphertext for storage: [iv (12 bytes) | ciphertext]
+  // Combine IV and ciphertext for storage
   const combined = new Uint8Array(iv.length + ciphertext.byteLength);
   combined.set(iv);
   combined.set(new Uint8Array(ciphertext), iv.length);
@@ -79,7 +71,7 @@ export async function decryptText(encryptedBase64: string): Promise<string> {
     return new TextDecoder().decode(decrypted);
   } catch (err) {
     console.warn("[Encryption] Decryption failed or data is not encrypted:", err);
-    // Fallback: if decryption fails (e.g. data is plain text), return as-is
+    // Fallback
     return encryptedBase64;
   }
 }

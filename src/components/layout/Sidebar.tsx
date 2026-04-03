@@ -84,7 +84,7 @@ export default function Sidebar({
   const SidebarContent = (
     <div className="flex h-full flex-col justify-between">
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        {/* Brand / New Chat Header */}
+        {/* New Chat Header */}
         <div className="p-4 border-b-[0.5px] border-[#1a1528]">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-playfair text-[#4a3d7a] text-lg font-medium flex items-center gap-2">
