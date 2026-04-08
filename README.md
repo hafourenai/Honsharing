@@ -1,6 +1,6 @@
 # Honey 
 <p align="center">
-  <img src="public/preview honeyy.png" width="800" alt="Honey Preview">
+  <img src="public/image.png" width="800" alt="Honey Preview">
 </p>
 
 
