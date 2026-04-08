@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Honey 
+<p align="center">
+  <img src="public/preview honeyy.png" width="800" alt="Honey Preview">
+</p>
 
-## Getting Started
 
-First, run the development server:
+Honey adalah sahabat AI yang selalu siap mendengarkan. Proyek ini didesain khusus untuk memberikan dukungan emosional dan empati yang tulus dalam ruang yang aman, hangat, dan sepenuhnya privat.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Frontend & Core**: [Next.js 15](https://nextjs.org/) (App Router), [React 19](https://react.dev/), TypeScript.
+- **Styling & UI**: [Tailwind CSS](https://tailwindcss.com/) untuk layout modern dan [Framer Motion](https://www.framer.com/motion/) untuk animasi yang halus.
+- **AI & Models**:
+  - **LLM (Chat)**: [Llama 3.3 70B](https://www.llama.com/) yang diakses melalui [Groq SDK](https://groq.com/) untuk respons secepat kilat.
+  - **Embeddings**: Model lokal yang berjalan langsung di browser/server menggunakan [@xenova/transformers](https://huggingface.co/docs/transformers.js/) (Hugging Face).
+- **Storage**: [Dexie.js](https://dexie.org/) (Wrapper IndexedDB) untuk manajemen database sisi klien yang tangguh.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Fitur Utama
 
-## Learn More
+- **Empati yang Tulus**: Honey difokuskan untuk mendengarkan dan memvalidasi perasaan, bukan sekadar memberikan informasi umum.
+- **Privasi Mutlak (E2EE)**: Semua riwayat curhatan dienkripsi dan disimpan secara lokal di perangkat Anda. Data sensitif tidak pernah menyentuh server dalam bentuk teks biasa.
+- **RAG-Enhanced Empathy**: Menggunakan teknik *Retrieval-Augmented Generation* untuk mencari konteks emosional dari percakapan lama, sehingga Honey bisa memahami perkembangan perasaan Anda dari waktu ke waktu.
+- **Mode Bahasa**: Pilih antara gaya bahasa **Santai** (sahabat dekat) atau **Formal** (pendengar dewasa) melalui panel pengaturan.
 
-To learn more about Next.js, take a look at the following resources:
+## Keamanan & Data
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Privasi adalah prioritas utama proyek ini:
+- **Zero-knowledge Storage**: Kami tidak menyimpan riwayat percakapan Anda di database cloud. Semuanya ada di tangan Anda.
+- **Local Integration**: Pemrosesan embedding dilakukan secara lokal untuk meminimalkan transmisi data.
+- **Session Managed**: Menggunakan sistem manajemen sesi yang aman untuk memastikan hanya Anda yang bisa mengakses data Anda sendiri.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*Dibuat untuk diri gua sendiri haha.*
