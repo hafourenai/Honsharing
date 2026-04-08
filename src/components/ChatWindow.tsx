@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react"
 import PhoneShell from "./chat/PhoneShell"
-import StatusBar from "./chat/StatusBar"
 import Header from "./chat/Header"
 import ChatBubble from "./chat/ChatBubble"
 import TypingIndicator from "./chat/TypingIndicator"
@@ -87,11 +86,6 @@ function ChatContent() {
       />
       
       <div className="flex-1 flex flex-col relative h-full w-full min-w-0 bg-honey-bg-outer">
-        {/* On mobile, status bar shows. On desktop, maybe not needed but keeping for stylistic consistency */}
-        <div className="md:hidden">
-          <StatusBar />
-        </div>
-
         <Header onOpenSidebar={() => setSidebarOpen(true)} />
         
         <AnimatePresence mode="wait">
