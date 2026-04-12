@@ -1,6 +1,5 @@
 "use client"
 
-import { useRef } from "react"
 import { PanelLeftClose, PanelLeftOpen, Clock } from "lucide-react"
 import { motion } from "framer-motion"
 

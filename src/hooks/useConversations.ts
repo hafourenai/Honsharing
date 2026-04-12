@@ -47,7 +47,7 @@ export function useConversations() {
 
   const deleteConversation = async (id: string) => {
     await db.deleteConversation(id)
-    const { convosData } = await loadData()
+    await loadData()
     if (activeId === id) {
       setActiveId(null)
     }
