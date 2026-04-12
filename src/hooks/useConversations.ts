@@ -23,12 +23,8 @@ export function useConversations() {
   }, [])
 
   useEffect(() => {
-    loadData().then(({ convosData }) => {
-      if (convosData.length > 0 && !activeId) {
-        setActiveId(convosData[0].id)
-      }
-    });
-  }, [loadData, activeId])
+    loadData()
+  }, [loadData])
 
   const createConversation = async (mood?: string) => {
     const id = uuidv4()
@@ -53,7 +49,7 @@ export function useConversations() {
     await db.deleteConversation(id)
     const { convosData } = await loadData()
     if (activeId === id) {
-      setActiveId(convosData.length > 0 ? convosData[0].id : null)
+      setActiveId(null)
     }
   }
 

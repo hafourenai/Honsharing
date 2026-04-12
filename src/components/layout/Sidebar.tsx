@@ -1,15 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { Plus, X, Pencil, Trash2 } from "lucide-react"
+import { Plus, X, Pencil, Trash2, GripVertical } from "lucide-react"
 import { Conversation, UserProfile } from "@/lib/db"
 
 interface SidebarProps {
   conversations: Conversation[]
   activeId: string | null
   isOpenMobile: boolean
+  isPinned?: boolean
   onCloseMobile: () => void
   onSelectChat: (id: string) => void
   onNewChat: () => void
@@ -23,6 +24,7 @@ export default function Sidebar({
   conversations,
   activeId,
   isOpenMobile,
+  isPinned,
   onCloseMobile,
   onSelectChat,
   onNewChat,
@@ -34,6 +36,59 @@ export default function Sidebar({
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [renameInput, setRenameInput] = useState("")
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [sidebarWidth, setSidebarWidth] = useState(240)
+  const [isResizing, setIsResizing] = useState(false)
+  const sidebarRef = useRef<HTMLDivElement>(null)
+
+  // Load saved width from localStorage
+  useEffect(() => {
+    const savedWidth = localStorage.getItem('sidebarWidth')
+    if (savedWidth) {
+      const width = parseInt(savedWidth, 10)
+      if (width >= 200 && width <= 500) {
+        setSidebarWidth(width)
+      }
+    }
+  }, [])
+
+  // Save width to localStorage when it changes
+  useEffect(() => {
+    if (sidebarWidth >= 200 && sidebarWidth <= 500) {
+      localStorage.setItem('sidebarWidth', sidebarWidth.toString())
+    }
+  }, [sidebarWidth])
+
+  // Handle mouse move during resize
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isResizing && sidebarRef.current) {
+        const newWidth = e.clientX
+        // Constrain width between 200px and 500px
+        if (newWidth >= 200 && newWidth <= 500) {
+          setSidebarWidth(newWidth)
+        }
+      }
+    }
+
+    const handleMouseUp = () => {
+      setIsResizing(false)
+    }
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isResizing])
+
+  const startResize = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsResizing(true)
+  }
 
   const handleRenameConfirm = async () => {
     if (renamingId && onRenameChat) {
@@ -256,7 +311,7 @@ export default function Sidebar({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
             onClick={onCloseMobile}
-            className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-[2px] md:hidden"
+            className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-[2px]"
           />
         )}
       </AnimatePresence>
@@ -265,7 +320,7 @@ export default function Sidebar({
       <AnimatePresence>
         {isOpenMobile && (
           <motion.div
-            className="fixed inset-y-0 left-0 z-[70] w-[280px] bg-[#0d0a14] border-r-[0.5px] border-[#1a1528] md:hidden"
+            className="fixed inset-y-0 left-0 z-[70] w-[280px] bg-[#0d0a14] border-r-[0.5px] border-[#1a1528]"
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
@@ -278,12 +333,30 @@ export default function Sidebar({
 
       {/* Desktop Sidebar */}
       <motion.div 
+        ref={sidebarRef}
         initial={{ x: -20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.25, ease: "easeOut", delay: 0 }}
-        className="hidden md:flex flex-col h-full bg-[#0d0a14] border-r-[0.5px] border-[#1a1528] z-30 group shrink-0 w-[240px]"
+        className={cn(
+          "hidden",
+          isPinned && "md:flex flex-col h-full bg-[#0d0a14] border-r-[0.5px] border-[#1a1528] z-30 group shrink-0 relative"
+        )}
+        style={{ width: `${sidebarWidth}px` }}
       >
         {SidebarContent}
+        
+        {/* Resize Handle */}
+        <div
+          onMouseDown={startResize}
+          className={cn(
+            "absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-[#4a3d7a]/50 transition-colors z-40",
+            isResizing && "bg-[#4a3d7a]/50"
+          )}
+        >
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 flex items-center justify-center">
+            <GripVertical className="h-4 w-4 text-[#5a4f72] opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+        </div>
       </motion.div>
     </>
   )
