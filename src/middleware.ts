@@ -1,6 +1,25 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
+// Encode string to base64 compatible with Buffer.from(json).toString('base64')
+function toBase64(str: string): string {
+  return btoa(
+    encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, p1) =>
+      String.fromCharCode(parseInt(p1, 16))
+    )
+  )
+}
+
+// Decode base64 compatible with Buffer.from(base64, 'base64').toString()
+function fromBase64(base64: string): string {
+  return decodeURIComponent(
+    atob(base64)
+      .split("")
+      .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+      .join("")
+  )
+}
+
 async function hmacSign(secret: string, data: string): Promise<string> {
   const enc = new TextEncoder()
   const key = await crypto.subtle.importKey(
@@ -18,11 +37,11 @@ async function hmacSign(secret: string, data: string): Promise<string> {
 
 async function generateToken(secret: string): Promise<string> {
   const payload = {
-    token: crypto.randomUUID(), 
+    token: crypto.randomUUID(),
     exp: Date.now() + 1000 * 60 * 60 * 24 * 7, // 7 days
   }
   const json = JSON.stringify(payload)
-  const base64 = btoa(json)
+  const base64 = toBase64(json)
   const sig = await hmacSign(secret, json)
   return `${base64}.${sig}`
 }
@@ -36,7 +55,7 @@ async function verifyToken(secret: string, token: string): Promise<boolean> {
     const sig = token.slice(dot + 1)
     if (!base64 || !sig) return false
 
-    const json = atob(base64)
+    const json = fromBase64(base64)
     const expectedSig = await hmacSign(secret, json)
 
     if (sig.length !== expectedSig.length) return false

@@ -17,29 +17,7 @@ const ChatRequestSchema = z.object({
   messages: z.array(ChatMessageSchema).min(1),
   mode: z.enum(["formal", "santai"]).optional(),
   username: z.string().max(20).optional(),
-  retrievedChunks: z.array(z.object({
-    id: z.string().optional(),
-    scenario: z.object({
-      topic: z.string(),
-      situation: z.string(),
-      core_fear: z.string(),
-      self_perception: z.string(),
-    }),
-    response_strategy: z.object({
-      tone: z.string(),
-      style: z.string(),
-      approach: z.array(z.string()),
-      conversation_pattern: z.array(z.string()),
-    }),
-    example_style: z.array(z.string()),
-    metadata: z.object({
-      emotion: z.array(z.string()),
-      need: z.array(z.string()),
-      intensity: z.string(),
-      topic: z.string(),
-    }),
-    embedding: z.array(z.number()).optional(),
-  })).optional(),
+  retrievedChunks: z.array(z.any()).optional(),
 });
 
 // Basic in-memory rate limit
