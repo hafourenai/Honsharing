@@ -40,10 +40,10 @@ export function buildSystemPrompt(
     relevantChunks
       .map(
         (c) =>
-          `Situasi mirip: ${c.scenario.situation}\n` +
-          `Kemungkinan kebutuhan: ${c.metadata.need.join(", ")}\n` +
-          `Arah emosi: ${c.metadata.emotion.join(", ")}\n` +
-          `Intensitas: ${c.metadata.intensity}`
+          `Situasi mirip: ${c?.scenario?.situation || "Tidak spesifik"}\n` +
+          `Kemungkinan kebutuhan: ${c?.metadata?.need?.join(", ") || "Tidak diketahui"}\n` +
+          `Arah emosi: ${c?.metadata?.emotion?.join(", ") || "Tidak diketahui"}\n` +
+          `Intensitas: ${c?.metadata?.intensity || "Tidak diketahui"}`
       )
       .join("\n\n") +
     `\n\nGunakan ini hanya untuk membaca situasi — bukan untuk menentukan gaya, nada, atau kalimat. Baca konteks percakapan aktual, lalu respons seperti biasa.\n---`
