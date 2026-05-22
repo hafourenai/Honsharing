@@ -260,9 +260,9 @@ export async function ragQuery(
   return {
     answer,
     sources: relevantChunks.map((c) => ({
-      content: `${c.scenario.topic} - ${c.scenario.situation}`.slice(0, 100) + "...",
-      source: c.metadata.topic || "emotional pattern",
-      score: c.score.toFixed(3),
+      content: `${c?.scenario?.topic || "Umum"} - ${c?.scenario?.situation || "Tidak spesifik"}`.slice(0, 100) + "...",
+      source: c?.metadata?.topic || "emotional pattern",
+      score: c?.score?.toFixed(3) || "0.000",
     })),
   };
 }
