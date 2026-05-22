@@ -1,16 +1,27 @@
 import { getBasePrompt, ChatMode } from "@/lib/systemPrompt"
 
 export interface Chunk {
-  id: string
-  content: string
-  response?: string
-  embedding?: number[]
+  id: string;
+  scenario: {
+    topic: string;
+    situation: string;
+    core_fear: string;
+    self_perception: string;
+  };
+  response_strategy: {
+    tone: string;
+    style: string;
+    approach: string[];
+    conversation_pattern: string[];
+  };
+  example_style: string[];
   metadata: {
-    source: string
-    emotion?: string[]
-    intensity?: "low" | "medium" | "high"
-    [key: string]: unknown
-  }
+    emotion: string[];
+    need: string[];
+    intensity: string;
+    topic: string;
+  };
+  embedding?: number[];
 }
 
 export function buildSystemPrompt(
@@ -25,14 +36,17 @@ export function buildSystemPrompt(
   }
 
   const contextBlock =
-    `\n\n---\nKonteks percakapan yang relevan:\n` +
+    `\n\n---\n[KONTEKS INTERNAL — jangan disebut, jangan dikutip]\n` +
     relevantChunks
       .map(
         (c) =>
-          `User berkata: "${c.content}"\nCara merespons yang tepat: "${c.response || "Berikan empati yang sesuai."}"`
+          `Situasi mirip: ${c.scenario.situation}\n` +
+          `Kemungkinan kebutuhan: ${c.metadata.need.join(", ")}\n` +
+          `Arah emosi: ${c.metadata.emotion.join(", ")}\n` +
+          `Intensitas: ${c.metadata.intensity}`
       )
       .join("\n\n") +
-    `\n\n(PENTING: Gunakan "Cara merespons yang tepat" di atas HANYA sebagai panduan nada dan gaya empati. JANGAN menyalin jawaban tersebut secara persis. Sesuaikan dengan konteks obrolan saat ini.)\n---`
+    `\n\nGunakan ini hanya untuk membaca situasi — bukan untuk menentukan gaya, nada, atau kalimat. Baca konteks percakapan aktual, lalu respons seperti biasa.\n---`
 
   return basePrompt + contextBlock
 }

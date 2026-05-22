@@ -4,7 +4,7 @@ import { Chunk } from "@/lib/rag/promptBuilder";
 export type { Chunk } from "@/lib/rag/promptBuilder";
 
 const DB_NAME = "rag_store";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = "chunks";
 
 
@@ -134,7 +134,8 @@ export async function ingestChunks({ onProgress }: { onProgress?: (current: numb
     // Embed batch
     const withEmbeddings = await Promise.all(
       batch.map(async (chunk) => {
-        const embedding = await embedWithRetry(chunk.content);
+        const textToEmbed = `${chunk.scenario.topic}. ${chunk.scenario.situation}. Kebutuhan: ${chunk.metadata.need?.join(", ") || ""}. Emosi: ${chunk.metadata.emotion?.join(", ") || ""}.`;
+        const embedding = await embedWithRetry(textToEmbed);
         return { ...chunk, embedding };
       })
     );
@@ -229,9 +230,11 @@ export async function ragQuery(
     { role: "user", content: userQuery },
   ];
 
-  const retrievedChunks = relevantChunks.map(({ content, response, metadata }) => ({
-    content,
-    response,
+  const retrievedChunks = relevantChunks.map(({ id, scenario, response_strategy, example_style, metadata }) => ({
+    id,
+    scenario,
+    response_strategy,
+    example_style,
     metadata,
   }));
 
@@ -257,8 +260,8 @@ export async function ragQuery(
   return {
     answer,
     sources: relevantChunks.map((c) => ({
-      content: c.content.slice(0, 100) + "...",
-      source: c.metadata.source,
+      content: `${c.scenario.topic} - ${c.scenario.situation}`.slice(0, 100) + "...",
+      source: c.metadata.topic || "emotional pattern",
       score: c.score.toFixed(3),
     })),
   };

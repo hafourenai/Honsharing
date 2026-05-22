@@ -19,10 +19,26 @@ const ChatRequestSchema = z.object({
   username: z.string().max(20).optional(),
   retrievedChunks: z.array(z.object({
     id: z.string().optional(),
-    content: z.string(),
-    response: z.string().optional(),
+    scenario: z.object({
+      topic: z.string(),
+      situation: z.string(),
+      core_fear: z.string(),
+      self_perception: z.string(),
+    }),
+    response_strategy: z.object({
+      tone: z.string(),
+      style: z.string(),
+      approach: z.array(z.string()),
+      conversation_pattern: z.array(z.string()),
+    }),
+    example_style: z.array(z.string()),
+    metadata: z.object({
+      emotion: z.array(z.string()),
+      need: z.array(z.string()),
+      intensity: z.string(),
+      topic: z.string(),
+    }),
     embedding: z.array(z.number()).optional(),
-    metadata: z.record(z.string(), z.unknown()),
   })).optional(),
 });
 
@@ -72,8 +88,7 @@ export async function POST(request: NextRequest) {
     }
     const { messages, mode, username, retrievedChunks } = parsed.data;
 
-    const systemContent = buildSystemPrompt((retrievedChunks ?? []) as Chunk[], mode as ChatMode, username)
-      + " Balas dengan empati.";
+    const systemContent = buildSystemPrompt((retrievedChunks ?? []) as Chunk[], mode as ChatMode, username);
 
     const completion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
@@ -81,7 +96,7 @@ export async function POST(request: NextRequest) {
         { role: "system", content: systemContent },
         ...messages,
       ],
-      temperature: 0.3,
+      temperature: 0.75,
       max_tokens: 1024,
     });
 
