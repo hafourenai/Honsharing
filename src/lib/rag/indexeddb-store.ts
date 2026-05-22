@@ -134,7 +134,7 @@ export async function ingestChunks({ onProgress }: { onProgress?: (current: numb
     // Embed batch
     const withEmbeddings = await Promise.all(
       batch.map(async (chunk) => {
-        const textToEmbed = `${chunk.scenario.topic}. ${chunk.scenario.situation}. Kebutuhan: ${chunk.metadata.need?.join(", ") || ""}. Emosi: ${chunk.metadata.emotion?.join(", ") || ""}.`;
+        const textToEmbed = `${chunk?.scenario?.topic || "Umum"}. ${chunk?.scenario?.situation || "Tidak spesifik"}. Kebutuhan: ${chunk?.metadata?.need?.join(", ") || ""}. Emosi: ${chunk?.metadata?.emotion?.join(", ") || ""}.`;
         const embedding = await embedWithRetry(textToEmbed);
         return { ...chunk, embedding };
       })
