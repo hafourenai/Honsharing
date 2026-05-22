@@ -90,3 +90,24 @@ Session-based access control ensures that conversation data remains private to t
 Honey was initially created as a personal project to explore how AI can provide emotionally supportive interactions while maintaining strong privacy guarantees.
 
 The goal is to experiment with a system where users can express thoughts freely without worrying about their data being collected, analyzed, or stored remotely.
+
+---
+
+## Troubleshooting
+
+### Clearing the Local Database (IndexedDB)
+
+Since Honey relies heavily on local browser storage for privacy, corrupted data or outdated cache in your browser's IndexedDB may occasionally cause runtime errors (such as `Cannot read properties of undefined`). If you encounter persistent issues, you can reset the local database.
+
+**Method 1: Using the Browser Console (Recommended)**
+1. Open Developer Tools in your browser (`F12` or `Ctrl + Shift + J` / `Cmd + Option + J`).
+2. Navigate to the **Console** tab.
+3. Run the following command:
+   ```javascript
+   indexedDB.deleteDatabase("rag_store");
+   ```
+4. Refresh the page. The application will automatically recreate the database.
+
+**Method 2: Using the Application/Storage Panel**
+* **Chrome / Edge / Brave:** Open Developer Tools (`F12`) > Go to the **Application** tab > Expand **IndexedDB** in the left sidebar > Select `rag_store` > Click **Delete database**.
+* **Firefox:** Open Developer Tools (`F12`) > Go to the **Storage** tab > Expand **Indexed DB** > Right-click the database and select **Delete**.
