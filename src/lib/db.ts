@@ -1,4 +1,4 @@
-import { get, set } from "idb-keyval"
+import { get, set, del } from "idb-keyval"
 import Dexie, { Table } from "dexie"
 import { encryptText, decryptText } from "./auth/encryption"
 
@@ -239,6 +239,28 @@ export const db = {
       await set(PREFS_KEY, prefs)
     } catch (err) {
       console.error("[db] savePreferences failed:", err)
+      throw err
+    }
+  },
+
+  async clearAppData(): Promise<void> {
+    try {
+      await honeyDb.transaction("rw", honeyDb.conversations, honeyDb.messages, async () => {
+        await honeyDb.conversations.clear()
+        await honeyDb.messages.clear()
+      })
+      await del(PROFILE_KEY)
+      await del(PREFS_KEY)
+      try {
+        const { clearAllChunks } = await import("@/lib/rag/indexeddb-store")
+        await clearAllChunks()
+      } catch (err) {
+        console.warn("[db] Failed to clear RAG store:", err)
+      }
+      localStorage.clear()
+      sessionStorage.clear()
+    } catch (err) {
+      console.error("[db] clearAppData failed:", err)
       throw err
     }
   },

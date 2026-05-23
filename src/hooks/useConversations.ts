@@ -64,6 +64,11 @@ export function useConversations() {
     setActiveId(null)
   }
 
+  const hardReset = async () => {
+    await db.clearAppData()
+    window.location.reload()
+  }
+
   const saveProfile = async (name: string, initialMood: string) => {
     const profile: UserProfile = { name, initialMood, onboardedAt: Date.now() }
     await db.saveUserProfile(profile)
@@ -93,6 +98,7 @@ export function useConversations() {
     deleteConversation,
     renameConversation,
     clearAllConversations,
+    hardReset,
     sendMessage,
     saveProfile,
     updateProfileName

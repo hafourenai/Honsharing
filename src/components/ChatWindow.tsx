@@ -41,6 +41,7 @@ function ChatContent() {
     deleteConversation,
     renameConversation,
     clearAllConversations,
+    hardReset,
     sendMessage,
     updateProfileName
   } = useConversationsContext()
@@ -187,6 +188,7 @@ function ChatContent() {
         userProfile={userProfile}
         updateProfileName={updateProfileName}
         clearAllHistory={clearAllConversations}
+        onHardReset={hardReset}
       />
     </PhoneShell>
   )

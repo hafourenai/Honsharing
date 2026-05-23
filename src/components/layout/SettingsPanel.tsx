@@ -6,6 +6,7 @@ import { X, Pencil } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useSettings } from "@/hooks/useSettings"
 import Toggle from "./Toggle"
+import ConfirmModal from "./ConfirmModal"
 
 import { UserProfile } from "@/lib/db"
 
@@ -15,12 +16,14 @@ interface SettingsPanelProps {
   userProfile: UserProfile | null | undefined
   updateProfileName: (name: string) => Promise<void>
   clearAllHistory: () => Promise<void>
+  onHardReset: () => Promise<void>
 }
 
-export default function SettingsPanel({ isOpen, onClose, userProfile, updateProfileName, clearAllHistory }: SettingsPanelProps) {
+export default function SettingsPanel({ isOpen, onClose, userProfile, updateProfileName, clearAllHistory, onHardReset }: SettingsPanelProps) {
   const { preferences, updatePreferences } = useSettings()
   const [isEditingName, setIsEditingName] = useState(false)
   const [tempName, setTempName] = useState("")
+  const [showResetModal, setShowResetModal] = useState(false)
 
   useEffect(() => {
     if (userProfile) setTempName(userProfile.name)
@@ -152,7 +155,21 @@ export default function SettingsPanel({ isOpen, onClose, userProfile, updateProf
                 >
                   hapus semua riwayat percakapan
                 </button>
+                <button
+                  onClick={() => setShowResetModal(true)}
+                  className="w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-left text-[12px] text-red-500 hover:bg-red-100 transition-colors"
+                >
+                  hard reset aplikasi
+                </button>
               </div>
+              <ConfirmModal
+                isOpen={showResetModal}
+                onClose={() => setShowResetModal(false)}
+                onConfirm={onHardReset}
+                title="Hard Reset Aplikasi?"
+                message="Semua data lokal akan dihapus termasuk percakapan, preferensi, dan cache. Akun kamu tetap aman. Tindakan ini tidak bisa dibatalkan."
+                confirmLabel="Hard Reset"
+              />
 
               <div className="flex flex-col gap-1 border-t border-honey-bg-user pt-6 opacity-60">
                 <span className="text-[11px] text-honey-text-primary">Honey v1.0</span>

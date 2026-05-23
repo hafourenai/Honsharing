@@ -21,3 +21,15 @@ export async function POST() {
 
   return NextResponse.json({ ok: true })
 }
+
+export async function DELETE() {
+  const cookieStore = await cookies()
+  cookieStore.set("hon_session", "", {
+    httpOnly: true,
+    sameSite: "strict",
+    path: "/",
+    maxAge: 0,
+    secure: process.env.NODE_ENV === "production",
+  })
+  return NextResponse.json({ ok: true })
+}
