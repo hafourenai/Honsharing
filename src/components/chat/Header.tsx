@@ -2,6 +2,7 @@
 
 import { PanelLeftClose, PanelLeftOpen, Clock } from "lucide-react"
 import { motion } from "framer-motion"
+import Image from "next/image"
 
 interface HeaderProps {
   onOpenSidebar: () => void
@@ -25,14 +26,14 @@ export default function Header({
       initial={{ y: -10, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.25, delay: 0.06, ease: "easeOut" }}
-      className="flex items-center justify-between border-b-[0.5px] border-[#1a1528] px-4 h-[56px] z-40 bg-[#0a0812] shrink-0 w-full pl-2 md:pl-4"
+      className="flex items-center justify-between border-b-[0.5px] border-honey-bg-user px-4 h-[56px] z-40 bg-honey-bg-outer shrink-0 w-full pl-2 md:pl-4"
     >
       <div className="flex items-center gap-2 md:gap-3">
         {/* Desktop sidebar toggle — only shown when there's history */}
         {showHistory && onToggleSidebarPinned && (
           <button
             onClick={onToggleSidebarPinned}
-            className="hidden md:flex h-8 w-8 items-center justify-center rounded-full text-[#9b8ec4] transition-colors hover:bg-[#1e1830]"
+            className="hidden md:flex h-8 w-8 items-center justify-center rounded-full text-honey-accent-lavender transition-colors hover:bg-honey-bg-elevated"
           >
             {isSidebarPinned ? (
               <PanelLeftClose className="h-5 w-5" />
@@ -43,11 +44,11 @@ export default function Header({
         )}
 
         <div className="flex items-center gap-3">
-          <div className="relative flex h-10 w-10 items-center justify-center rounded-full border-[1.5px] border-[#4a3d6a] bg-honey-bg-elevated">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="#9b8ec4" />
-            </svg>
-            <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border border-[#0a0812] bg-honey-status-online" />
+          <div className="relative flex h-10 w-10 shrink-0">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border-[1.5px] border-honey-accent-lavender bg-honey-bg-elevated overflow-hidden">
+              <Image src="/Logo.jpg" alt="Honey Logo" width={40} height={40} className="object-cover w-full h-full" />
+            </div>
+            <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border border-white bg-honey-status-online z-10" />
           </div>
 
           <div className="flex flex-col">
@@ -63,7 +64,7 @@ export default function Header({
         {showHistory && !isSidebarPinned && (
           <button
             onClick={onOpenSidebar}
-            className="md:hidden flex h-8 w-8 items-center justify-center rounded-full text-[#9b8ec4] transition-colors hover:bg-[#1e1830]"
+            className="md:hidden flex h-8 w-8 items-center justify-center rounded-full text-honey-accent-lavender transition-colors hover:bg-honey-bg-elevated"
           >
             <PanelLeftOpen className="h-5 w-5" />
           </button>
@@ -74,7 +75,7 @@ export default function Header({
           <button
             ref={clockRef}
             onClick={onOpenHistory}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-[#9b8ec4] transition-colors hover:bg-[#1e1830]"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-honey-accent-lavender transition-colors hover:bg-honey-bg-elevated"
           >
             <Clock className="h-5 w-5" />
           </button>

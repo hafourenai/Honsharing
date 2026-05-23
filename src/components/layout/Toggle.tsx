@@ -15,13 +15,13 @@ export default function Toggle({ isOn, onToggle }: ToggleProps) {
       onClick={onToggle}
       className={cn(
         "relative h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors duration-180",
-        isOn ? "bg-[#4a3d7a]" : "bg-[#1e1830]"
+        isOn ? "bg-honey-accent-primary" : "bg-honey-bg-user"
       )}
     >
       <motion.div
         className={cn(
           "absolute top-[2px] h-4 w-4 rounded-full transition-colors duration-180",
-          isOn ? "bg-[#c4b8e8]" : "bg-[#3d3060]"
+          isOn ? "bg-white" : "bg-honey-text-ghost"
         )}
         initial={false}
         animate={{ x: isOn ? 18 : 2 }}

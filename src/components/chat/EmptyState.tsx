@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import Image from "next/image"
 
 interface EmptyStateProps {
   onSuggest: (msg: string) => void
@@ -21,16 +22,14 @@ export default function EmptyState({ onSuggest }: EmptyStateProps) {
         transition={{ duration: 0.4, ease: "easeOut" }}
         className="mb-8 flex flex-col items-center text-center"
       >
-        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[#2e264a] bg-[#1a1530]">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="#5a4f72" />
-          </svg>
+        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full border-[1.5px] border-honey-accent-lavender bg-honey-bg-elevated overflow-hidden">
+          <Image src="/Logo.jpg" alt="Honey Logo" width={64} height={64} className="object-cover w-full h-full" />
         </div>
         
-        <h2 className="mb-2 font-playfair text-[22px] italic text-[#4a3d7a]">
+        <h2 className="mb-2 font-playfair text-[22px] italic text-honey-accent-primary">
           ada apa hari ini?
         </h2>
-        <p className="text-[13px] text-[#3d3356]">
+        <p className="text-[13px] text-honey-text-muted">
           cerita aja, aku di sini untuk mendengarkan
         </p>
       </motion.div>
@@ -45,7 +44,7 @@ export default function EmptyState({ onSuggest }: EmptyStateProps) {
           <button
             key={i}
             onClick={() => onSuggest(s)}
-            className="rounded-full border border-[#2e264a] bg-[#131020] px-4 py-3 text-[13px] text-[#9b8ec4] transition-colors hover:bg-[#1e1830] hover:text-[#e2d9f3]"
+            className="rounded-full border border-honey-bg-user bg-honey-bg-input px-4 py-3 text-[13px] text-honey-accent-lavender transition-colors hover:bg-honey-bg-user hover:text-honey-text-primary shadow-sm"
           >
             {`"${s}"`}
           </button>

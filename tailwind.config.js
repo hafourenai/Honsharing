@@ -6,25 +6,25 @@ module.exports = {
       colors: {
         honey: {
           bg: {
-            outer: "#0d0a14",
-            input: "#131020",
-            bot: "#16122a",
-            elevated: "#1e1830",
-            user: "#261e45",
+            outer: "#f0edf6",
+            input: "#ffffff",
+            bot: "#ffffff",
+            elevated: "#faf9fc",
+            user: "#e4d9f1",
           },
           accent: {
-            primary: "#4a3d7a",
-            lavender: "#9b8ec4",
+            primary: "#6b539c",
+            lavender: "#8a74c2",
           },
           text: {
-            primary: "#e2d9f3",
-            bot: "#c9bfe0",
-            user: "#d4ccec",
-            muted: "#5a4f72",
-            ghost: "#3d3356",
+            primary: "#2e2545",
+            bot: "#4a3c68",
+            user: "#2e2545",
+            muted: "#7a6b99",
+            ghost: "#a395c2",
           },
           status: {
-            online: "#9be09b",
+            online: "#4ade80",
           }
         }
       },

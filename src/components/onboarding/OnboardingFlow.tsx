@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
+import Image from "next/image"
 
 const MOODS = [
   { id: "kesepian", label: "kesepian" },
@@ -53,7 +54,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#0a0812] relative overflow-hidden text-honey-text-primary p-6">
+    <div className="flex h-screen w-screen flex-col items-center justify-center bg-honey-bg-outer relative overflow-hidden text-honey-text-primary p-6">
       
       <AnimatePresence mode="wait">
         
@@ -70,11 +71,9 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             <motion.div
               animate={{ scale: [1, 1.04, 1] }}
               transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-              className="mb-8 flex h-[64px] w-[64px] items-center justify-center rounded-full border-[1.5px] border-[#4a3d6a] bg-honey-bg-elevated shadow-[0_0_20px_rgba(74,61,122,0.3)]"
+              className="mb-8 flex h-[64px] w-[64px] items-center justify-center rounded-full border-[1.5px] border-honey-accent-lavender bg-honey-bg-elevated shadow-[0_0_20px_rgba(107,83,156,0.2)] overflow-hidden"
             >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="#9b8ec4" />
-              </svg>
+              <Image src="/Logo.jpg" alt="Honey Logo" width={64} height={64} className="object-cover w-full h-full" />
             </motion.div>
 
             {/* Simulated Typewriter with simple CSS steps or just Framer Motion sequence */}
@@ -82,7 +81,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               initial={{ width: 0 }}
               animate={{ width: "100%" }}
               transition={{ duration: 0.6, ease: "linear" }}
-              className="font-playfair text-[32px] italic text-[#e2d9f3] overflow-hidden whitespace-nowrap mb-6"
+              className="font-playfair text-[32px] italic text-honey-text-primary overflow-hidden whitespace-nowrap mb-6"
             >
               hei, aku Honey.
             </motion.h1>
@@ -93,7 +92,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.4 }}
-                  className="text-[14px] text-[#5a4f72] mb-10"
+                  className="text-[14px] text-honey-text-muted mb-10"
                 >
                   aku di sini untuk mendengarkan, bukan menghakimi.
                 </motion.p>
@@ -107,7 +106,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                   onClick={handleNext}
-                  className="rounded-full border border-[#2e264a] text-[#9b8ec4] px-6 py-2.5 text-[14px] hover:bg-[#16122a] transition-colors"
+                  className="rounded-full border border-honey-bg-user text-honey-accent-lavender px-6 py-2.5 text-[14px] hover:bg-honey-bg-bot transition-colors"
                 >
                   kenalan dulu &rarr;
                 </motion.button>
@@ -126,18 +125,18 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             transition={{ duration: 0.25, ease: "easeOut" }}
             className="flex flex-col max-w-sm w-full"
           >
-            <h2 className="font-playfair text-[22px] italic text-[#e2d9f3] mb-2">panggil aku apa?</h2>
-            <p className="text-[13px] text-[#5a4f72] mb-8">biar percakapan kita terasa lebih personal.</p>
+            <h2 className="font-playfair text-[22px] italic text-honey-text-primary mb-2">panggil aku apa?</h2>
+            <p className="text-[13px] text-honey-text-muted mb-8">biar percakapan kita terasa lebih personal.</p>
             
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value.slice(0, 20))}
               placeholder="nama atau panggilanmu..."
-              className="w-full rounded-2xl border border-[#2a2248] bg-[#131020] px-4 py-3 font-playfair italic text-[#e2d9f3] placeholder:text-[#3d3560] focus:border-[#4a3d7a] focus:outline-none mb-8"
+              className="w-full rounded-2xl border border-honey-bg-user bg-honey-bg-input px-4 py-3 font-playfair italic text-honey-text-primary placeholder:text-honey-text-ghost focus:border-honey-accent-primary focus:outline-none mb-8"
             />
 
-            <h3 className="text-[13px] text-[#e2d9f3] mb-4">hari ini kamu lagi gimana?</h3>
+            <h3 className="text-[13px] text-honey-text-primary mb-4">hari ini kamu lagi gimana?</h3>
             <div className="flex flex-wrap gap-2 mb-10">
               {MOODS.map((m) => {
                 const isActive = mood === m.id
@@ -148,8 +147,8 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     className={cn(
                       "rounded-full border px-4 py-1.5 text-[13px] font-medium transition-colors duration-[180ms] ease-out",
                       isActive
-                        ? "border-[#6b5ca0] bg-[#231a3d] text-[#c4b8e8]"
-                        : "border-[#2e2650] bg-[#13102099] text-[#8a7faa] hover:bg-[#231a3d] hover:text-[#c4b8e8]"
+                        ? "border-honey-accent-lavender bg-honey-accent-primary text-white"
+                        : "border-honey-bg-user bg-honey-bg-input text-honey-text-ghost hover:bg-honey-accent-primary hover:text-white"
                     )}
                   >
                     {m.label}
@@ -161,7 +160,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             <button
               disabled={!name.trim() || !mood}
               onClick={() => onComplete(name, mood)}
-              className="rounded-full bg-[#4a3d7a] text-[#e2d9f3] px-6 py-3 text-[14px] font-medium disabled:bg-[#16122a] disabled:text-[#5a4f72] transition-colors self-end w-full"
+              className="rounded-full bg-honey-accent-primary text-white px-6 py-3 text-[14px] font-medium disabled:bg-honey-bg-user disabled:text-honey-text-muted transition-colors self-end w-full"
             >
               lanjut &rarr;
             </button>
@@ -178,7 +177,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             initial={false}
             animate={{
               width: step === idx ? 20 : 6,
-              backgroundColor: step === idx ? "#4a3d7a" : "#2a2248",
+              backgroundColor: step === idx ? "#6b539c" : "#e4d9f1",
             }}
             transition={{ duration: 0.2 }}
             className="h-1.5 rounded-full"

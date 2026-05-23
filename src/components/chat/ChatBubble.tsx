@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
+import Image from "next/image"
 
 interface ChatBubbleProps {
   id: string
@@ -23,10 +24,8 @@ export default function ChatBubble({ text, isBot, delay = 0 }: ChatBubbleProps) 
       className={cn("mb-4 flex w-full", isBot ? "justify-start" : "justify-end")}
     >
       {isBot && (
-        <div className="mr-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#4a3d6a] bg-honey-bg-elevated self-end mb-1">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="#9b8ec4" />
-          </svg>
+        <div className="mr-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-[1.5px] border-honey-accent-lavender bg-honey-bg-elevated self-end mb-1 overflow-hidden">
+          <Image src="/Logo.jpg" alt="Honey Logo" width={24} height={24} className="object-cover w-full h-full" />
         </div>
       )}
 
@@ -34,8 +33,8 @@ export default function ChatBubble({ text, isBot, delay = 0 }: ChatBubbleProps) 
         className={cn(
           "relative max-w-[80%] px-4 py-3 leading-relaxed",
           isBot
-            ? "rounded-[4px_16px_16px_16px] border-[0.5px] border-[#2e264a] bg-honey-bg-bot text-[13px] text-honey-text-bot font-inter"
-            : "rounded-[16px_4px_16px_16px] border-[0.5px] border-[#3d3060] bg-honey-bg-user text-[13px] text-honey-text-user font-inter font-medium"
+            ? "rounded-[4px_16px_16px_16px] border-[0.5px] border-honey-bg-user bg-honey-bg-bot text-[13px] text-honey-text-bot font-inter shadow-sm"
+            : "rounded-[16px_4px_16px_16px] border-[0.5px] border-honey-accent-lavender bg-honey-bg-user text-[13px] text-honey-text-user font-inter font-medium shadow-sm"
         )}
       >
         <div className="whitespace-pre-wrap">{text}</div>

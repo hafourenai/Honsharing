@@ -12,7 +12,7 @@ export default function PhoneShell({ children, className }: { children: ReactNod
           // Mobile 
           "max-w-[380px] sm:max-w-full sm:rounded-none",
           // Tablet 
-          "md:h-full md:w-full md:max-w-full md:rounded-[24px] md:border md:border-[#2a2040]",
+          "md:h-full md:w-full md:max-w-full md:rounded-[24px] md:border md:border-honey-bg-user",
           "lg:h-screen lg:w-screen lg:rounded-none lg:border-none",
           className
         )}

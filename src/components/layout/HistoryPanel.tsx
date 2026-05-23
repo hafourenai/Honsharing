@@ -78,36 +78,33 @@ export default function HistoryPanel({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -8, scale: 0.96 }}
           transition={{ duration: 0.18, ease: "easeOut" }}
-          className="absolute top-[56px] right-2 z-[80] w-[300px] rounded-xl bg-[#0d0a14] border border-[#1a1528] shadow-[0_8px_32px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden"
+          className="absolute top-[56px] right-2 z-[80] w-[300px] rounded-xl bg-honey-bg-outer border border-honey-bg-user shadow-xl flex flex-col overflow-hidden"
           style={{ maxHeight: "min(420px, calc(100vh - 80px))" }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[#1a1528]">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-honey-bg-user">
             <div className="flex items-center gap-2">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="#9b8ec4" />
-              </svg>
-              <span className="font-playfair text-[#c4b8e8] text-[13px] font-medium">Riwayat Chat</span>
+              <span className="font-playfair text-honey-text-bot text-[13px] font-medium">Riwayat Chat</span>
             </div>
             <button
               onClick={onClose}
-              className="flex h-6 w-6 items-center justify-center rounded-full text-[#5a4f72] transition-colors hover:text-[#9b8ec4] hover:bg-[#1e1830]"
+              className="flex h-6 w-6 items-center justify-center rounded-full text-honey-text-muted transition-colors hover:text-honey-accent-lavender hover:bg-honey-bg-elevated"
             >
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
 
           {/* Search */}
-          <div className="px-3 py-2.5 border-b border-[#1a1528]">
+          <div className="px-3 py-2.5 border-b border-honey-bg-user">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#5a4f72]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-honey-text-muted" />
               <input
                 type="text"
                 placeholder="Cari chat..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 autoFocus
-                className="w-full bg-[#16122a] border border-[#2e264a] rounded-lg pl-9 pr-3 py-1.5 text-[11px] text-[#e2d9f3] placeholder-[#3d3356] outline-none focus:border-[#4a3d7a] transition-colors"
+                className="w-full bg-honey-bg-bot border border-honey-bg-user rounded-lg pl-9 pr-3 py-1.5 text-[11px] text-honey-text-primary placeholder-honey-text-ghost outline-none focus:border-honey-accent-primary transition-colors"
               />
             </div>
           </div>
@@ -116,12 +113,12 @@ export default function HistoryPanel({
           <div className="flex-1 overflow-y-auto py-2 px-2 scrollbar-hide">
             {filteredConversations.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 gap-2">
-                <MessageSquare className="h-8 w-8 text-[#2e264a]" />
-                <p className="text-[11px] text-[#3d3356] text-center">
+                <MessageSquare className="h-8 w-8 text-honey-bg-user" />
+                <p className="text-[11px] text-honey-text-ghost text-center">
                   {searchQuery ? "Tidak ada chat ditemukan" : "Belum ada riwayat Chat"}
                 </p>
                 {!searchQuery && (
-                  <p className="text-[10px] text-[#2e264a] text-center">
+                  <p className="text-[10px] text-honey-text-ghost text-center">
                     Mulai Chat baru untuk percakapan<br />
                   </p>
                 )}
@@ -144,24 +141,24 @@ export default function HistoryPanel({
                       className={cn(
                         "flex flex-col items-start px-3 py-2 rounded-lg text-left transition-all duration-150 w-full",
                         active
-                          ? "bg-[#1a1530] border border-[#2e264a]"
-                          : "hover:bg-[#131020] border border-transparent"
+                          ? "bg-honey-bg-elevated border border-honey-bg-user"
+                          : "hover:bg-honey-bg-input border border-transparent"
                       )}
                     >
                       <div className="flex items-center gap-2 w-full">
-                        <span className={cn("text-[9px] shrink-0", active ? "text-[#9b8ec4]" : "text-[#3d3356]")}>
+                        <span className={cn("text-[9px] shrink-0", active ? "text-honey-accent-lavender" : "text-honey-text-ghost")}>
                           {active ? "●" : "○"}
                         </span>
                         <span
                           className={cn(
                             "text-[12px] font-jakarta truncate flex-1",
-                            active ? "text-[#e2d9f3]" : "text-[#c4b8e8]"
+                            active ? "text-honey-text-primary" : "text-honey-text-bot"
                           )}
                         >
                           {conv.title}
                         </span>
                       </div>
-                      <div className="text-[10px] text-[#3d3356] pl-4 mt-0.5">{meta}</div>
+                      <div className="text-[10px] text-honey-text-ghost pl-4 mt-0.5">{meta}</div>
                     </button>
                   )
                 })}

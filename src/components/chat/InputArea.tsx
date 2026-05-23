@@ -77,12 +77,12 @@ export default function InputArea({ onSend, disabled }: InputAreaProps) {
       <motion.div 
         animate={{
           scale: isFocused ? 1.005 : 1,
-          borderColor: isFocused ? "#4a3d7a" : "#2a2248"
+          borderColor: isFocused ? "#8a74c2" : "#e4d9f1"
         }}
         transition={{ duration: 0.18, ease: "easeOut" }}
-        className="flex w-full items-center gap-2 rounded-full border bg-honey-bg-input p-1.5"
+        className="flex w-full items-center gap-2 rounded-full border bg-honey-bg-input p-1.5 shadow-sm"
       >
-        <button className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-[#1e1838] text-honey-text-muted hover:text-honey-text-primary transition-colors">
+        <button className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-honey-bg-user text-honey-text-muted hover:text-honey-text-primary transition-colors">
           <Plus className="h-4 w-4" />
         </button>
         
@@ -101,7 +101,7 @@ export default function InputArea({ onSend, disabled }: InputAreaProps) {
           }}
           placeholder="tulis apa yang kamu rasakan..."
           rows={1}
-          className="flex-1 bg-transparent px-2 font-playfair italic text-[14px] text-honey-text-primary placeholder:text-[#3d3560] focus:outline-none resize-none"
+          className="flex-1 bg-transparent px-2 font-playfair italic text-[14px] text-honey-text-primary placeholder:text-honey-text-ghost focus:outline-none resize-none"
           disabled={disabled}
         />
         
@@ -113,8 +113,8 @@ export default function InputArea({ onSend, disabled }: InputAreaProps) {
           className={cn(
             "flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full transition-colors",
             text.trim() && !disabled
-              ? "bg-honey-accent-primary text-honey-text-primary"
-              : "bg-[#2a2248] text-[#5a4f72]"
+              ? "bg-honey-accent-primary text-white"
+              : "bg-honey-bg-user text-honey-text-muted"
           )}
         >
           <Send className="h-[14px] w-[14px] translate-x-[-1px] translate-y-[1px]" />
@@ -122,7 +122,7 @@ export default function InputArea({ onSend, disabled }: InputAreaProps) {
       </motion.div>
 
       <div className="mt-5 flex justify-center">
-        <div className="h-1 w-[100px] rounded-full bg-[#2a2248]" />
+        <div className="h-1 w-[100px] rounded-full bg-honey-bg-user" />
       </div>
     </div>
   )
