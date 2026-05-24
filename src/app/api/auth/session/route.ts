@@ -1,8 +1,14 @@
 import { cookies } from "next/headers"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { generateSessionToken } from "@/lib/auth/hmac"
+import { checkRateLimit, extractIp } from "@/lib/rate-limiter"
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  const ip = extractIp(request)
+  if (!checkRateLimit(`session:${ip}`, 10, 60_000)) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan." }, { status: 429 })
+  }
+
   const secret = process.env.SESSION_SECRET
   if (!secret) {
     return NextResponse.json({ error: "Server misconfigured" }, { status: 500 })
@@ -22,7 +28,12 @@ export async function POST() {
   return NextResponse.json({ ok: true })
 }
 
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
+  const ip = extractIp(request)
+  if (!checkRateLimit(`session:${ip}`, 5, 60_000)) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan." }, { status: 429 })
+  }
+
   const cookieStore = await cookies()
   cookieStore.set("hon_session", "", {
     httpOnly: true,

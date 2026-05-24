@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateRequest } from "@/lib/auth/validateRequest";
 import { z } from "zod";
+import { checkRateLimit, extractIp } from "@/lib/rate-limiter";
 
 const EmbedRequestSchema = z.object({
   text: z.string().min(1).max(5000),
@@ -18,12 +19,15 @@ async function getEmbedder(): Promise<FeatureExtractionPipeline> {
   return embedder;
 }
 
-// Embedding runs locally — no rate limit needed
-
 export async function POST(request: NextRequest) {
   const auth = await validateRequest();
   if (!auth.valid) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const ip = extractIp(request);
+  if (!checkRateLimit(`embed:${ip}`, 30, 60_000)) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan." }, { status: 429 });
   }
 
   try {

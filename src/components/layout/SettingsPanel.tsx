@@ -24,6 +24,7 @@ export default function SettingsPanel({ isOpen, onClose, userProfile, updateProf
   const [isEditingName, setIsEditingName] = useState(false)
   const [tempName, setTempName] = useState("")
   const [showResetModal, setShowResetModal] = useState(false)
+  const [showClearModal, setShowClearModal] = useState(false)
 
   useEffect(() => {
     if (userProfile) setTempName(userProfile.name)
@@ -146,11 +147,7 @@ export default function SettingsPanel({ isOpen, onClose, userProfile, updateProf
               <div className="mb-10 flex flex-col gap-4">
                 <div className="text-[10px] font-jakarta uppercase tracking-wider text-honey-text-ghost">Privasi</div>
                 <button 
-                  onClick={() => {
-                    if (confirm("ini akan menghapus semua percakapanmu secara permanen.")) {
-                      clearAllHistory()
-                    }
-                  }}
+                  onClick={() => setShowClearModal(true)}
                   className="w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-left text-[12px] text-red-500 hover:bg-red-100 transition-colors"
                 >
                   hapus semua riwayat percakapan
@@ -163,6 +160,14 @@ export default function SettingsPanel({ isOpen, onClose, userProfile, updateProf
                 </button>
               </div>
               <ConfirmModal
+                isOpen={showClearModal}
+                onClose={() => setShowClearModal(false)}
+                onConfirm={clearAllHistory}
+                title="Hapus Semua Riwayat?"
+                message="ini akan menghapus semua percakapanmu secara permanen."
+                confirmLabel="Hapus Semua"
+              />
+              <ConfirmModal
                 isOpen={showResetModal}
                 onClose={() => setShowResetModal(false)}
                 onConfirm={onHardReset}
@@ -172,7 +177,7 @@ export default function SettingsPanel({ isOpen, onClose, userProfile, updateProf
               />
 
               <div className="flex flex-col gap-1 border-t border-honey-bg-user pt-6 opacity-60">
-                <span className="text-[11px] text-honey-text-primary">Honey v1.0</span>
+                <span className="text-[11px] text-honey-text-primary">Honey v1.2</span>
                 <span className="text-[10px] text-honey-text-ghost">dibuat dengan ❤ untuk kamu yang butuh didengarkan</span>
               </div>
             </div>

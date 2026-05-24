@@ -1,23 +1,55 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-// Encode string to base64 compatible with Buffer.from(json).toString('base64')
-function toBase64(str: string): string {
-  return btoa(
-    encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, p1) =>
-      String.fromCharCode(parseInt(p1, 16))
-    )
-  )
+// Rate limiting for middleware (IP-based, in-memory)
+interface RateLimitEntry {
+  count: number
+  resetAt: number
 }
 
-// Decode base64 compatible with Buffer.from(base64, 'base64').toString()
+const midRlMap = new Map<string, RateLimitEntry>()
+
+function midRlCheck(key: string, limit: number, windowMs: number): boolean {
+  const now = Date.now()
+  const entry = midRlMap.get(key)
+  if (!entry || now > entry.resetAt) {
+    midRlMap.set(key, { count: 1, resetAt: now + windowMs })
+    return true
+  }
+  if (entry.count >= limit) return false
+  entry.count++
+  return true
+}
+
+// Periodic cleanup every 5 minutes to prevent memory leak
+const MID_RL_CLEAN_INTERVAL = 300_000
+let midRlLastCleanup = Date.now()
+function midRlCleanup() {
+  const now = Date.now()
+  if (now - midRlLastCleanup < MID_RL_CLEAN_INTERVAL) return
+  midRlLastCleanup = now
+  for (const [key, entry] of midRlMap) {
+    if (now > entry.resetAt) midRlMap.delete(key)
+  }
+}
+
+// Base64 helpers compatible with hmac.ts (Node.js Buffer)
+function toBase64(str: string): string {
+  const bytes = new TextEncoder().encode(str)
+  let binary = ""
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i])
+  }
+  return btoa(binary)
+}
+
 function fromBase64(base64: string): string {
-  return decodeURIComponent(
-    atob(base64)
-      .split("")
-      .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-      .join("")
-  )
+  const binary = atob(base64)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i)
+  }
+  return new TextDecoder().decode(bytes)
 }
 
 async function hmacSign(secret: string, data: string): Promise<string> {
@@ -33,17 +65,6 @@ async function hmacSign(secret: string, data: string): Promise<string> {
   return Array.from(new Uint8Array(sig))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("")
-}
-
-async function generateToken(secret: string): Promise<string> {
-  const payload = {
-    token: crypto.randomUUID(),
-    exp: Date.now() + 1000 * 60 * 60 * 24 * 7, // 7 days
-  }
-  const json = JSON.stringify(payload)
-  const base64 = toBase64(json)
-  const sig = await hmacSign(secret, json)
-  return `${base64}.${sig}`
 }
 
 async function verifyToken(secret: string, token: string): Promise<boolean> {
@@ -75,28 +96,48 @@ async function verifyToken(secret: string, token: string): Promise<boolean> {
 }
 
 export async function middleware(request: NextRequest) {
+  midRlCleanup()
+
   const secret = process.env.SESSION_SECRET
   if (!secret) return NextResponse.next()
 
+  // Rate limit middleware requests per IP
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+    || request.headers.get("x-real-ip")
+    || "unknown"
+  if (!midRlCheck(`mid:${ip}`, 60, 60_000)) {
+    return new NextResponse(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: { "Content-Type": "application/json" },
+    })
+  }
+
   const existing = request.cookies.get("hon_session")?.value
   const isValid = existing ? await verifyToken(secret, existing) : false
-
-  // If cookie is already valid, pass through without touching anything
   if (isValid) return NextResponse.next()
 
-  const token = await generateToken(secret)
-  const response = NextResponse.next()
+  // Generate new session token
+  const payload = {
+    token: crypto.randomUUID(),
+    exp: Date.now() + 1000 * 60 * 60 * 24 * 7,
+  }
+  const json = JSON.stringify(payload)
+  const base64 = toBase64(json)
+  const sig = await hmacSign(secret, json)
+  const token = `${base64}.${sig}`
 
+  const response = NextResponse.next()
   response.cookies.set("hon_session", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: 60 * 60 * 24 * 7,
     path: "/",
   })
 
   return response
 }
+
 export const config = {
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",

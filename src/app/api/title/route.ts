@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import Groq from "groq-sdk";
 import { validateRequest } from "@/lib/auth/validateRequest";
+import { checkRateLimit, extractIp } from "@/lib/rate-limiter";
 
 const TitleRequestSchema = z.object({
   message: z.string().min(1).max(500),
@@ -13,6 +14,11 @@ export async function POST(request: NextRequest) {
   const auth = await validateRequest();
   if (!auth.valid) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const ip = extractIp(request);
+  if (!checkRateLimit(`title:${ip}`, 30, 60_000)) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan." }, { status: 429 });
   }
 
   try {

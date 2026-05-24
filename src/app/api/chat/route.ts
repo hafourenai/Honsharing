@@ -5,6 +5,7 @@ import { validateRequest } from "@/lib/auth/validateRequest";
 import { buildSystemPrompt } from "@/lib/rag/promptBuilder";
 import { ChatMode } from "@/lib/systemPrompt";
 import type { Chunk } from "@/lib/rag/promptBuilder";
+import { checkRateLimit, extractIp } from "@/lib/rate-limiter";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -20,39 +21,15 @@ const ChatRequestSchema = z.object({
   retrievedChunks: z.array(z.any()).optional(),
 });
 
-// Basic in-memory rate limit
-const rateLimitMap = new Map<string, { count: number, resetTime: number, lastUpdate: number }>();
-
-function cleanupRateLimitMap() {
-  const now = Date.now();
-  for (const [ip, data] of rateLimitMap.entries()) {
-    if (now > data.resetTime) {
-      rateLimitMap.delete(ip);
-    }
-  }
-}
-
 export async function POST(request: NextRequest) {
-  cleanupRateLimitMap();
   const auth = await validateRequest();
   if (!auth.valid) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const ip = request.headers.get("x-forwarded-for") ?? "unknown";
-  const limit = 20; // max requests
-  const windowMs = 60 * 1000; // 1 minute
-  
-  const now = Date.now();
-  const rl = rateLimitMap.get(ip);
-  if (!rl || now > rl.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + windowMs, lastUpdate: now });
-  } else {
-    if (rl.count >= limit) {
-      return NextResponse.json({ error: "Terlalu banyak permintaan." }, { status: 429 });
-    }
-    rl.count++;
-    rl.lastUpdate = now;
+  const ip = extractIp(request);
+  if (!checkRateLimit(`chat:${ip}`, 20, 60_000)) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan." }, { status: 429 });
   }
 
   try {

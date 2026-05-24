@@ -1,8 +1,10 @@
 const ALGORITHM = "AES-GCM";
-
 const SALT = new TextEncoder().encode("honsharing-deterministic-salt-2026");
 
+let cachedKey: CryptoKey | null = null;
+
 async function getKey(): Promise<CryptoKey> {
+  if (cachedKey) return cachedKey;
   const secret = "honsharing-internal-app-secret-v1";
   const encoder = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
@@ -13,7 +15,7 @@ async function getKey(): Promise<CryptoKey> {
     ["deriveKey"]
   );
 
-  return crypto.subtle.deriveKey(
+  cachedKey = await crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
       salt: SALT,
@@ -25,6 +27,7 @@ async function getKey(): Promise<CryptoKey> {
     false,
     ["encrypt", "decrypt"]
   );
+  return cachedKey;
 }
 
 export async function encryptText(text: string): Promise<string> {

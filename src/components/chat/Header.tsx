@@ -53,7 +53,7 @@ export default function Header({
 
           <div className="flex flex-col">
             <h1 className="font-playfair text-[15px] text-honey-text-primary">Honey</h1>
-            <p className="font-jakarta text-[10px] text-honey-text-muted">mendengarkan · selalu ada</p>
+            <p className="font-jakarta text-[10px] text-honey-text-muted">online </p>
           </div>
         </div>
       </div>
