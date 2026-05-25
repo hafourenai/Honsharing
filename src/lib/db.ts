@@ -2,7 +2,7 @@ import { get, set, del } from "idb-keyval"
 import Dexie, { Table } from "dexie"
 import { encryptText, decryptText } from "./auth/encryption"
 
-// ─── Dexie row types (internal) ────────────────────────────────────────────
+// Dexie row types (internal) 
 
 export interface ConversationRow {
   id: string
