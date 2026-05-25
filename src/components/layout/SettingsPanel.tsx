@@ -132,15 +132,12 @@ export default function SettingsPanel({ isOpen, onClose, userProfile, updateProf
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between opacity-60">
                   <div className="flex flex-col">
-                    <span className="text-[13px] text-honey-text-primary">Mode Suara</span>
-                    <span className="text-[11px] text-honey-text-ghost">bacakan jawaban Honey dengan suara</span>
+                    <span className="text-[13px] text-honey-text-primary">Call Dengan Honey</span>
+                    <span className="text-[11px] text-honey-text-ghost">Mau Coba Interaksi Dengan ku?</span>
+                    <span className="mt-0.5 text-[11px] italic text-amber-500">fitur ini masih dalam tahap pengembangan sampai developer punya duit</span>
                   </div>
-                  <Toggle 
-                    isOn={preferences.voiceMode} 
-                    onToggle={() => updatePreferences({ voiceMode: !preferences.voiceMode })} 
-                  />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -189,7 +186,7 @@ export default function SettingsPanel({ isOpen, onClose, userProfile, updateProf
 
               <div className="flex flex-col gap-1 border-t border-honey-bg-user pt-6 opacity-60">
                 <span className="text-[11px] text-honey-text-primary">Honey v1.2</span>
-                <span className="text-[10px] text-honey-text-ghost">dibuat dengan ❤ untuk kamu yang butuh didengarkan</span>
+                <span className="text-[10px] text-honey-text-ghost">dibuat dengan ❤ untuk kamu yang butuh teman</span>
               </div>
             </div>
           </motion.div>
