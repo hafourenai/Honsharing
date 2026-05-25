@@ -134,6 +134,17 @@ export default function SettingsPanel({ isOpen, onClose, userProfile, updateProf
 
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
+                    <span className="text-[13px] text-honey-text-primary">Mode Suara</span>
+                    <span className="text-[11px] text-honey-text-ghost">bacakan jawaban Honey dengan suara</span>
+                  </div>
+                  <Toggle 
+                    isOn={preferences.voiceMode} 
+                    onToggle={() => updatePreferences({ voiceMode: !preferences.voiceMode })} 
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
                     <span className="text-[13px] text-honey-text-primary">Suara notifikasi</span>
                     <span className="text-[11px] text-honey-text-ghost">subtle chime saat membalas</span>
                   </div>

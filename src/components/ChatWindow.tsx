@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import PhoneShell from "./chat/PhoneShell"
 import Header from "./chat/Header"
 import ChatBubble from "./chat/ChatBubble"
@@ -15,6 +15,7 @@ import { useConversationsContext } from "@/contexts/ConversationsContext"
 import { motion, AnimatePresence } from "framer-motion"
 import { SettingsProvider, useSettings } from "@/hooks/useSettings"
 import dynamic from "next/dynamic"
+import { speakSentence, stopSpeaking } from "@/lib/audio/tts"
 
 const SettingsPanel = dynamic(() => import("./layout/SettingsPanel"), {
   ssr: false,
@@ -52,8 +53,10 @@ function ChatContent() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isSidebarPinned, setIsSidebarPinned] = useState(false)
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+  const [streamingText, setStreamingText] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const clockRef = useRef<HTMLButtonElement>(null)
+  const sentenceBufRef = useRef("")
 
   const hasHistory = conversations.some((c) => c.messages.length > 0)
   const isLanding = !activeConversation || activeConversation.messages.length === 0
@@ -64,13 +67,44 @@ function ChatContent() {
 
   useEffect(() => {
     scrollToBottom()
-  }, [activeConversation?.messages, loading])
+  }, [activeConversation?.messages, streamingText, loading])
+
+  useEffect(() => {
+    stopSpeaking()
+    setStreamingText("")
+    sentenceBufRef.current = ""
+  }, [activeId])
+
+  useEffect(() => {
+    if (loading) return
+
+    const remaining = sentenceBufRef.current.trim()
+    if (preferences.voiceMode && remaining) {
+      speakSentence(remaining)
+    }
+
+    setStreamingText("")
+    sentenceBufRef.current = ""
+  }, [loading, preferences.voiceMode])
+
+  const handleSend = useCallback((text: string) => {
+    if (preferences.voiceMode) {
+      stopSpeaking()
+    }
+
+    setStreamingText("")
+    sentenceBufRef.current = ""
+
+    sendMessage(text, preferences.language, (token: string) => {
+      setStreamingText((prev) => {
+        const next = prev + token
+        sentenceBufRef.current += token
+        return next
+      })
+    })
+  }, [sendMessage, preferences])
 
   if (!isLoaded) return null
-
-  const handleSend = (text: string) => {
-    sendMessage(text, preferences.language)
-  }
 
   return (
     <PhoneShell className="flex-row">
@@ -94,7 +128,6 @@ function ChatContent() {
         userProfile={userProfile}
       />
 
-      {/* Main content column */}
       <div className="flex-1 flex flex-col relative h-full w-full min-w-0 bg-honey-bg-outer">
         <div className="relative shrink-0">
           <Header
@@ -105,7 +138,6 @@ function ChatContent() {
             onOpenHistory={() => setIsHistoryOpen((v) => !v)}
             clockRef={clockRef}
           />
-
 
           <HistoryPanel
             isOpen={isHistoryOpen}
@@ -129,10 +161,10 @@ function ChatContent() {
               transition={{ duration: 0.15, ease: "easeOut" }}
               className="flex-1 overflow-hidden flex flex-col items-center justify-center"
             >
-              <EmptyState onSuggest={handleSend} />
+                <EmptyState onSuggest={handleSend} />
 
               <div className="w-full max-w-[520px]">
-                <InputArea onSend={handleSend} disabled={loading} />
+                <InputArea onSend={handleSend} disabled={loading} stopAiSpeech={stopSpeaking} />
               </div>
             </motion.div>
           ) : (
@@ -159,7 +191,16 @@ function ChatContent() {
                 )
               })}
 
-              {loading && <TypingIndicator />}
+              {streamingText && (
+                <ChatBubble
+                  id="streaming"
+                  text={streamingText}
+                  isBot={true}
+                  delay={0}
+                />
+              )}
+
+              {loading && !streamingText && <TypingIndicator />}
 
               <div ref={messagesEndRef} className="h-4 w-full flex-shrink-0" />
             </motion.div>
@@ -174,9 +215,8 @@ function ChatContent() {
             className="flex flex-col z-30 shrink-0"
           >
             <div className="relative">
-              {/* Soft shadow/gradient to separate input from chat */}
               <div className="absolute left-0 top-[-20px] h-[20px] w-full bg-gradient-to-t from-honey-bg-outer to-transparent pointer-events-none" />
-              <InputArea onSend={handleSend} disabled={loading} />
+              <InputArea onSend={handleSend} disabled={loading} stopAiSpeech={stopSpeaking} />
             </div>
           </motion.div>
         )}

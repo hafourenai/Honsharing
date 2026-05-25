@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { v4 as uuidv4 } from "uuid"
 import { db, Conversation, Message, UserProfile } from "@/lib/db"
-import { ragQuery, ChatHistoryItem } from "@/lib/rag/indexeddb-store"
+import { ChatHistoryItem, ragQueryStream } from "@/lib/rag/indexeddb-store"
 import { ChatMode } from "@/lib/systemPrompt"
 import { playNotifSound } from "@/lib/audio/notif"
 
@@ -26,7 +26,6 @@ export function useChat({ activeId, userProfile, loadData, createConversation }:
       if (response.ok) {
         const data = await response.json()
         let title = data.title.trim().toLowerCase().replace(/[.,!?;:'"]/g, "")
-        // Enforce max 5 words
         const words = title.split(" ")
         if (words.length > 5) {
           title = words.slice(0, 5).join(" ")
@@ -39,7 +38,11 @@ export function useChat({ activeId, userProfile, loadData, createConversation }:
     }
   }
 
-  const sendMessage = async (text: string, language: string = "santai") => {
+  const sendMessage = async (
+    text: string,
+    language: string = "santai",
+    onToken?: (token: string) => void
+  ) => {
     let targetId = activeId
     if (!targetId) {
       targetId = await createConversation()
@@ -57,7 +60,6 @@ export function useChat({ activeId, userProfile, loadData, createConversation }:
 
     await db.appendMessage(targetId, userMsg)
     
-    // Auto generate title
     if (conv.messages.length === 0 && conv.title === "percakapan baru") {
       generateTitle(targetId, text)
     }
@@ -66,13 +68,15 @@ export function useChat({ activeId, userProfile, loadData, createConversation }:
     setLoading(true)
 
     try {
-      const chatHistory: ChatHistoryItem[] = conv.messages.map(m => ({ 
-        role: (m.role === "bot" ? "assistant" : "user") as "assistant" | "user", 
-        content: m.content 
+      const chatHistory: ChatHistoryItem[] = conv.messages.map(m => ({
+        role: (m.role === "bot" ? "assistant" : "user") as "assistant" | "user",
+        content: m.content
       }))
-      const { answer } = await ragQuery(text, chatHistory, { 
+
+      const { answer } = await ragQueryStream(text, chatHistory, {
         mode: language as ChatMode,
-        username: userProfile?.name
+        username: userProfile?.name,
+        onToken,
       })
 
       const aiMsg: Message = {

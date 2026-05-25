@@ -266,3 +266,81 @@ export async function ragQuery(
     })),
   };
 }
+
+export async function ragQueryStream(
+  userQuery: string,
+  chatHistory: ChatHistoryItem[] = [],
+  options: { mode?: ChatMode; username?: string; onToken?: (token: string) => void } = {}
+): Promise<{ answer: string; sources: RagSource[] }> {
+  const relevantChunks = await retrieve(userQuery, 5);
+
+  const messages = [
+    ...chatHistory,
+    { role: "user", content: userQuery },
+  ];
+
+  const retrievedChunks = relevantChunks.map(({ id, scenario, response_strategy, example_style, metadata }) => ({
+    id,
+    scenario,
+    response_strategy,
+    example_style,
+    metadata,
+  }));
+
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      messages,
+      mode: options.mode,
+      username: options.username,
+      retrievedChunks,
+    }),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data?.error || `Server error ${res.status}`);
+  }
+
+  const reader = res.body?.getReader();
+  if (!reader) throw new Error("No response body");
+
+  const decoder = new TextDecoder();
+  let answer = "";
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+
+    for (const line of lines) {
+      if (!line.startsWith("data: ")) continue;
+      const data = line.slice(6);
+      if (data === "[DONE]") continue;
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed.error) throw new Error(parsed.error);
+        if (parsed.content) {
+          answer += parsed.content;
+          options.onToken?.(parsed.content);
+        }
+      } catch {
+        // skip malformed lines
+      }
+    }
+  }
+
+  return {
+    answer,
+    sources: relevantChunks.map((c) => ({
+      content: `${c?.scenario?.topic || "Umum"} - ${c?.scenario?.situation || "Tidak spesifik"}`.slice(0, 100) + "...",
+      source: c?.metadata?.topic || "emotional pattern",
+      score: c?.score?.toFixed(3) || "0.000",
+    })),
+  };
+}

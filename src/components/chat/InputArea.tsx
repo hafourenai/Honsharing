@@ -1,32 +1,36 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
-import { Mic, MicOff, Plus, Send, Square } from "lucide-react"
+import { Mic, MicOff, Plus, Send } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useAudioRecorder } from "@/hooks/useAudioRecorder"
+import { useVoiceChat } from "@/hooks/useVoiceChat"
 
 interface InputAreaProps {
   onSend: (message: string) => void
   disabled?: boolean
+  stopAiSpeech: () => void
 }
 
-function formatDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60)
-  const s = seconds % 60
-  return `${m}:${s.toString().padStart(2, "0")}`
-}
-
-export default function InputArea({ onSend, disabled }: InputAreaProps) {
+export default function InputArea({ onSend, disabled, stopAiSpeech }: InputAreaProps) {
   const [text, setText] = useState("")
   const [isFocused, setIsFocused] = useState(false)
   const [isSending, setIsSending] = useState(false)
-  const [transcribing, setTranscribing] = useState(false)
+  const [voiceActive, setVoiceActive] = useState(false)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  const { status, duration, startRecording, stopRecording, error } = useAudioRecorder()
+  const {
+    status: voiceStatus,
+    error: voiceError,
+    start: startVad,
+    stop: stopVad,
+  } = useVoiceChat({ onSend, stopAiSpeech })
 
-  const isRecording = status === "recording"
+  const voiceColor =
+    voiceStatus === "speaking" ? "#ef4444" :
+    voiceStatus === "listening" ? "#8a74c2" :
+    voiceStatus === "processing" ? "#f59e0b" :
+    "#e4d9f1"
 
   const adjustHeight = () => {
     const el = inputRef.current
@@ -66,46 +70,30 @@ export default function InputArea({ onSend, disabled }: InputAreaProps) {
   }
 
   useEffect(() => {
-    if (!disabled && inputRef.current && !isRecording && !transcribing) {
+    if (!disabled && inputRef.current && !voiceActive) {
       inputRef.current.focus()
     }
-  }, [disabled, isRecording, transcribing])
+  }, [disabled, voiceActive])
 
   useEffect(() => {
     adjustHeight()
   }, [text])
 
-  const handleToggleMic = async () => {
-    if (isRecording) {
-      const blob = await stopRecording()
-      if (blob.size > 0) {
-        setTranscribing(true)
-        try {
-          const formData = new FormData()
-          formData.append("audio", blob, "recording.webm")
-          const res = await fetch("/api/stt", { method: "POST", body: formData })
-          if (res.ok) {
-            const data = await res.json()
-            const transcript = data.transcript?.trim()
-            if (transcript) {
-              setIsSending(true)
-              setTimeout(() => setIsSending(false), 200)
-              onSend(transcript)
-            }
-          } else {
-            const err = await res.json()
-            console.error("STT error:", err.error)
-          }
-        } catch (e) {
-          console.error("STT fetch error:", e)
-        } finally {
-          setTranscribing(false)
-        }
-      }
-    } else {
-      await startRecording()
+  useEffect(() => {
+    if (voiceStatus === "error") {
+      setVoiceActive(false)
     }
-  }
+  }, [voiceStatus])
+
+  const toggleVoice = useCallback(() => {
+    if (voiceActive) {
+      stopVad()
+      setVoiceActive(false)
+    } else {
+      setVoiceActive(true)
+      startVad()
+    }
+  }, [voiceActive, startVad, stopVad])
 
   const handleSend = () => {
     if (text.trim() && !disabled) {
@@ -116,29 +104,33 @@ export default function InputArea({ onSend, disabled }: InputAreaProps) {
     }
   }
 
-  const placeholder = isRecording
-    ? "sedang merekam..."
-    : transcribing
-      ? "memproses suara..."
-      : "tulis apa yang kamu rasakan..."
+  const placeholder = voiceActive
+    ? voiceStatus === "speaking"
+      ? "sedang bicara..."
+      : voiceStatus === "processing"
+        ? "memproses suara..."
+        : voiceStatus === "listening"
+          ? "aku dengar..."
+          : "tulis apa yang kamu rasakan..."
+    : "tulis apa yang kamu rasakan..."
 
   return (
     <div className="w-full bg-honey-bg-outer pb-6 pt-2 px-4 z-40">
-      <motion.div 
+      <motion.div
         animate={{
           scale: isFocused ? 1.005 : 1,
-          borderColor: isRecording ? "#ef4444" : isFocused ? "#8a74c2" : "#e4d9f1"
+          borderColor: voiceActive ? voiceColor : isFocused ? "#8a74c2" : "#e4d9f1",
         }}
         transition={{ duration: 0.18, ease: "easeOut" }}
         className={cn(
           "flex w-full items-center gap-2 rounded-full border bg-honey-bg-input p-1.5 shadow-sm",
-          isRecording && "border-red-400"
+          voiceActive && voiceStatus === "speaking" && "border-red-400"
         )}
       >
         <button className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-honey-bg-user text-honey-text-muted hover:text-honey-text-primary transition-colors">
           <Plus className="h-4 w-4" />
         </button>
-        
+
         <textarea
           ref={inputRef}
           value={text}
@@ -154,64 +146,64 @@ export default function InputArea({ onSend, disabled }: InputAreaProps) {
           }}
           placeholder={placeholder}
           rows={1}
-          readOnly={isRecording || transcribing}
+          readOnly={voiceActive && voiceStatus === "speaking"}
           className="flex-1 bg-transparent px-2 font-playfair italic text-[14px] text-honey-text-primary placeholder:text-honey-text-ghost focus:outline-none resize-none"
-          disabled={disabled && !isRecording && !transcribing}
+          disabled={disabled && !voiceActive}
         />
-
-        {isRecording && (
-          <span className="text-xs text-red-500 font-mono tabular-nums shrink-0">
-            {formatDuration(duration)}
-          </span>
-        )}
-
-        {transcribing && (
-          <motion.div
-            className="h-4 w-4 shrink-0 rounded-full border-2 border-honey-accent-primary border-t-transparent"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 0.6, repeat: Infinity, ease: "linear" }}
-          />
-        )}
 
         <motion.button
           type="button"
-          onClick={handleToggleMic}
-          disabled={(disabled && !isRecording) || transcribing}
+          onClick={toggleVoice}
           whileTap={{ scale: 0.9 }}
           className={cn(
             "flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full transition-colors relative",
-            isRecording
+            voiceActive && voiceStatus === "speaking"
               ? "bg-red-500 text-white"
-              : "bg-honey-bg-user text-honey-text-muted hover:text-honey-text-primary"
+              : voiceActive && voiceStatus === "listening"
+                ? "bg-honey-accent-primary text-white"
+                : voiceActive && voiceStatus === "processing"
+                  ? "bg-amber-500 text-white"
+                  : voiceActive && voiceStatus === "error"
+                    ? "bg-red-100 text-red-500"
+                    : "bg-honey-bg-user text-honey-text-muted hover:text-honey-text-primary"
           )}
         >
-          {isRecording ? (
+          {voiceActive && voiceStatus === "speaking" ? (
             <>
-              <Square className="h-3 w-3" />
+              <Mic className="h-4 w-4" />
               <motion.span
                 className="absolute inset-0 rounded-full border-2 border-red-400"
                 animate={{ scale: [1, 1.3, 1], opacity: [0.6, 0, 0.6] }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
               />
             </>
-          ) : status === "stopping" ? (
+          ) : voiceActive && voiceStatus === "listening" ? (
+            <>
+              <Mic className="h-4 w-4" />
+              <motion.span
+                className="absolute inset-0 rounded-full border-2 border-honey-accent-primary"
+                animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.1, 0.3] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </>
+          ) : voiceActive && voiceStatus === "processing" ? (
             <motion.div
-              className="h-4 w-4 rounded-full border-2 border-honey-text-muted border-t-transparent"
+              className="h-4 w-4 rounded-full border-2 border-white border-t-transparent"
               animate={{ rotate: 360 }}
               transition={{ duration: 0.6, repeat: Infinity, ease: "linear" }}
             />
-          ) : error ? (
+          ) : voiceActive && voiceStatus === "error" ? (
             <MicOff className="h-4 w-4" />
           ) : (
             <Mic className="h-4 w-4" />
           )}
         </motion.button>
-        
+
         <motion.button
           onClick={handleSend}
           animate={{ scale: isSending ? [1, 0.88, 1] : 1 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          disabled={!text.trim() || disabled || isRecording || transcribing}
+          disabled={!text.trim() || disabled || voiceActive}
           className={cn(
             "flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full transition-colors",
             text.trim() && !disabled
@@ -223,8 +215,8 @@ export default function InputArea({ onSend, disabled }: InputAreaProps) {
         </motion.button>
       </motion.div>
 
-      {error && (
-        <p className="text-xs text-red-400 text-center mt-2">{error}</p>
+      {voiceError && (
+        <p className="text-xs text-red-400 text-center mt-2">{voiceError}</p>
       )}
 
       <div className="mt-5 flex justify-center">

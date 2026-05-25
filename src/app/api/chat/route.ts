@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { z } from "zod";
 import Groq from "groq-sdk";
 import { validateRequest } from "@/lib/auth/validateRequest";
@@ -24,26 +24,36 @@ const ChatRequestSchema = z.object({
 export async function POST(request: NextRequest) {
   const auth = await validateRequest();
   if (!auth.valid) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   const ip = extractIp(request);
   if (!checkRateLimit(`chat:${ip}`, 20, 60_000)) {
-    return NextResponse.json({ error: "Terlalu banyak permintaan." }, { status: 429 });
+    return new Response(JSON.stringify({ error: "Terlalu banyak permintaan." }), {
+      status: 429,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   try {
     const body = await request.json();
     const parsed = ChatRequestSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Invalid request", details: parsed.error.flatten() },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ error: "Invalid request", details: parsed.error.flatten() }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
-    const { messages, mode, username, retrievedChunks } = parsed.data;
 
-    const systemContent = buildSystemPrompt((retrievedChunks ?? []) as Chunk[], mode as ChatMode, username);
+    const { messages, mode, username, retrievedChunks } = parsed.data;
+    const systemContent = buildSystemPrompt(
+      (retrievedChunks ?? []) as Chunk[],
+      mode as ChatMode,
+      username
+    );
 
     const completion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
@@ -53,17 +63,53 @@ export async function POST(request: NextRequest) {
       ],
       temperature: 0.75,
       max_tokens: 1024,
+      stream: true,
     });
 
-    const reply = completion.choices[0]?.message?.content ?? "";
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of completion) {
+            const content = chunk.choices[0]?.delta?.content || "";
+            if (content) {
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ content })}\n\n`)
+              );
+            }
+          }
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+        } catch (err) {
+          const msg =
+            err instanceof Error ? err.message : "Stream error";
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({ error: msg })}\n\n`
+            )
+          );
+        } finally {
+          controller.close();
+        }
+      },
+    });
 
-    return NextResponse.json({ reply });
+    return new Response(stream, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
+    });
   } catch (error: unknown) {
     console.error("Groq API error:", error);
-    const msg = error instanceof Error ? error.message : "Terjadi kesalahan pada server";
-    return NextResponse.json(
-      { error: msg },
-      { status: 500 }
-    );
+    const msg =
+      error instanceof Error
+        ? error.message
+        : "Terjadi kesalahan pada server";
+    return new Response(JSON.stringify({ error: msg }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

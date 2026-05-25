@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["@xenova/transformers"],
+  serverExternalPackages: ["@xenova/transformers", "bufferutil", "utf-8-validate", "ws", "isomorphic-ws", "msedge-tts"],
+  webpack: (config) => {
+    config.ignoreWarnings = [
+      { module: /onnxruntime-web/ },
+    ]
+    return config
+  },
   async headers() {
     return [
       {

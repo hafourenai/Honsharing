@@ -12,6 +12,7 @@ interface SettingsContextType {
 const defaultPreferences: UserPreferences = {
   language: "santai",
   soundNotif: false,
+  voiceMode: false,
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)

@@ -62,6 +62,7 @@ export interface UserProfile {
 export interface UserPreferences {
   language: "santai" | "formal"
   soundNotif: boolean
+  voiceMode: boolean
 }
 
 
