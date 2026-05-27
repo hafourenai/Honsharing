@@ -1,22 +1,17 @@
 /**
- * ============================================================
- * SIDANG PREPARATION NOTES — PERSIAPAN SIDANG SKRIPSI
- * ============================================================
- *
+  * SIDANG PREPARATION NOTES — PERSIAPAN SIDANG SKRIPSI
+  *
  * Dokumentasi khusus untuk persiapan sidang skripsi.
  * Berisi kemungkinan pertanyaan dosen dan jawabannya.
  *
  * @author  Tim Skripsi
  * @version 1.0
- * ============================================================
- */
+  */
 
 import { TestScenario } from "@/test/types"
 import { ResearchStats } from "./research-statistics"
 
-// ================================================================
 // GENERATE SIDANG NOTES LENGKAP
-// ================================================================
 
 export function generateSidangNotes(
   scenarios: TestScenario[],
@@ -51,9 +46,7 @@ export function generateSidangNotes(
   )
 }
 
-// ================================================================
 // A. PERTANYAAN UMUM
-// ================================================================
 
 function generatePertanyaanUmum(): string {
   return (
@@ -87,9 +80,7 @@ function generatePertanyaanUmum(): string {
   )
 }
 
-// ================================================================
 // B. PERTANYAAN RAG
-// ================================================================
 
 function generatePertanyaanRAG(): string {
   return (
@@ -132,9 +123,7 @@ function generatePertanyaanRAG(): string {
   )
 }
 
-// ================================================================
 // C. PERTANYAAN EVALUASI
-// ================================================================
 
 function generatePertanyaanEvaluasi(): string {
   return (
@@ -167,9 +156,7 @@ function generatePertanyaanEvaluasi(): string {
   )
 }
 
-// ================================================================
 // D. PERTANYAAN HASIL
-// ================================================================
 
 function generatePertanyaanHasil(stats?: ResearchStats): string {
   const s = stats?.averageScores
@@ -205,9 +192,7 @@ function generatePertanyaanHasil(stats?: ResearchStats): string {
   )
 }
 
-// ================================================================
 // E. KELEMAHAN SISTEM
-// ================================================================
 
 function generateKelemahanSistem(): string {
   return (
@@ -234,9 +219,7 @@ function generateKelemahanSistem(): string {
   )
 }
 
-// ================================================================
 // F. FUTURE WORK
-// ================================================================
 
 function generateFutureWork(): string {
   return (

@@ -26,9 +26,7 @@ import {
 import { TEST_CONFIG } from "@/test/config/test-config";
 import { standardDeviation } from "@/test/types/utils/scoring";
 
-// ------------------------------------------------------------------
 // GENERATE REPORT MARKDOWN
-// ------------------------------------------------------------------
 
 /**
  * Menghasilkan laporan evaluasi lengkap dalam format markdown.
@@ -189,9 +187,7 @@ export function generateMarkdownReport(report: EvaluationReport): string {
   return lines.join("\n");
 }
 
-// ------------------------------------------------------------------
 // INTERPRETASI AKADEMIK
-// ------------------------------------------------------------------
 
 /**
  * Menghasilkan interpretasi akademik berdasarkan hasil evaluasi.
@@ -300,9 +296,7 @@ function generateAcademicInterpretation(report: EvaluationReport): string {
   return parts.join("");
 }
 
-// ------------------------------------------------------------------
 // HITUNG STATISTIK AGREGAT
-// ------------------------------------------------------------------
 
 /**
  * Menghitung statistik agregat dari hasil evaluasi.

@@ -1,7 +1,5 @@
 /**
- * ============================================================
  * VISUALIZATION DATASET GENERATOR — DATA UNTUK VISUALISASI
- * ============================================================
  *
  * Menghasilkan data untuk visualisasi yang dapat digunakan
  * dengan tools seperti Excel, Google Sheets, atau chart library.
@@ -13,15 +11,12 @@
  *
  * @author  Tim Skripsi
  * @version 1.0
- * ============================================================
  */
 
 import { EvaluationSession, TestScenario, MultiTurnSummary } from "@/test/types"
 import { ResearchStats, CategoryStats } from "./research-statistics"
 
-// ================================================================
 // TIPE DATA VISUALISASI
-// ================================================================
 
 export interface VisualizationDataset {
   /** Data untuk bar chart (skor per dimensi) */
@@ -85,9 +80,7 @@ export interface MultiTurnChartData {
   overall: number[]
 }
 
-// ================================================================
 // GENERATE VISUALIZATION DATASET
-// ================================================================
 
 export function generateVisualizationDataset(
   session: EvaluationSession,
@@ -181,9 +174,7 @@ export function generateVisualizationDataset(
   }
 }
 
-// ================================================================
 // EXPORT CSV
-// ================================================================
 
 export function generateBarChartCSV(data: BarChartData): string {
   const rows: string[] = []
@@ -246,17 +237,13 @@ export function generateMultiTurnCSV(data: MultiTurnChartData): string {
   return rows.join("\n")
 }
 
-// ================================================================
 // EXPORT JSON
-// ================================================================
 
 export function generateVisualizationJSON(data: VisualizationDataset): string {
   return JSON.stringify(data, null, 2)
 }
 
-// ================================================================
 // EXPORT MARKDOWN TABLE
-// ================================================================
 
 export function generateScoreDistributionTable(data: ScoreDistributionData): string {
   const lines: string[] = []

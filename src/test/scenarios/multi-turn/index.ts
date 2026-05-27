@@ -19,9 +19,7 @@
 
 import { MultiTurnScenario } from "@/test/types"
 
-// ================================================================
 // PERCAKAPAN 1: Overthinking Malam → Tenang
-// ================================================================
 
 export const multiOverthinkingMalam: MultiTurnScenario = {
   id: "multi_overthinking_malam",
@@ -87,9 +85,7 @@ export const multiOverthinkingMalam: MultiTurnScenario = {
   },
 }
 
-// ================================================================
 // PERCAKAPAN 2: Kecemasan Sosial — Persiapan Event
-// ================================================================
 
 export const multiKecemasanSosial: MultiTurnScenario = {
   id: "multi_anxiety_sosial",
@@ -150,9 +146,7 @@ export const multiKecemasanSosial: MultiTurnScenario = {
   },
 }
 
-// ================================================================
 // PERCAKAPAN 3: Masalah Hubungan — Konflik Bertahap
-// ================================================================
 
 export const multiMasalahHubungan: MultiTurnScenario = {
   id: "multi_relationship_konflik",
@@ -212,9 +206,7 @@ export const multiMasalahHubungan: MultiTurnScenario = {
   },
 }
 
-// ================================================================
 // PERCAKAPAN 4: Masalah Keluarga — Tekanan Orang Tua
-// ================================================================
 
 export const multiKeluargaTekanan: MultiTurnScenario = {
   id: "multi_keluarga_tekanan",
@@ -274,9 +266,7 @@ export const multiKeluargaTekanan: MultiTurnScenario = {
   },
 }
 
-// ================================================================
 // PERCAKAPAN 5: Kehilangan Motivasi — Bangkit Kembali
-// ================================================================
 
 export const multiKehilanganMotivasi: MultiTurnScenario = {
   id: "multi_motivasi_bangkit",
@@ -346,9 +336,7 @@ export const multiKehilanganMotivasi: MultiTurnScenario = {
   },
 }
 
-// ================================================================
 // PERCAKAPAN 6: Kesepian di Kota Baru
-// ================================================================
 
 export const multiKesepianKotaBaru: MultiTurnScenario = {
   id: "multi_kesepian_kota",
@@ -408,9 +396,7 @@ export const multiKesepianKotaBaru: MultiTurnScenario = {
   },
 }
 
-// ================================================================
 // PERCAKAPAN 7: Insecure Akademik — Impostor Syndrome
-// ================================================================
 
 export const multiInsecureAkademik: MultiTurnScenario = {
   id: "multi_insecure_akademik",
@@ -470,9 +456,7 @@ export const multiInsecureAkademik: MultiTurnScenario = {
   },
 }
 
-// ================================================================
 // PERCAKAPAN 8: Burnout Organisasi
-// ================================================================
 
 export const multiBurnoutOrganisasi: MultiTurnScenario = {
   id: "multi_burnout_organisasi",
@@ -542,9 +526,7 @@ export const multiBurnoutOrganisasi: MultiTurnScenario = {
   },
 }
 
-// ================================================================
 // PERCAKAPAN 9: Stress Kuliah — Deadline Bertubi-tubi
-// ================================================================
 
 export const multiStressKuliah: MultiTurnScenario = {
   id: "multi_stress_kuliah",
@@ -614,9 +596,7 @@ export const multiStressKuliah: MultiTurnScenario = {
   },
 }
 
-// ================================================================
 // PERCAKAPAN 10: Kecemasan Masa Depan — Lulus
-// ================================================================
 
 export const multiCemasMasaDepan: MultiTurnScenario = {
   id: "multi_cemas_masa_depan",
@@ -686,9 +666,7 @@ export const multiCemasMasaDepan: MultiTurnScenario = {
   },
 }
 
-// ================================================================
 // REGISTRY SEMUA SKENARIO MULTI-TURN
-// ================================================================
 
 export const ALL_MULTI_TURN_SCENARIOS: MultiTurnScenario[] = [
   multiOverthinkingMalam,

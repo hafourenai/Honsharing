@@ -12,9 +12,7 @@
  * ============================================================
  */
 
-// ------------------------------------------------------------------
 // TIPE SKENARIO
-// ------------------------------------------------------------------
 
 /**
  * Menyimpan satu skenario pengujian chatbot curhat.
@@ -22,34 +20,34 @@
  */
 export interface TestScenario {
   /** ID unik skenario (contoh: "overthinking_001") */
-  id: string
+  id: string;
 
   /** Nama skenario yang mudah dibaca manusia */
-  name: string
+  name: string;
 
   /** Kategori emosional (contoh: "overthinking", "anxiety", "relationship") */
-  category: string
+  category: string;
 
   /** Input/user query yang akan diuji */
-  userInput: string
+  userInput: string;
 
   /** Konteks RAG yang diharapkan ter-retrieve (mock) */
-  expectedRetrievedContext: RetrievedContext[]
+  expectedRetrievedContext: RetrievedContext[];
 
   /** Arah emosional yang diharapkan dari respons chatbot */
-  expectedEmotionalDirection: string[]
+  expectedEmotionalDirection: string[];
 
   /** Kriteria respons yang harus dipenuhi */
-  expectedResponseCriteria: string[]
+  expectedResponseCriteria: string[];
 
   /** Kata kunci yang harus muncul dalam respons (opsional) */
-  requiredKeywords?: string[]
+  requiredKeywords?: string[];
 
   /** Kata kunci yang TIDAK boleh muncul dalam respons (opsional) */
-  forbiddenKeywords?: string[]
+  forbiddenKeywords?: string[];
 
   /** Tingkat keparahan emosional (1 = ringan, 5 = sangat berat) */
-  severityLevel: 1 | 2 | 3 | 4 | 5
+  severityLevel: 1 | 2 | 3 | 4 | 5;
 }
 
 /**
@@ -57,61 +55,59 @@ export interface TestScenario {
  */
 export interface RetrievedContext {
   /** ID chunk yang relevan */
-  chunkId: string
+  chunkId: string;
 
   /** Topik dari chunk */
-  topic: string
+  topic: string;
 
   /** Situasi emosional */
-  situation: string
+  situation: string;
 
   /** Skor relevansi yang diharapkan (0.0 - 1.0) */
-  expectedRelevanceScore: number
+  expectedRelevanceScore: number;
 
   /** Emosi yang terkandung */
-  emotions: string[]
+  emotions: string[];
 
   /** Kebutuhan emosional */
-  needs: string[]
+  needs: string[];
 }
 
-// ------------------------------------------------------------------
 // TIPE EVALUASI
-// ------------------------------------------------------------------
 
 /**
  * Hasil evaluasi untuk satu skenario pengujian.
  */
 export interface EvaluationResult {
   /** ID skenario yang dievaluasi */
-  scenarioId: string
+  scenarioId: string;
 
   /** Nama skenario */
-  scenarioName: string
+  scenarioName: string;
 
   /** Timestamp evaluasi */
-  timestamp: string
+  timestamp: string;
 
   /** Skor keseluruhan (0-100) */
-  overallScore: number
+  overallScore: number;
 
   /** Hasil evaluasi similarity */
-  similarity: SimilarityScore
+  similarity: SimilarityScore;
 
   /** Hasil evaluasi relevansi */
-  relevance: RelevanceScore
+  relevance: RelevanceScore;
 
   /** Hasil evaluasi empati */
-  empathy: EmpathyScore
+  empathy: EmpathyScore;
 
   /** Hasil evaluasi konsistensi konteks */
-  contextualConsistency: ContextualConsistencyScore
+  contextualConsistency: ContextualConsistencyScore;
 
   /** Hasil evaluasi akurasi retrieval */
-  retrievalAccuracy: RetrievalAccuracyScore
+  retrievalAccuracy: RetrievalAccuracyScore;
 
   /** Catatan tambahan */
-  notes: string
+  notes: string;
 }
 
 /**
@@ -119,19 +115,19 @@ export interface EvaluationResult {
  */
 export interface SimilarityScore {
   /** Nilai cosine similarity antara query dan respons (0.0 - 1.0) */
-  cosineSimilarity: number
+  cosineSimilarity: number;
 
   /** Skor overlap teks (0.0 - 1.0) */
-  textOverlap: number
+  textOverlap: number;
 
   /** Skor keyword matching (0.0 - 1.0) */
-  keywordMatch: number
+  keywordMatch: number;
 
   /** Skor akhir similarity (rata-rata tertimbang, 0-100) */
-  finalScore: number
+  finalScore: number;
 
   /** Interpretasi kelulusan */
-  verdict: "SANGAT_RELEVAN" | "RELEVAN" | "CUKUP" | "KURANG" | "TIDAK_RELEVAN"
+  verdict: "SANGAT_RELEVAN" | "RELEVAN" | "CUKUP" | "KURANG" | "TIDAK_RELEVAN";
 }
 
 /**
@@ -139,19 +135,19 @@ export interface SimilarityScore {
  */
 export interface RelevanceScore {
   /** Relevansi konten (0-100) */
-  contentRelevance: number
+  contentRelevance: number;
 
   /** Relevansi konteks emosional (0-100) */
-  emotionalRelevance: number
+  emotionalRelevance: number;
 
   /** Kesesuaian tone/nada bicara (0-100) */
-  toneAppropriateness: number
+  toneAppropriateness: number;
 
   /** Skor akhir relevansi (rata-rata, 0-100) */
-  finalScore: number
+  finalScore: number;
 
   /** Interpretasi */
-  verdict: "SANGAT_RELEVAN" | "RELEVAN" | "CUKUP" | "KURANG" | "TIDAK_RELEVAN"
+  verdict: "SANGAT_RELEVAN" | "RELEVAN" | "CUKUP" | "KURANG" | "TIDAK_RELEVAN";
 }
 
 /**
@@ -159,19 +155,19 @@ export interface RelevanceScore {
  */
 export interface EmpathyScore {
   /** Tingkat validasi emosi (0-100) */
-  emotionalValidation: number
+  emotionalValidation: number;
 
   /** Tingkat pemahaman (0-100) */
-  understanding: number
+  understanding: number;
 
   /** Dukungan yang diberikan (0-100) */
-  supportiveness: number
+  supportiveness: number;
 
   /** Skor akhir empati (rata-rata, 0-100) */
-  finalScore: number
+  finalScore: number;
 
   /** Interpretasi */
-  verdict: "SANGAT_EMPATIK" | "EMPATIK" | "CUKUP" | "KURANG" | "TIDAK_EMPATIK"
+  verdict: "SANGAT_EMPATIK" | "EMPATIK" | "CUKUP" | "KURANG" | "TIDAK_EMPATIK";
 }
 
 /**
@@ -180,19 +176,24 @@ export interface EmpathyScore {
  */
 export interface ContextualConsistencyScore {
   /** Konsistensi dengan retrieved chunks (0-100) */
-  chunkConsistency: number
+  chunkConsistency: number;
 
   /** Konsistensi dengan arah emosional skenario (0-100) */
-  emotionalConsistency: number
+  emotionalConsistency: number;
 
   /** Kontradiksi dalam respons (0 = banyak kontradiksi, 100 = konsisten) */
-  noContradiction: number
+  noContradiction: number;
 
   /** Skor akhir konsistensi (rata-rata, 0-100) */
-  finalScore: number
+  finalScore: number;
 
   /** Interpretasi */
-  verdict: "SANGAT_KONSISTEN" | "KONSISTEN" | "CUKUP" | "KURANG" | "TIDAK_KONSISTEN"
+  verdict:
+    | "SANGAT_KONSISTEN"
+    | "KONSISTEN"
+    | "CUKUP"
+    | "KURANG"
+    | "TIDAK_KONSISTEN";
 }
 
 /**
@@ -200,43 +201,41 @@ export interface ContextualConsistencyScore {
  */
 export interface RetrievalAccuracyScore {
   /** Precision retrieved chunks (0-100) */
-  precision: number
+  precision: number;
 
   /** Recall retrieved chunks (0-100) */
-  recall: number
+  recall: number;
 
   /** Skor relevansi rata-rata chunks (0-100) */
-  avgRelevanceScore: number
+  avgRelevanceScore: number;
 
   /** Skor akhir akurasi (rata-rata, 0-100) */
-  finalScore: number
+  finalScore: number;
 
   /** Interpretasi */
-  verdict: "SANGAT_AKURAT" | "AKURAT" | "CUKUP" | "KURANG" | "TIDAK_AKURAT"
+  verdict: "SANGAT_AKURAT" | "AKURAT" | "CUKUP" | "KURANG" | "TIDAK_AKURAT";
 }
 
-// ------------------------------------------------------------------
 // TIPE REPORT
-// ------------------------------------------------------------------
 
 /**
  * Report evaluasi lengkap untuk satu atau banyak skenario.
  */
 export interface EvaluationReport {
   /** Judul report */
-  title: string
+  title: string;
 
   /** Tanggal pembuatan */
-  createdAt: string
+  createdAt: string;
 
   /** Deskripsi report */
-  description: string
+  description: string;
 
   /** Hasil evaluasi per skenario */
-  results: EvaluationResult[]
+  results: EvaluationResult[];
 
   /** Statistik agregat */
-  aggregateStats: AggregateStats
+  aggregateStats: AggregateStats;
 }
 
 /**
@@ -244,49 +243,47 @@ export interface EvaluationReport {
  */
 export interface AggregateStats {
   /** Rata-rata skor keseluruhan */
-  averageOverallScore: number
+  averageOverallScore: number;
 
   /** Skor tertinggi */
-  highestScore: number
+  highestScore: number;
 
   /** Skor terendah */
-  lowestScore: number
+  lowestScore: number;
 
   /** Standar deviasi */
-  standardDeviation: number
+  standardDeviation: number;
 
   /** Distribusi verdict */
-  verdictDistribution: Record<string, number>
+  verdictDistribution: Record<string, number>;
 
   /** Rata-rata per kategori evaluasi */
   categoryAverages: {
-    similarity: number
-    relevance: number
-    empathy: number
-    contextualConsistency: number
-    retrievalAccuracy: number
-  }
+    similarity: number;
+    relevance: number;
+    empathy: number;
+    contextualConsistency: number;
+    retrievalAccuracy: number;
+  };
 }
 
-// ------------------------------------------------------------------
 // TIPE MOCK
-// ------------------------------------------------------------------
 
 /**
  * Konfigurasi untuk mock embedding.
  */
 export interface MockEmbeddingConfig {
   /** Dimensi embedding (default: 384 untuk Xenova/Transformers) */
-  dimension: number
+  dimension: number;
 
   /** Seed untuk deterministik random */
-  seed: number
+  seed: number;
 
   /** Apakah mock harus memberikan error simulasi */
-  simulateError: boolean
+  simulateError: boolean;
 
   /** Error rate untuk simulasi kegagalan (0.0 - 1.0) */
-  errorRate: number
+  errorRate: number;
 }
 
 /**
@@ -294,13 +291,13 @@ export interface MockEmbeddingConfig {
  */
 export interface MockRetrievalConfig {
   /** Jumlah chunk yang dikembalikan */
-  topK: number
+  topK: number;
 
   /** Threshold similarity minimum */
-  threshold: number
+  threshold: number;
 
   /** Apakah hasil retrieval diacak */
-  shuffle: boolean
+  shuffle: boolean;
 }
 
 /**
@@ -308,18 +305,16 @@ export interface MockRetrievalConfig {
  */
 export interface MockLLMConfig {
   /** Mode respons: "deterministic" atau "template-based" */
-  mode: "deterministic" | "template"
+  mode: "deterministic" | "template";
 
   /** Delay simulasi streaming (ms) */
-  streamingDelay: number
+  streamingDelay: number;
 
   /** Variasi respons (untuk mode template) */
-  responseVariation: "low" | "medium" | "high"
+  responseVariation: "low" | "medium" | "high";
 }
 
-// ================================================================
 // TIPE REAL EVALUATION — EVALUASI RESPON CHATBOT NYATA
-// ================================================================
 
 /**
  * Mode evaluasi untuk real evaluation.
@@ -328,33 +323,31 @@ export interface MockLLMConfig {
  * - HYBRID: Retrieval real, respons mock
  * - REAL  : Respons asli dari chatbot
  */
-export type EvaluationMode = "MOCK" | "HYBRID" | "REAL"
+export type EvaluationMode = "MOCK" | "HYBRID" | "REAL";
 
 /**
  * Label kualitas respons untuk failure analysis.
  */
-export type QualityLabel = "GOOD" | "ACCEPTABLE" | "WEAK" | "FAILED"
+export type QualityLabel = "GOOD" | "ACCEPTABLE" | "WEAK" | "FAILED";
 
-// ------------------------------------------------------------------
 // TIPE MULTI-TURN SCENARIO
-// ------------------------------------------------------------------
 
 /**
  * Satu putaran percakapan dalam multi-turn scenario.
  */
 export interface ConversationTurn {
   /** Input user pada turn ini */
-  userInput: string
+  userInput: string;
   /** Keadaan emosional yang diharapkan pada turn ini */
-  expectedEmotionalState: string
+  expectedEmotionalState: string;
   /** Topik yang dibahas pada turn ini */
-  topic: string
+  topic: string;
   /** Petunjuk memori — hal yang harus diingat chatbot dari turn sebelumnya */
-  memoryHints: string[]
+  memoryHints: string[];
   /** Kata kunci yang harus muncul dalam respons (opsional) */
-  requiredKeywords?: string[]
+  requiredKeywords?: string[];
   /** Kata kunci terlarang (opsional) */
-  forbiddenKeywords?: string[]
+  forbiddenKeywords?: string[];
 }
 
 /**
@@ -362,52 +355,50 @@ export interface ConversationTurn {
  */
 export interface MultiTurnScenario {
   /** ID unik skenario multi-turn */
-  id: string
+  id: string;
   /** Nama skenario */
-  name: string
+  name: string;
   /** Deskripsi panjang skenario */
-  description: string
+  description: string;
   /** Kategori emosional utama */
-  category: string
+  category: string;
   /** Tingkat keparahan awal (1-5) */
-  initialSeverity: 1 | 2 | 3 | 4 | 5
+  initialSeverity: 1 | 2 | 3 | 4 | 5;
   /** Semua putaran percakapan */
-  turns: ConversationTurn[]
+  turns: ConversationTurn[];
   /** Hasil yang diharapkan dari keseluruhan percakapan */
   expectedOutcomes: {
     /** Progresi emosional yang diharapkan */
-    emotionalProgression: string[]
+    emotionalProgression: string[];
     /** Apakah topik berkesinambungan */
-    topicContinuity: boolean
+    topicContinuity: boolean;
     /** Penanda memori yang harus muncul */
-    memoryMarkers: string[]
+    memoryMarkers: string[];
     /** Arah akhir percakapan */
-    finalEmotionalDirection: string[]
-  }
+    finalEmotionalDirection: string[];
+  };
 }
 
-// ------------------------------------------------------------------
 // TIPE CHAT API WRAPPER
-// ------------------------------------------------------------------
 
 /**
  * Informasi chunk yang diretrieve untuk inspection.
  */
 export interface RetrievedChunkInfo {
   /** ID chunk */
-  chunkId: string
+  chunkId: string;
   /** Skor similarity */
-  similarityScore: number
+  similarityScore: number;
   /** Peringkat dalam hasil retrieval */
-  rank: number
+  rank: number;
   /** Konten/topik chunk */
-  topic: string
+  topic: string;
   /** Situasi chunk */
-  situation: string
+  situation: string;
   /** Emosi yang terkandung */
-  emotions: string[]
+  emotions: string[];
   /** Apakah chunk berkontribusi pada respons */
-  contributedToResponse: boolean
+  contributedToResponse: boolean;
 }
 
 /**
@@ -415,17 +406,17 @@ export interface RetrievedChunkInfo {
  */
 export interface ChatApiConfig {
   /** Base URL aplikasi (default: http://localhost:3000) */
-  baseUrl: string
+  baseUrl: string;
   /** Timeout dalam ms (default: 30000) */
-  timeout: number
+  timeout: number;
   /** Jumlah maksimal retry (default: 3) */
-  maxRetries: number
+  maxRetries: number;
   /** Delay antar retry dalam ms (default: 1000) */
-  retryDelay: number
+  retryDelay: number;
   /** Session cookie untuk autentikasi */
-  sessionCookie?: string
+  sessionCookie?: string;
   /** Mode chatting: "santai" | "formal" */
-  mode?: string
+  mode?: string;
 }
 
 /**
@@ -433,59 +424,57 @@ export interface ChatApiConfig {
  */
 export interface ChatApiResponse {
   /** Respons teks dari chatbot */
-  response: string
+  response: string;
   /** Waktu respons dalam ms */
-  responseTimeMs: number
+  responseTimeMs: number;
   /** Jumlah retry yang dilakukan */
-  retryCount: number
+  retryCount: number;
   /** Apakah ada error */
-  error: string | null
+  error: string | null;
   /** Status HTTP */
-  status: number
+  status: number;
   /** Timestamp */
-  timestamp: string
+  timestamp: string;
 }
 
-// ------------------------------------------------------------------
 // TIPE EVALUATION SESSION LOGGER
-// ------------------------------------------------------------------
 
 /**
  * Satu entry dalam session log evaluasi.
  */
 export interface SessionLogEntry {
   /** ID unik sesi */
-  sessionId: string
+  sessionId: string;
   /** Mode evaluasi */
-  mode: EvaluationMode
+  mode: EvaluationMode;
   /** ID skenario yang dievaluasi */
-  scenarioId: string
+  scenarioId: string;
   /** Nama skenario */
-  scenarioName: string
+  scenarioName: string;
   /** Kategori skenario */
-  category: string
+  category: string;
   /** Input user */
-  userInput: string
+  userInput: string;
   /** Konteks yang diretrieve */
-  retrievedContext: RetrievedChunkInfo[]
+  retrievedContext: RetrievedChunkInfo[];
   /** Respons yang dihasilkan chatbot */
-  generatedResponse: string
+  generatedResponse: string;
   /** Skor similarity */
-  similarityScore: number
+  similarityScore: number;
   /** Skor empati */
-  empathyScore: number
+  empathyScore: number;
   /** Skor relevansi */
-  relevanceScore: number
+  relevanceScore: number;
   /** Skor retrieval */
-  retrievalScore: number
+  retrievalScore: number;
   /** Label kualitas */
-  qualityLabel: QualityLabel
+  qualityLabel: QualityLabel;
   /** Waktu respons (ms) */
-  responseTimeMs: number
+  responseTimeMs: number;
   /** Timestamp */
-  timestamp: string
+  timestamp: string;
   /** Catatan tambahan */
-  notes: string
+  notes: string;
 }
 
 /**
@@ -493,120 +482,114 @@ export interface SessionLogEntry {
  */
 export interface EvaluationSession {
   /** ID unik sesi evaluasi */
-  evaluationId: string
+  evaluationId: string;
   /** Mode evaluasi */
-  mode: EvaluationMode
+  mode: EvaluationMode;
   /** Tanggal evaluasi */
-  date: string
+  date: string;
   /** Semua entry log */
-  entries: SessionLogEntry[]
+  entries: SessionLogEntry[];
   /** Ringkasan sesi */
   summary: {
-    totalScenarios: number
-    averageSimilarity: number
-    averageEmpathy: number
-    averageRelevance: number
-    averageRetrieval: number
-    averageResponseTimeMs: number
-    labelDistribution: Record<QualityLabel, number>
-  }
+    totalScenarios: number;
+    averageSimilarity: number;
+    averageEmpathy: number;
+    averageRelevance: number;
+    averageRetrieval: number;
+    averageResponseTimeMs: number;
+    labelDistribution: Record<QualityLabel, number>;
+  };
 }
 
-// ------------------------------------------------------------------
 // TIPE FAILURE ANALYSIS
-// ------------------------------------------------------------------
 
 /**
  * Hasil analisis kegagalan untuk satu respons.
  */
 export interface FailureAnalysis {
   /** ID skenario */
-  scenarioId: string
+  scenarioId: string;
   /** Nama skenario */
-  scenarioName: string
+  scenarioName: string;
   /** Label kualitas akhir */
-  label: QualityLabel
+  label: QualityLabel;
   /** Apakah respons tidak relevan */
-  isIrrelevant: boolean
+  isIrrelevant: boolean;
   /** Apakah retrieval salah konteks */
-  isWrongContext: boolean
+  isWrongContext: boolean;
   /** Apakah jawaban terlalu generic */
-  isGenericResponse: boolean
+  isGenericResponse: boolean;
   /** Apakah ada hallucination ringan */
-  isHallucination: boolean
+  isHallucination: boolean;
   /** Apakah konteks emosional tidak nyambung */
-  isEmotionalMismatch: boolean
+  isEmotionalMismatch: boolean;
   /** Detail analisis */
   details: {
-    irrelevantReason?: string
-    wrongContextReason?: string
-    genericReason?: string
-    hallucinationEvidence?: string
-    mismatchEvidence?: string
-  }
+    irrelevantReason?: string;
+    wrongContextReason?: string;
+    genericReason?: string;
+    hallucinationEvidence?: string;
+    mismatchEvidence?: string;
+  };
   /** Skor kualitas akhir (0-100) */
-  qualityScore: number
+  qualityScore: number;
 }
 
-// ------------------------------------------------------------------
 // TIPE RESPONSE QUALITY ANALYZER
-// ------------------------------------------------------------------
 
 /**
  * Hasil analisis kualitas respons.
  */
 export interface ResponseQualityResult {
   /** Skor kesesuaian konteks (0-100) */
-  contextualFit: number
+  contextualFit: number;
   /** Skor empati (0-100) */
-  empathyScore: number
+  empathyScore: number;
   /** Skor konsistensi (0-100) */
-  consistencyScore: number
+  consistencyScore: number;
   /** Skor kekhususan (0-100) — 100 = sangat spesifik */
-  specificityScore: number
+  specificityScore: number;
   /** Apakah menggunakan konteks retrieval */
-  usesRetrievalContext: boolean
+  usesRetrievalContext: boolean;
   /** Persentase overlap dengan retrieval context */
-  retrievalOverlapPercent: number
+  retrievalOverlapPercent: number;
   /** Detail analisis */
   details: {
-    contextualMarkers: string[]
-    empathyMarkers: string[]
-    genericPhrases: string[]
-    retrievalPhrases: string[]
-  }
+    contextualMarkers: string[];
+    empathyMarkers: string[];
+    genericPhrases: string[];
+    retrievalPhrases: string[];
+  };
 }
 
-// ------------------------------------------------------------------
 // TIPE COMPARATIVE EVALUATION
-// ------------------------------------------------------------------
 
 /**
  * Hasil perbandingan RAG vs Non-RAG untuk satu skenario.
  */
 export interface RealComparisonResult {
   /** ID skenario */
-  scenarioId: string
+  scenarioId: string;
   /** Nama skenario */
-  scenarioName: string
+  scenarioName: string;
   /** Kategori */
-  category: string
+  category: string;
   /** Respons Non-RAG */
-  nonRagResponse: string
+  nonRagResponse: string;
   /** Respons RAG */
-  ragResponse: string
+  ragResponse: string;
   /** Skor kualitas Non-RAG */
-  nonRagScore: ResponseQualityResult
+  nonRagScore: ResponseQualityResult;
   /** Skor kualitas RAG */
-  ragScore: ResponseQualityResult
+  ragScore: ResponseQualityResult;
   /** Selisih kualitas konteks */
-  contextualImprovement: number
+  contextualImprovement: number;
   /** Selisih empati */
-  empathyImprovement: number
+  empathyImprovement: number;
   /** Selisih kekhususan */
-  specificityImprovement: number
+  specificityImprovement: number;
   /** Kesimpulan */
-  conclusion: string
+  conclusion: string;
 }
 
 /**
@@ -614,99 +597,93 @@ export interface RealComparisonResult {
  */
 export interface RealComparisonSummary {
   /** Jumlah skenario */
-  totalScenarios: number
+  totalScenarios: number;
   /** Rata-rata skor Non-RAG */
-  averageNonRagContextualFit: number
+  averageNonRagContextualFit: number;
   /** Rata-rata skor RAG */
-  averageRagContextualFit: number
+  averageRagContextualFit: number;
   /** Rata-rata peningkatan */
-  averageImprovement: number
+  averageImprovement: number;
   /** Detail per skenario */
-  details: RealComparisonResult[]
+  details: RealComparisonResult[];
 }
 
-// ------------------------------------------------------------------
 // TIPE MULTI-TURN EVALUATION
-// ------------------------------------------------------------------
 
 /**
  * Hasil evaluasi untuk satu percakapan multi-turn.
  */
 export interface MultiTurnResult {
   /** ID skenario multi-turn */
-  scenarioId: string
+  scenarioId: string;
   /** Nama skenario */
-  scenarioName: string
+  scenarioName: string;
   /** Skor memory consistency (0-100) */
-  memoryConsistency: number
+  memoryConsistency: number;
   /** Skor emotional continuity (0-100) */
-  emotionalContinuity: number
+  emotionalContinuity: number;
   /** Skor context retention (0-100) */
-  contextRetention: number
+  contextRetention: number;
   /** Skor topic tracking (0-100) */
-  topicTracking: number
+  topicTracking: number;
   /** Skor keseluruhan (0-100) */
-  overallScore: number
+  overallScore: number;
   /** Label kualitas */
-  label: QualityLabel
+  label: QualityLabel;
   /** Detail per turn */
   turnDetails: Array<{
-    turnIndex: number
-    userInput: string
-    botResponse: string
-    memoryScore: number
-    emotionalScore: number
-    contextScore: number
-    topicScore: number
-  }>
+    turnIndex: number;
+    userInput: string;
+    botResponse: string;
+    memoryScore: number;
+    emotionalScore: number;
+    contextScore: number;
+    topicScore: number;
+  }>;
   /** Analisis kegagalan */
-  failures: string[]
+  failures: string[];
 }
 
 /**
  * Ringkasan evaluasi multi-turn.
  */
 export interface MultiTurnSummary {
-  totalConversations: number
-  averageMemoryConsistency: number
-  averageEmotionalContinuity: number
-  averageContextRetention: number
-  averageTopicTracking: number
-  averageOverallScore: number
-  details: MultiTurnResult[]
+  totalConversations: number;
+  averageMemoryConsistency: number;
+  averageEmotionalContinuity: number;
+  averageContextRetention: number;
+  averageTopicTracking: number;
+  averageOverallScore: number;
+  details: MultiTurnResult[];
 }
 
-// ------------------------------------------------------------------
 // TIPE ACADEMIC INTERPRETATION
-// ------------------------------------------------------------------
 
 /**
  * Bagian interpretasi akademik.
  */
 export interface AcademicInterpretation {
   /** Ringkasan eksekutif */
-  executiveSummary: string
+  executiveSummary: string;
   /** Analisis similarity */
-  similarityAnalysis: string
+  similarityAnalysis: string;
   /** Analisis empati */
-  empathyAnalysis: string
+  empathyAnalysis: string;
   /** Analisis retrieval */
-  retrievalAnalysis: string
+  retrievalAnalysis: string;
   /** Analisis kegagalan */
-  failureAnalysis: string
+  failureAnalysis: string;
   /** Analisis RAG vs Non-RAG */
-  ragComparisonAnalysis: string
+  ragComparisonAnalysis: string;
   /** Analisis multi-turn */
-  multiTurnAnalysis: string
+  multiTurnAnalysis: string;
   /** Kesimpulan */
-  conclusion: string
+  conclusion: string;
   /** Saran pengembangan */
-  suggestions: string[]
+  suggestions: string[];
 }
 
-// ------------------------------------------------------------------
 // TIPE EVALUATION REPORT STRUCTURE
-// ------------------------------------------------------------------
 
 /**
  * Struktur laporan evaluasi lengkap.
@@ -714,52 +691,52 @@ export interface AcademicInterpretation {
 export interface AcademicReportStructure {
   /** Pendahuluan */
   pendahuluan: {
-    latarBelakang: string
-    tujuanPengujian: string[]
-    ruangLingkup: string
-  }
+    latarBelakang: string;
+    tujuanPengujian: string[];
+    ruangLingkup: string;
+  };
   /** Metode evaluasi */
   metode: {
-    jenisEvaluasi: string
+    jenisEvaluasi: string;
     dimensiEvaluasi: Array<{
-      nama: string
-      deskripsi: string
-      metrik: string
-    }>
+      nama: string;
+      deskripsi: string;
+      metrik: string;
+    }>;
     skalaPenilaian: Array<{
-      range: string
-      kategori: string
-      interpretasi: string
-    }>
+      range: string;
+      kategori: string;
+      interpretasi: string;
+    }>;
     dataset: {
-      totalSkenario: number
+      totalSkenario: number;
       kategori: Array<{
-        nama: string
-        jumlah: number
-      }>
-    }
-  }
+        nama: string;
+        jumlah: number;
+      }>;
+    };
+  };
   /** Hasil pengujian */
   hasil: {
-    ringkasan: string
-    tabelSimilarity: string
-    tabelEmpati: string
-    tabelRetrieval: string
-    tabelPerbandinganRAG?: string
-    tabelMultiTurn?: string
-  }
+    ringkasan: string;
+    tabelSimilarity: string;
+    tabelEmpati: string;
+    tabelRetrieval: string;
+    tabelPerbandinganRAG?: string;
+    tabelMultiTurn?: string;
+  };
   /** Analisis */
   analisis: {
-    similarity: string
-    empati: string
-    retrieval: string
-    ragEffectiveness: string
-    kegagalan: string
-  }
+    similarity: string;
+    empati: string;
+    retrieval: string;
+    ragEffectiveness: string;
+    kegagalan: string;
+  };
   /** Kesimpulan */
   kesimpulan: {
-    ringkasan: string
-    temuanUtama: string[]
-    saran: string[]
-  }
+    ringkasan: string;
+    temuanUtama: string[];
+    saran: string[];
+  };
 }

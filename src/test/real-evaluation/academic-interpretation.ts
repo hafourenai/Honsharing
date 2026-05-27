@@ -1,8 +1,6 @@
 /**
- * ============================================================
- * ACADEMIC INTERPRETATION GENERATOR — BAHASA INDONESIA FORMAL
- * ============================================================
- *
+  * ACADEMIC INTERPRETATION GENERATOR — BAHASA INDONESIA FORMAL
+  *
  * Menghasilkan interpretasi akademik otomatis berbahasa
  * Indonesia formal untuk membantu penulisan BAB 4 skripsi.
  *
@@ -14,8 +12,7 @@
  *
  * @author  Tim Skripsi
  * @version 1.0
- * ============================================================
- */
+  */
 
 import {
   EvaluationSession,
@@ -25,9 +22,7 @@ import {
 } from "@/test/types"
 import { FailureAnalysis } from "@/test/types"
 
-// ------------------------------------------------------------------
 // GENERATE INTERPRETASI LENGKAP
-// ------------------------------------------------------------------
 
 /**
  * Menghasilkan interpretasi akademik lengkap dari hasil evaluasi.
@@ -46,34 +41,34 @@ export function generateAcademicInterpretation(
 ): AcademicInterpretation {
   const s = session.summary
 
-  // --- RINGKASAN EKSEKUTIF ---
+  // RINGKASAN EKSEKUTIF
   const executiveSummary = generateExecutiveSummary(s, session.mode)
 
-  // --- ANALISIS SIMILARITY ---
+  // ANALISIS SIMILARITY
   const similarityAnalysis = generateSimilarityAnalysis(s.averageSimilarity)
 
-  // --- ANALISIS EMPATI ---
+  //  ANALISIS EMPATI
   const empathyAnalysis = generateEmpathyAnalysis(s.averageEmpathy)
 
-  // --- ANALISIS RETRIEVAL ---
+  //  ANALISIS RETRIEVAL 
   const retrievalAnalysis = generateRetrievalAnalysis(s.averageRetrieval)
 
-  // --- ANALISIS KEGAGALAN ---
+  // ANALISIS KEGAGALAN 
   const failureAnalysis = failures
     ? generateFailureInterpretation(failures)
     : "Analisis kegagalan tidak dilakukan pada sesi ini."
 
-  // --- ANALISIS RAG VS NON-RAG ---
+  //  ANALISIS RAG VS NON-RAG
   const ragComparisonAnalysis = comparisons
     ? generateRagComparisonInterpretation(comparisons)
     : "Perbandingan RAG vs Non-RAG tidak dilakukan pada sesi ini."
 
-  // --- ANALISIS MULTI-TURN ---
+  // ANALISIS MULTI-TURN 
   const multiTurnAnalysis = multiTurn
     ? generateMultiTurnInterpretation(multiTurn)
     : "Evaluasi multi-turn tidak dilakukan pada sesi ini."
 
-  // --- KESIMPULAN ---
+  // KESIMPULAN 
   const conclusion = generateConclusion(
     s.averageSimilarity,
     s.averageEmpathy,
@@ -81,7 +76,7 @@ export function generateAcademicInterpretation(
     s.averageRetrieval
   )
 
-  // --- SARAN ---
+  //  SARAN
   const suggestions = generateSuggestions(
     s.averageSimilarity,
     s.averageEmpathy,
@@ -102,9 +97,7 @@ export function generateAcademicInterpretation(
   }
 }
 
-// ------------------------------------------------------------------
 // RINGKASAN EKSEKUTIF
-// ------------------------------------------------------------------
 
 function generateExecutiveSummary(
   summary: EvaluationSession["summary"],
@@ -138,9 +131,8 @@ function generateExecutiveSummary(
   )
 }
 
-// ------------------------------------------------------------------
 // ANALISIS SIMILARITY
-// ------------------------------------------------------------------
+
 
 function generateSimilarityAnalysis(score: number): string {
   if (score >= 80) {
@@ -181,9 +173,7 @@ function generateSimilarityAnalysis(score: number): string {
   }
 }
 
-// ------------------------------------------------------------------
 // ANALISIS EMPATI
-// ------------------------------------------------------------------
 
 function generateEmpathyAnalysis(score: number): string {
   if (score >= 80) {
@@ -224,9 +214,7 @@ function generateEmpathyAnalysis(score: number): string {
   }
 }
 
-// ------------------------------------------------------------------
 // ANALISIS RETRIEVAL
-// ------------------------------------------------------------------
 
 function generateRetrievalAnalysis(score: number): string {
   if (score >= 75) {
@@ -266,9 +254,7 @@ function generateRetrievalAnalysis(score: number): string {
   }
 }
 
-// ------------------------------------------------------------------
 // ANALISIS KEGAGALAN
-// ------------------------------------------------------------------
 
 function generateFailureInterpretation(failures: FailureAnalysis[]): string {
   const total = failures.length
@@ -309,9 +295,7 @@ function generateFailureInterpretation(failures: FailureAnalysis[]): string {
   )
 }
 
-// ------------------------------------------------------------------
 // ANALISIS RAG VS NON-RAG
-// ------------------------------------------------------------------
 
 function generateRagComparisonInterpretation(
   comparisons: RealComparisonSummary
@@ -340,9 +324,7 @@ function generateRagComparisonInterpretation(
   )
 }
 
-// ------------------------------------------------------------------
 // ANALISIS MULTI-TURN
-// ------------------------------------------------------------------
 
 function generateMultiTurnInterpretation(summary: MultiTurnSummary): string {
   return (
@@ -366,9 +348,7 @@ function generateMultiTurnInterpretation(summary: MultiTurnSummary): string {
   )
 }
 
-// ------------------------------------------------------------------
 // KESIMPULAN
-// ------------------------------------------------------------------
 
 function generateConclusion(
   similarity: number,
@@ -397,9 +377,7 @@ function generateConclusion(
   )
 }
 
-// ------------------------------------------------------------------
 // SARAN PENGEMBANGAN
-// ------------------------------------------------------------------
 
 function generateSuggestions(
   similarity: number,

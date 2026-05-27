@@ -1,22 +1,17 @@
 /**
- * ============================================================
- * EVALUATION SUMMARY DASHBOARD — DATA RINGKASAN EVALUASI
- * ============================================================
- *
+  * EVALUATION SUMMARY DASHBOARD — DATA RINGKASAN EVALUASI
+  *
  * Menghasilkan data ringkasan untuk dashboard evaluasi.
  * Output dalam format JSON dan Markdown.
  *
  * @author  Tim Skripsi
  * @version 1.0
- * ============================================================
- */
+  */
 
 import { EvaluationSession } from "@/test/types"
 import { ResearchStats, CategoryStats } from "./research-statistics"
 
-// ================================================================
 // TIPE DATA
-// ================================================================
 
 export interface SummaryDashboard {
   /** Informasi sesi */
@@ -56,9 +51,7 @@ export interface CategoryRanking {
   status: "Sangat Baik" | "Baik" | "Cukup" | "Kurang"
 }
 
-// ================================================================
 // GENERATE DASHBOARD
-// ================================================================
 
 /**
  * Menghasilkan data dashboard dari sesi evaluasi dan statistik.
@@ -122,9 +115,7 @@ export function generateSummaryDashboard(
   }
 }
 
-// ================================================================
 // OUTPUT FORMATS
-// ================================================================
 
 export function generateDashboardJSON(dashboard: SummaryDashboard): string {
   return JSON.stringify(dashboard, null, 2)

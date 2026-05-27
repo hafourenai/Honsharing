@@ -1,8 +1,6 @@
 /**
- * ============================================================
- * RESEARCH LIMITATIONS — KETERBATASAN PENELITIAN
- * ============================================================
- *
+  * RESEARCH LIMITATIONS — KETERBATASAN PENELITIAN
+  *
  * Mendokumentasikan keterbatasan penelitian secara formal
  * untuk menjawab pertanyaan dosen penguji.
  *
@@ -13,12 +11,9 @@
  *
  * @author  Tim Skripsi
  * @version 1.0
- * ============================================================
- */
+  */
 
-// ================================================================
 // GENERATE LIMITATION DOKUMENTASI
-// ================================================================
 
 export function generateResearchLimitations(): string {
   return (
@@ -113,9 +108,7 @@ export function generateResearchLimitations(): string {
   )
 }
 
-// ================================================================
 // GENERATE LIMITATION SINGKAT
-// ================================================================
 
 export function generateLimitationSummary(): string {
   return (

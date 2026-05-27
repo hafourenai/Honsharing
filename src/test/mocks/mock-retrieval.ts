@@ -27,9 +27,7 @@ import { cosineSimilarity } from "@/test/types/utils/cosine-similarity";
 import { getMockEmbedding } from "@/test/mocks/mock-embeddings";
 import { ALL_MOCK_CHUNKS } from "@/test/mocks/mock-chunks";
 
-// ------------------------------------------------------------------
 // PENCARIAN SIMILARITY DENGAN MOCK EMBEDDING
-// ------------------------------------------------------------------
 
 /**
  * Mensimulasikan retrieval RAG dengan mock embedding.
@@ -76,9 +74,7 @@ export async function mockRetrieve(
     .slice(0, topK);
 }
 
-// ------------------------------------------------------------------
 // MOCK RETRIEVAL DENGAN HASIL YANG SUDAH DITENTUKAN
-// ------------------------------------------------------------------
 
 /**
  * Mendapatkan hasil retrieval yang sudah ditentukan untuk skenario.
@@ -102,9 +98,7 @@ export function mockDeterministicRetrieval(
     }));
 }
 
-// ------------------------------------------------------------------
 // EVALUASI RETRIEVAL
-// ------------------------------------------------------------------
 
 /**
  * Mengevaluasi hasil retrieval dengan menghitung precision dan recall

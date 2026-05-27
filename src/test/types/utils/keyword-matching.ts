@@ -22,9 +22,7 @@
  * ============================================================
  */
 
-// ------------------------------------------------------------------
 // SEMANTIC KEYWORD GROUPS
-// ------------------------------------------------------------------
 
 /**
  * Grup kata kunci semantik untuk setiap konteks emosional.
@@ -160,11 +158,9 @@ export const EMOTIONAL_KEYWORD_GROUPS: Record<string, string[]> = {
     "cuek",
     "diem aja",
   ],
-}
+};
 
-// ------------------------------------------------------------------
 // KEYWORD SCORING
-// ------------------------------------------------------------------
 
 /**
  * Menghitung skor keyword match antara teks dan grup kata kunci.
@@ -173,19 +169,16 @@ export const EMOTIONAL_KEYWORD_GROUPS: Record<string, string[]> = {
  * @param keywordGroup - Nama grup kata kunci (lihat EMOTIONAL_KEYWORD_GROUPS)
  * @returns Skor 0.0 - 1.0 (proporsi keyword group yang muncul)
  */
-export function keywordGroupScore(
-  text: string,
-  keywordGroup: string
-): number {
-  const keywords = EMOTIONAL_KEYWORD_GROUPS[keywordGroup]
-  if (!keywords) return 0
+export function keywordGroupScore(text: string, keywordGroup: string): number {
+  const keywords = EMOTIONAL_KEYWORD_GROUPS[keywordGroup];
+  if (!keywords) return 0;
 
-  const textLower = text.toLowerCase()
+  const textLower = text.toLowerCase();
   const matchedCount = keywords.filter((keyword) =>
-    textLower.includes(keyword)
-  ).length
+    textLower.includes(keyword),
+  ).length;
 
-  return matchedCount / keywords.length
+  return matchedCount / keywords.length;
 }
 
 /**
@@ -199,14 +192,14 @@ export function keywordGroupScore(
  */
 export function requiredKeywordScore(
   text: string,
-  expectedKeywords: string[]
+  expectedKeywords: string[],
 ): number {
-  if (expectedKeywords.length === 0) return 1.0 // Tidak ada requirement
+  if (expectedKeywords.length === 0) return 1.0; // Tidak ada requirement
 
-  const textLower = text.toLowerCase()
-  const matched = expectedKeywords.filter((kw) => textLower.includes(kw))
+  const textLower = text.toLowerCase();
+  const matched = expectedKeywords.filter((kw) => textLower.includes(kw));
 
-  return matched.length / expectedKeywords.length
+  return matched.length / expectedKeywords.length;
 }
 
 /**
@@ -218,10 +211,10 @@ export function requiredKeywordScore(
  */
 export function hasForbiddenKeywords(
   text: string,
-  forbiddenKeywords: string[]
+  forbiddenKeywords: string[],
 ): boolean {
-  const textLower = text.toLowerCase()
-  return forbiddenKeywords.some((kw) => textLower.includes(kw))
+  const textLower = text.toLowerCase();
+  return forbiddenKeywords.some((kw) => textLower.includes(kw));
 }
 
 /**
@@ -237,23 +230,26 @@ export function hasForbiddenKeywords(
 export function keywordMatchingScore(
   text: string,
   required: string[],
-  forbidden: string[]
+  forbidden: string[],
 ): { score: number; details: { matched: string[]; violated: string[] } } {
-  const textLower = text.toLowerCase()
+  const textLower = text.toLowerCase();
 
   // Cari kata kunci yang harus ada
-  const matched = required.filter((kw) => textLower.includes(kw))
+  const matched = required.filter((kw) => textLower.includes(kw));
 
   // Cari kata kunci yang tidak boleh ada
-  const violated = forbidden.filter((kw) => textLower.includes(kw))
+  const violated = forbidden.filter((kw) => textLower.includes(kw));
 
   // Skor: proporsi kata kunci yang terpenuhi dikurangi penalti
   const requiredScore =
-    required.length > 0 ? matched.length / required.length : 1.0
+    required.length > 0 ? matched.length / required.length : 1.0;
 
   // Penalti untuk kata terlarang
-  const penalty = violated.length * 0.2 // Setiap pelanggaran -20%
-  const finalScore = Math.max(0, Math.min(100, requiredScore * 100 * (1 - penalty)))
+  const penalty = violated.length * 0.2; // Setiap pelanggaran -20%
+  const finalScore = Math.max(
+    0,
+    Math.min(100, requiredScore * 100 * (1 - penalty)),
+  );
 
   return {
     score: Math.round(finalScore),
@@ -261,5 +257,5 @@ export function keywordMatchingScore(
       matched,
       violated,
     },
-  }
+  };
 }

@@ -1,10 +1,5 @@
 /**
- * ============================================================
- * ACADEMIC WRITING GENERATOR — NARASI FORMAL OTOMATIS
- * ============================================================
- *
- * Utility untuk menghasilkan narasi akademik formal berbahasa
- * Indonesia yang natural dan siap digunakan dalam skripsi S1.
+ * ACADEMIC WRITING GENERATOR — NARASI FORMAL OTOMA
  *
  * Mencakup:
  * - Interpretasi tabel hasil
@@ -14,7 +9,6 @@
  *
  * @author  Tim Skripsi
  * @version 1.0
- * ============================================================
  */
 
 import {
@@ -22,9 +16,9 @@ import {
   CategoryStats,
 } from "./research-statistics"
 
-// ================================================================
+
 // INTERPRETASI TABEL HASIL
-// ================================================================
+
 
 /**
  * Menghasilkan narasi interpretasi untuk tabel hasil pengujian.
@@ -87,9 +81,9 @@ export function interpretPeningkatan(
   )
 }
 
-// ================================================================
+
 // ANALISIS SKOR
-// ================================================================
+
 
 /**
  * Menghasilkan analisis akademik untuk rata-rata skor per dimensi.
@@ -177,9 +171,9 @@ export function analisisPerKategori(categories: CategoryStats[]): string {
   return parts.join("")
 }
 
-// ================================================================
+
 // KESIMPULAN PENGUJIAN
-// ================================================================
+
 
 export function kesimpulanPengujian(
   stats: ResearchStats,
@@ -218,9 +212,9 @@ export function kesimpulanPengujian(
   return parts.join("")
 }
 
-// ================================================================
+
 // PENJELASAN PENINGKATAN PERFORM
-// ================================================================
+
 
 export function penjelasanPeningkatan(
   dimensi: string,
@@ -243,9 +237,9 @@ export function penjelasanPeningkatan(
   )
 }
 
-// ================================================================
+
 // PENJELASAN RETRIEVAL
-// ================================================================
+
 
 export function penjelasanEfektivitasRetrieval(
   retrievalScore: number,
@@ -273,9 +267,9 @@ export function penjelasanEfektivitasRetrieval(
   )
 }
 
-// ================================================================
+
 // HELPERS
-// ================================================================
+
 
 function kategorikan(score: number): string {
   if (score >= 85) return "Sangat Baik"

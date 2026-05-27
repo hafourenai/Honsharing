@@ -31,9 +31,7 @@ import {
 import { getVerdict, Verdict } from "@/test/types/utils/scoring";
 import { standardDeviation } from "@/test/types/utils/scoring";
 
-// ------------------------------------------------------------------
 // STATISTIK DASAR
-// ------------------------------------------------------------------
 
 export interface BasicStats {
   mean: number;
@@ -72,9 +70,7 @@ export function calculateBasicStats(values: number[]): BasicStats {
   };
 }
 
-// ------------------------------------------------------------------
 // DISTRIBUSI PER KATEGORI
-// ------------------------------------------------------------------
 
 export interface CategoryStats {
   category: string;
@@ -149,9 +145,7 @@ function extractCategory(scenarioId: string): string {
   return parts.length > 1 ? parts.slice(0, -1).join("_") : scenarioId;
 }
 
-// ------------------------------------------------------------------
 // DISTRIBUSI VERDICT
-// ------------------------------------------------------------------
 
 export interface VerdictDistribution {
   verdict: string;
@@ -212,9 +206,7 @@ export function calculateVerdictDistribution(
     .sort((a, b) => b.count - a.count);
 }
 
-// ------------------------------------------------------------------
 // PERSENTASE KEBERHASILAN
-// ------------------------------------------------------------------
 
 export interface SuccessRate {
   /** Persentase skenario dengan skor >= 70 (BAIK) */
@@ -254,9 +246,7 @@ export function calculateSuccessRate(results: EvaluationResult[]): SuccessRate {
   };
 }
 
-// ------------------------------------------------------------------
 // GENERATE MARKDOWN SUMMARY
-// ------------------------------------------------------------------
 
 /**
  * Menghasilkan ringkasan statistik dalam format markdown.
@@ -320,9 +310,7 @@ export function generateMarkdownSummary(report: EvaluationReport): string {
   return lines.join("\n");
 }
 
-// ------------------------------------------------------------------
 // GENERATE JSON SUMMARY
-// ------------------------------------------------------------------
 
 /**
  * Menghasilkan ringkasan statistik dalam format JSON.
@@ -358,9 +346,7 @@ export function generateJsonSummary(
   };
 }
 
-// ------------------------------------------------------------------
 // GENERATE CSV
-// ------------------------------------------------------------------
 
 /**
  * Menghasilkan data CSV dari hasil evaluasi.

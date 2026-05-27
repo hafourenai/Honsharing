@@ -22,11 +22,9 @@
  * ============================================================
  */
 
-import { TEST_CONFIG } from "@/test/config/test-config"
+import { TEST_CONFIG } from "@/test/config/test-config";
 
-// ------------------------------------------------------------------
 // DETERMINISTIC PSEUDO-RANDOM NUMBER GENERATOR
-// ------------------------------------------------------------------
 
 /**
  * Simple PRNG (Pseudo-Random Number Generator) untuk menghasilkan
@@ -40,16 +38,14 @@ import { TEST_CONFIG } from "@/test/config/test-config"
  * @returns Fungsi random yang menghasilkan angka 0..1
  */
 function createPRNG(seed: number): () => number {
-  let state = seed
+  let state = seed;
   return () => {
-    state = (state * 1664525 + 1013904223) & 0xffffffff
-    return (state >>> 0) / 0xffffffff
-  }
+    state = (state * 1664525 + 1013904223) & 0xffffffff;
+    return (state >>> 0) / 0xffffffff;
+  };
 }
 
-// ------------------------------------------------------------------
 // MOCK EMBEDDING GENERATOR
-// ------------------------------------------------------------------
 
 /**
  * Menghasilkan vektor embedding deterministic untuk suatu teks.
@@ -67,40 +63,38 @@ function createPRNG(seed: number): () => number {
  * // Returns: number[384] (vektor deterministic)
  */
 export function generateMockEmbedding(text: string): number[] {
-  const { dimension, seed } = TEST_CONFIG.mockEmbedding
+  const { dimension, seed } = TEST_CONFIG.mockEmbedding;
 
   // Hash teks menjadi seed numerik
-  let textSeed = seed
+  let textSeed = seed;
   for (let i = 0; i < text.length; i++) {
-    textSeed = (textSeed * 31 + text.charCodeAt(i)) & 0xffffffff
+    textSeed = (textSeed * 31 + text.charCodeAt(i)) & 0xffffffff;
   }
 
-  const random = createPRNG(textSeed)
-  const vector: number[] = []
+  const random = createPRNG(textSeed);
+  const vector: number[] = [];
 
   // Generate vektor
-  let sumSquares = 0
+  let sumSquares = 0;
   for (let i = 0; i < dimension; i++) {
-    const val = random() * 2 - 1 // Range -1..1
-    vector.push(val)
-    sumSquares += val * val
+    const val = random() * 2 - 1; // Range -1..1
+    vector.push(val);
+    sumSquares += val * val;
   }
 
   // Normalisasi (panjang vektor = 1)
-  const magnitude = Math.sqrt(sumSquares)
-  return vector.map((val) => val / magnitude)
+  const magnitude = Math.sqrt(sumSquares);
+  return vector.map((val) => val / magnitude);
 }
 
-// ------------------------------------------------------------------
 // SIMILARITY MATRIX (CACHED)
-// ------------------------------------------------------------------
 
 /**
  * Cache embedding untuk teks yang sudah pernah diproses.
  * Ini memastikan bahwa teks yang sama selalu menghasilkan
  * embedding yang identik.
  */
-const embeddingCache = new Map<string, number[]>()
+const embeddingCache = new Map<string, number[]>();
 
 /**
  * Mendapatkan mock embedding dengan cache.
@@ -110,12 +104,12 @@ const embeddingCache = new Map<string, number[]>()
  */
 export function getMockEmbedding(text: string): number[] {
   if (embeddingCache.has(text)) {
-    return embeddingCache.get(text)!
+    return embeddingCache.get(text)!;
   }
 
-  const embedding = generateMockEmbedding(text)
-  embeddingCache.set(text, embedding)
-  return embedding
+  const embedding = generateMockEmbedding(text);
+  embeddingCache.set(text, embedding);
+  return embedding;
 }
 
 /**
@@ -123,12 +117,10 @@ export function getMockEmbedding(text: string): number[] {
  * Berguna saat ingin memulai ulang testing.
  */
 export function clearEmbeddingCache(): void {
-  embeddingCache.clear()
+  embeddingCache.clear();
 }
 
-// ------------------------------------------------------------------
 // PRE-COMPUTED EMBEDDINGS UNTUK SKENARIO UMUM
-// ------------------------------------------------------------------
 
 /**
  * Pre-computed embeddings untuk query umum.
@@ -136,28 +128,26 @@ export function clearEmbeddingCache(): void {
  */
 export const SCENARIO_EMBEDDINGS: Record<string, number[]> = {
   overthinking: generateMockEmbedding(
-    "pikiran saya tidak bisa berhenti, terus overthinking setiap malam"
+    "pikiran saya tidak bisa berhenti, terus overthinking setiap malam",
   ),
   anxiety: generateMockEmbedding(
-    "saya merasa cemas dan takut tanpa alasan yang jelas"
+    "saya merasa cemas dan takut tanpa alasan yang jelas",
   ),
   relationship: generateMockEmbedding(
-    "saya merasa tidak pantas untuk pasangan saya"
+    "saya merasa tidak pantas untuk pasangan saya",
   ),
   loneliness: generateMockEmbedding(
-    "saya merasa kesepian meskipun dikelilingi banyak orang"
+    "saya merasa kesepian meskipun dikelilingi banyak orang",
   ),
   motivation: generateMockEmbedding(
-    "saya kehilangan semangat untuk melakukan apapun"
+    "saya kehilangan semangat untuk melakukan apapun",
   ),
   stress: generateMockEmbedding(
-    "tugas kuliah menumpuk, saya merasa stress dan overwhelmed"
+    "tugas kuliah menumpuk, saya merasa stress dan overwhelmed",
   ),
-}
+};
 
-// ------------------------------------------------------------------
 // SIMULASI ERROR
-// ------------------------------------------------------------------
 
 /**
  * Mock untuk fungsi embedText asli.
@@ -168,12 +158,12 @@ export const SCENARIO_EMBEDDINGS: Record<string, number[]> = {
  * @throws Error jika simulasi error diaktifkan
  */
 export async function mockEmbedText(text: string): Promise<number[]> {
-  const config = TEST_CONFIG.mockEmbedding
+  const config = TEST_CONFIG.mockEmbedding;
 
   // Simulasi error berdasarkan errorRate
   if (config.simulateError && Math.random() < config.errorRate) {
-    throw new Error("[MOCK] Simulated embedding error")
+    throw new Error("[MOCK] Simulated embedding error");
   }
 
-  return getMockEmbedding(text)
+  return getMockEmbedding(text);
 }

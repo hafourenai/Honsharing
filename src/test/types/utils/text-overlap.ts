@@ -30,9 +30,7 @@
  * ============================================================
  */
 
-// ------------------------------------------------------------------
 // JACCARD SIMILARITY COEFFICIENT
-// ------------------------------------------------------------------
 
 /**
  * Menghitung Jaccard Similarity antara dua teks.
@@ -51,28 +49,26 @@
  * @returns Nilai Jaccard similarity (0.0 - 1.0)
  */
 export function jaccardSimilarity(textA: string, textB: string): number {
-  const tokensA = new Set(tokenize(textA))
-  const tokensB = new Set(tokenize(textB))
+  const tokensA = new Set(tokenize(textA));
+  const tokensB = new Set(tokenize(textB));
 
   // Jika kedua teks kosong, anggap identik
   if (tokensA.size === 0 && tokensB.size === 0) {
-    return 1.0
+    return 1.0;
   }
 
   // Hitung irisan (intersection)
   const intersection = new Set(
-    [...tokensA].filter((token) => tokensB.has(token))
-  )
+    [...tokensA].filter((token) => tokensB.has(token)),
+  );
 
   // Hitung gabungan (union)
-  const union = new Set([...tokensA, ...tokensB])
+  const union = new Set([...tokensA, ...tokensB]);
 
-  return intersection.size / union.size
+  return intersection.size / union.size;
 }
 
-// ------------------------------------------------------------------
 // OVERLAP COEFFICIENT (Szymkiewicz–Simpson)
-// ------------------------------------------------------------------
 
 /**
  * Overlap Coefficient mengukur proporsi overlap terhadap
@@ -91,25 +87,23 @@ export function jaccardSimilarity(textA: string, textB: string): number {
  * @returns Nilai overlap coefficient (0.0 - 1.0)
  */
 export function overlapCoefficient(textA: string, textB: string): number {
-  const tokensA = new Set(tokenize(textA))
-  const tokensB = new Set(tokenize(textB))
+  const tokensA = new Set(tokenize(textA));
+  const tokensB = new Set(tokenize(textB));
 
   if (tokensA.size === 0 || tokensB.size === 0) {
-    return 0
+    return 0;
   }
 
   const intersection = new Set(
-    [...tokensA].filter((token) => tokensB.has(token))
-  )
+    [...tokensA].filter((token) => tokensB.has(token)),
+  );
 
-  const minSize = Math.min(tokensA.size, tokensB.size)
+  const minSize = Math.min(tokensA.size, tokensB.size);
 
-  return intersection.size / minSize
+  return intersection.size / minSize;
 }
 
-// ------------------------------------------------------------------
 // WORD OVERLAP SCORE (Composite)
-// ------------------------------------------------------------------
 
 /**
  * Menghitung composite word overlap score.
@@ -123,15 +117,13 @@ export function overlapCoefficient(textA: string, textB: string): number {
  * @returns Composite overlap score (0.0 - 1.0)
  */
 export function wordOverlapScore(textA: string, textB: string): number {
-  const jaccard = jaccardSimilarity(textA, textB)
-  const overlap = overlapCoefficient(textA, textB)
+  const jaccard = jaccardSimilarity(textA, textB);
+  const overlap = overlapCoefficient(textA, textB);
 
-  return (jaccard + overlap) / 2
+  return (jaccard + overlap) / 2;
 }
 
-// ------------------------------------------------------------------
 // HELPER
-// ------------------------------------------------------------------
 
 /**
  * Tokenisasi teks untuk perbandingan.
@@ -141,5 +133,5 @@ function tokenize(text: string): string[] {
     .toLowerCase()
     .replace(/[^\w\s]/g, " ")
     .split(/\s+/)
-    .filter((t) => t.length > 0 && t.length > 2) // Filter kata pendek (stopword kasar)
+    .filter((t) => t.length > 0 && t.length > 2); // Filter kata pendek (stopword kasar)
 }

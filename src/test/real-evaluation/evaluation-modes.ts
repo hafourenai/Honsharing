@@ -20,17 +20,12 @@
  * ============================================================
  */
 
-import { TestScenario, EvaluationMode, ChatApiConfig } from "@/test/types"
-import { callChatApi, DEFAULT_CONFIG } from "./chat-api-wrapper"
-import {
-  mockRetrieve,
-  getDeterministicResponse,
-} from "@/test/mocks"
-import { ChatApiResponse } from "@/test/types"
+import { TestScenario, EvaluationMode, ChatApiConfig } from "@/test/types";
+import { callChatApi, DEFAULT_CONFIG } from "./chat-api-wrapper";
+import { mockRetrieve, getDeterministicResponse } from "@/test/mocks";
+import { ChatApiResponse } from "@/test/types";
 
-// ------------------------------------------------------------------
 // INTERFACE MODE EVALUATION
-// ------------------------------------------------------------------
 
 /**
  * Interface seragam untuk semua mode evaluasi.
@@ -39,7 +34,7 @@ export interface EvaluationModeHandler {
   /**
    * Nama mode.
    */
-  readonly mode: EvaluationMode
+  readonly mode: EvaluationMode;
 
   /**
    * Mendapatkan respons chatbot untuk input tertentu.
@@ -50,17 +45,15 @@ export interface EvaluationModeHandler {
    */
   getResponse(
     userInput: string,
-    scenario: TestScenario
+    scenario: TestScenario,
   ): Promise<{
-    response: string
-    responseTimeMs: number
-    retrievedChunks: unknown[]
-  }>
+    response: string;
+    responseTimeMs: number;
+    retrievedChunks: unknown[];
+  }>;
 }
 
-// ------------------------------------------------------------------
 // MODE 1: MOCK — Full Simulated
-// ------------------------------------------------------------------
 
 /**
  * Mode MOCK: Semua komponen disimulasikan.
@@ -75,35 +68,33 @@ export interface EvaluationModeHandler {
  * - Demo tanpa API key
  */
 export class MockMode implements EvaluationModeHandler {
-  readonly mode: EvaluationMode = "MOCK"
+  readonly mode: EvaluationMode = "MOCK";
 
   async getResponse(
     userInput: string,
-    scenario: TestScenario
+    scenario: TestScenario,
   ): Promise<{
-    response: string
-    responseTimeMs: number
-    retrievedChunks: unknown[]
+    response: string;
+    responseTimeMs: number;
+    retrievedChunks: unknown[];
   }> {
-    const startTime = Date.now()
+    const startTime = Date.now();
 
     // Mock retrieval
-    const retrievedChunks = await mockRetrieve(userInput)
+    const retrievedChunks = await mockRetrieve(userInput);
 
     // Mock response deterministik
-    const response = getDeterministicResponse(scenario.id)
+    const response = getDeterministicResponse(scenario.id);
 
     return {
       response,
       responseTimeMs: Date.now() - startTime,
       retrievedChunks,
-    }
+    };
   }
 }
 
-// ------------------------------------------------------------------
 // MODE 2: HYBRID — Retrieval Real, Response Mock
-// ------------------------------------------------------------------
 
 /**
  * Mode HYBRID: Retrieval menggunakan API asli, response mock.
@@ -117,42 +108,40 @@ export class MockMode implements EvaluationModeHandler {
  * - Evaluasi standalone retrieval
  */
 export class HybridMode implements EvaluationModeHandler {
-  readonly mode: EvaluationMode = "HYBRID"
-  private apiConfig: ChatApiConfig
+  readonly mode: EvaluationMode = "HYBRID";
+  private apiConfig: ChatApiConfig;
 
   constructor(apiConfig?: Partial<ChatApiConfig>) {
-    this.apiConfig = { ...DEFAULT_CONFIG, ...apiConfig }
+    this.apiConfig = { ...DEFAULT_CONFIG, ...apiConfig };
   }
 
   async getResponse(
     userInput: string,
-    scenario: TestScenario
+    scenario: TestScenario,
   ): Promise<{
-    response: string
-    responseTimeMs: number
-    retrievedChunks: unknown[]
+    response: string;
+    responseTimeMs: number;
+    retrievedChunks: unknown[];
   }> {
-    const startTime = Date.now()
+    const startTime = Date.now();
 
     // TODO: Untuk retrieval real, kita perlu memanggil
     // endpoint embedding dan melakukan cosine similarity
     // sendiri. Sementara gunakan mock retrieval.
-    const retrievedChunks = await mockRetrieve(userInput)
+    const retrievedChunks = await mockRetrieve(userInput);
 
     // Tetap gunakan mock response agar biaya LLM tidak membengkak
-    const response = getDeterministicResponse(scenario.id)
+    const response = getDeterministicResponse(scenario.id);
 
     return {
       response,
       responseTimeMs: Date.now() - startTime,
       retrievedChunks,
-    }
+    };
   }
 }
 
-// ------------------------------------------------------------------
 // MODE 3: REAL — Full Production Pipeline
-// ------------------------------------------------------------------
 
 /**
  * Mode REAL: Semua komponen menggunakan API asli.
@@ -173,44 +162,42 @@ export class HybridMode implements EvaluationModeHandler {
  * - Pengumpulan data penelitian
  */
 export class RealMode implements EvaluationModeHandler {
-  readonly mode: EvaluationMode = "REAL"
-  private apiConfig: ChatApiConfig
+  readonly mode: EvaluationMode = "REAL";
+  private apiConfig: ChatApiConfig;
 
   constructor(apiConfig?: Partial<ChatApiConfig>) {
-    this.apiConfig = { ...DEFAULT_CONFIG, ...apiConfig }
+    this.apiConfig = { ...DEFAULT_CONFIG, ...apiConfig };
   }
 
   async getResponse(
     userInput: string,
-    scenario: TestScenario
+    scenario: TestScenario,
   ): Promise<{
-    response: string
-    responseTimeMs: number
-    retrievedChunks: unknown[]
+    response: string;
+    responseTimeMs: number;
+    retrievedChunks: unknown[];
   }> {
-    const startTime = Date.now()
+    const startTime = Date.now();
 
     // Panggil API chat asli
     const apiResponse: ChatApiResponse = await callChatApi(
       userInput,
       undefined,
-      this.apiConfig
-    )
+      this.apiConfig,
+    );
 
     // Mock retrieval untuk logging (tidak mempengaruhi response)
-    const retrievedChunks = await mockRetrieve(userInput)
+    const retrievedChunks = await mockRetrieve(userInput);
 
     return {
       response: apiResponse.response,
       responseTimeMs: apiResponse.responseTimeMs,
       retrievedChunks,
-    }
+    };
   }
 }
 
-// ------------------------------------------------------------------
 // MODE FACTORY
-// ------------------------------------------------------------------
 
 /**
  * Factory untuk membuat handler mode evaluasi.
@@ -221,19 +208,19 @@ export class RealMode implements EvaluationModeHandler {
  */
 export function createEvaluationMode(
   mode: EvaluationMode,
-  apiConfig?: Partial<ChatApiConfig>
+  apiConfig?: Partial<ChatApiConfig>,
 ): EvaluationModeHandler {
   switch (mode) {
     case "MOCK":
-      return new MockMode()
+      return new MockMode();
     case "HYBRID":
-      return new HybridMode(apiConfig)
+      return new HybridMode(apiConfig);
     case "REAL":
-      return new RealMode(apiConfig)
+      return new RealMode(apiConfig);
     default:
       console.warn(
-        `[EvaluationMode] Mode "${mode}" tidak dikenal, menggunakan MOCK sebagai default`
-      )
-      return new MockMode()
+        `[EvaluationMode] Mode "${mode}" tidak dikenal, menggunakan MOCK sebagai default`,
+      );
+      return new MockMode();
   }
 }

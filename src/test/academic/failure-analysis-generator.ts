@@ -1,8 +1,6 @@
 /**
- * ============================================================
- * FAILURE ANALYSIS GENERATOR — ANALISIS KEGAGALAN AKADEMIK
- * ============================================================
- *
+  * FAILURE ANALYSIS GENERATOR — ANALISIS KEGAGALAN AKADEMIK
+  *
  * Menganalisis kegagalan sistem secara akademik dan menghasilkan
  * dokumentasi yang siap digunakan untuk skripsi.
  *
@@ -14,14 +12,11 @@
  *
  * @author  Tim Skripsi
  * @version 1.0
- * ============================================================
- */
+  */
 
 import { FailureAnalysis, QualityLabel } from "@/test/types"
 
-// ================================================================
 // TIPE DATA
-// ================================================================
 
 export interface AcademicFailureReport {
   /** Ringkasan kegagalan */
@@ -70,9 +65,7 @@ export interface FailureRecommendation {
   priority: "Tinggi" | "Sedang" | "Rendah"
 }
 
-// ================================================================
 // DATA PENGETAHUAN KEGAGALAN
-// ================================================================
 
 const FAILURE_KNOWLEDGE: Record<string, {
   possibleCauses: string[]
@@ -129,9 +122,7 @@ const FAILURE_KNOWLEDGE: Record<string, {
   },
 }
 
-// ================================================================
 // GENERATE LAPORAN
-// ================================================================
 
 /**
  * Menghasilkan laporan analisis kegagalan akademik lengkap.
@@ -219,9 +210,7 @@ export function generateAcademicFailureReport(
   }
 }
 
-// ================================================================
 // SUMMARY
-// ================================================================
 
 function generateSummary(
   types: FailureTypeAnalysis[],
@@ -242,9 +231,7 @@ function generateSummary(
   )
 }
 
-// ================================================================
 // TABEL DISTRIBUSI
-// ================================================================
 
 function generateDistribusiTable(
   types: FailureTypeAnalysis[],
@@ -261,9 +248,7 @@ function generateDistribusiTable(
   return lines.join("\n")
 }
 
-// ================================================================
 // REKOMENDASI
-// ================================================================
 
 function generateRecommendations(
   types: FailureTypeAnalysis[]
@@ -295,9 +280,7 @@ function generateRecommendations(
   return recs
 }
 
-// ================================================================
 // ANALISIS PER JENIS
-// ================================================================
 
 /**
  * Menghasilkan analisis mendalam untuk satu jenis kegagalan.
@@ -320,9 +303,7 @@ export function generateFailureTypeNarrative(
   )
 }
 
-// ================================================================
 // REKOMENDASI UNTUK DOSEN PENGUJI
-// ================================================================
 
 /**
  * Menghasilkan jawaban atas kemungkinan pertanyaan dosen penguji

@@ -22,12 +22,10 @@
  * ============================================================
  */
 
-import { Chunk } from "@/lib/rag/promptBuilder"
-import { TEST_CONFIG } from "@/test/config/test-config"
+import { Chunk } from "@/lib/rag/promptBuilder";
+import { TEST_CONFIG } from "@/test/config/test-config";
 
-// ------------------------------------------------------------------
 // TEMPLATE RESPONS PER SKENARIO
-// ------------------------------------------------------------------
 
 /**
  * Template respons untuk setiap kategori emosional.
@@ -66,21 +64,17 @@ const RESPONSE_TEMPLATES: Record<string, string[]> = {
 
     "Stress kuliah itu nyata, dan kamu berhak buat merasa capek. Tapi jangan lupa istirahat ya. Otak dan tubuh kamu butuh recharge. Kamu bukan mesin, kamu manusia.",
   ],
-}
+};
 
-// ------------------------------------------------------------------
 // DEFAULT RESPONS (FALLBACK)
-// ------------------------------------------------------------------
 
 /**
  * Respons default jika tidak ada template yang cocok.
  */
 const DEFAULT_RESPONSE =
-  "Aku denger kamu. Ceritain aja semuanya, aku disini buat kamu. Kadang dengan berbagi, beban kita jadi terasa lebih ringan."
+  "Aku denger kamu. Ceritain aja semuanya, aku disini buat kamu. Kadang dengan berbagi, beban kita jadi terasa lebih ringan.";
 
-// ------------------------------------------------------------------
 // GENERATE RESPONS BERDASARKAN CHUNKS
-// ------------------------------------------------------------------
 
 /**
  * Memilih template respons yang paling sesuai berdasarkan chunks.
@@ -93,39 +87,35 @@ const DEFAULT_RESPONSE =
  * @param relevantChunks - Chunks yang diretrieve dari RAG
  * @returns Respons teks
  */
-export function generateMockResponse(
-  relevantChunks: Chunk[]
-): string {
+export function generateMockResponse(relevantChunks: Chunk[]): string {
   // Jika tidak ada chunk, gunakan default
   if (relevantChunks.length === 0) {
-    return DEFAULT_RESPONSE
+    return DEFAULT_RESPONSE;
   }
 
   // Ambil topik dari chunk dengan score tertinggi
-  const primaryTopic = relevantChunks[0]?.metadata?.topic || "unknown"
+  const primaryTopic = relevantChunks[0]?.metadata?.topic || "unknown";
 
   // Cari template yang sesuai
-  const templates = RESPONSE_TEMPLATES[primaryTopic]
+  const templates = RESPONSE_TEMPLATES[primaryTopic];
 
   if (!templates || templates.length === 0) {
     // Fallback: cari berdasarkan emosi
-    const primaryEmotion = relevantChunks[0]?.metadata?.emotion?.[0]
+    const primaryEmotion = relevantChunks[0]?.metadata?.emotion?.[0];
     for (const [topic, responses] of Object.entries(RESPONSE_TEMPLATES)) {
       if (topic === primaryEmotion) {
-        return responses[0]
+        return responses[0];
       }
     }
-    return DEFAULT_RESPONSE
+    return DEFAULT_RESPONSE;
   }
 
   // Pilih variasi template secara acak
-  const randomIndex = Math.floor(Math.random() * templates.length)
-  return templates[randomIndex]
+  const randomIndex = Math.floor(Math.random() * templates.length);
+  return templates[randomIndex];
 }
 
-// ------------------------------------------------------------------
 // STREAMING MOCK
-// ------------------------------------------------------------------
 
 /**
  * Mensimulasikan streaming respons token-by-token.
@@ -137,24 +127,22 @@ export function generateMockResponse(
 export async function mockStreamResponse(
   text: string,
   onToken: (token: string) => void,
-  delay: number = TEST_CONFIG.mockLLM.streamingDelay
+  delay: number = TEST_CONFIG.mockLLM.streamingDelay,
 ): Promise<void> {
   // Split menjadi kata-kata
-  const words = text.split(" ")
+  const words = text.split(" ");
 
   for (let i = 0; i < words.length; i++) {
-    const token = words[i] + (i < words.length - 1 ? " " : "")
-    onToken(token)
+    const token = words[i] + (i < words.length - 1 ? " " : "");
+    onToken(token);
 
     if (delay > 0) {
-      await new Promise((resolve) => setTimeout(resolve, delay))
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 }
 
-// ------------------------------------------------------------------
 // MOCK FUNGSI UTAMA
-// ------------------------------------------------------------------
 
 /**
  * Mock untuk fungsi ragQueryStream.
@@ -173,17 +161,17 @@ export async function mockStreamResponse(
 export async function mockRagQueryStream(
   userQuery: string,
   relevantChunks: Chunk[],
-  onToken?: (token: string) => void
+  onToken?: (token: string) => void,
 ): Promise<{ answer: string }> {
   // Generate respons berdasarkan chunks
-  const fullResponse = generateMockResponse(relevantChunks)
+  const fullResponse = generateMockResponse(relevantChunks);
 
   // Jika ada callback streaming, kirim token
   if (onToken) {
-    await mockStreamResponse(fullResponse, onToken)
+    await mockStreamResponse(fullResponse, onToken);
   }
 
-  return { answer: fullResponse }
+  return { answer: fullResponse };
 }
 
 /**
@@ -253,7 +241,7 @@ export function getDeterministicResponse(scenarioId: string): string {
 
     // Keluarga
     keluarga_001:
-      "Konflik sama orang tua emang berat banget ya. Apalagi kalo kita merasa ga didenger. Tapi wajar kok kalo kamu punya keinginan buat hidup sesuai cara kamu sendiri. Ceritain lebih lanjut dong, gimana perasaan kamu?", 
+      "Konflik sama orang tua emang berat banget ya. Apalagi kalo kita merasa ga didenger. Tapi wajar kok kalo kamu punya keinginan buat hidup sesuai cara kamu sendiri. Ceritain lebih lanjut dong, gimana perasaan kamu?",
 
     keluarga_002:
       "Perasaan kamu valid banget. Perceraian orang tua itu berat buat siapapun, dan pasti ada rasa sedih, bingung, bahkan mungkin salah. Tapi inget ya, ini bukan salah kamu. Kamu berhak bahagia.",
@@ -304,7 +292,7 @@ export function getDeterministicResponse(scenarioId: string): string {
 
     loneliness_004:
       "Kehilangan kontak sama sahabat lama itu sedih banget ya. Apalagi kalo dulu deket banget. Tapi kenangan indah kalian ga akan hilang. Dan mungkin nanti akan ada koneksi baru yang sama berartinya.",
-  }
+  };
 
-  return deterministicResponses[scenarioId] || DEFAULT_RESPONSE
+  return deterministicResponses[scenarioId] || DEFAULT_RESPONSE;
 }

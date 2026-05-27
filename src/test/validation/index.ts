@@ -1,6 +1,4 @@
-// ============================================================
 // VALIDATION MODULE — Final validation system for skripsi
-// ============================================================
 
 export type {
   ValidationLevel,

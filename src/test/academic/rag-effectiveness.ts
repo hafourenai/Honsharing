@@ -1,8 +1,6 @@
 /**
- * ============================================================
- * RAG EFFECTIVENESS ANALYSIS — ANALISIS EFEKTIVITAS RAG
- * ============================================================
- *
+  * RAG EFFECTIVENESS ANALYSIS — ANALISIS EFEKTIVITAS RAG
+  *
  * Menganalisis seberapa efektif Retrieval-Augmented Generation
  * dalam meningkatkan kualitas respons chatbot curhat.
  *
@@ -14,14 +12,11 @@
  *
  * @author  Tim Skripsi
  * @version 1.0
- * ============================================================
- */
+  */
 
 import { RealComparisonSummary, RealComparisonResult } from "@/test/types"
 
-// ================================================================
 // TIPE DATA
-// ================================================================
 
 export interface RAGEffectivenessReport {
   /** Ringkasan eksekutif */
@@ -54,9 +49,7 @@ export interface ScenarioRAGAnalysis {
   interpretation: string
 }
 
-// ================================================================
 // ANALISIS UTAMA
-// ================================================================
 
 /**
  * Menghasilkan analisis lengkap efektivitas RAG dari hasil
@@ -124,9 +117,7 @@ export function analyzeRAGEffectiveness(
   }
 }
 
-// ================================================================
 // ANALISIS PER SKENARIO
-// ================================================================
 
 function analyzeSingleScenario(
   result: RealComparisonResult
@@ -178,9 +169,7 @@ function analyzeSingleScenario(
   }
 }
 
-// ================================================================
 // RINGKASAN EKSEKUTIF
-// ================================================================
 
 function generateExecutiveSummary(
   avgRag: number,
@@ -210,9 +199,7 @@ function generateExecutiveSummary(
   )
 }
 
-// ================================================================
 // TABEL PERBANDINGAN
-// ================================================================
 
 export function generateRAGEffectivenessTable(
   report: RAGEffectivenessReport
@@ -252,9 +239,7 @@ export function generateScenarioImprovementTable(
   return lines.join("\n")
 }
 
-// ================================================================
 // INTERPRETASI AKADEMIK LENGKAP
-// ================================================================
 
 export function generateAcademicInterpretationRAG(
   report: RAGEffectivenessReport
@@ -296,9 +281,7 @@ export function generateAcademicInterpretationRAG(
   return parts.join("\n")
 }
 
-// ================================================================
 // EXPORT CSV
-// ================================================================
 
 export function generateRAGComparisonCSV(
   analyses: ScenarioRAGAnalysis[]

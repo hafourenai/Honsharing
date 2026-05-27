@@ -1,7 +1,5 @@
 /**
- * ============================================================
  * RESEARCH METHODOLOGY — PENJELASAN METODOLOGI PENELITIAN
- * ============================================================
  *
  * Menghasilkan dokumentasi formal tentang metodologi penelitian
  * yang digunakan dalam evaluasi chatbot curhat.
@@ -13,14 +11,11 @@
  *
  * @author  Tim Skripsi
  * @version 1.0
- * ============================================================
  */
 
 import { TestScenario } from "@/test/types"
 
-// ================================================================
 // GENERATE METODOLOGI LENGKAP
-// ================================================================
 
 export function generateMetodologiPenelitian(
   scenarios: TestScenario[]
@@ -131,9 +126,7 @@ export function generateMetodologiPenelitian(
   )
 }
 
-// ================================================================
 // GENERATE RINGKASAN METODE
-// ================================================================
 
 export function generateRingkasanMetode(): string {
   return (
@@ -154,9 +147,7 @@ export function generateRingkasanMetode(): string {
   )
 }
 
-// ================================================================
 // GENERATE PENJELASAN TEKNIK
-// ================================================================
 
 export function generatePenjelasanTeknik(): string {
   return (

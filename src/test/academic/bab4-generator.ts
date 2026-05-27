@@ -1,25 +1,8 @@
 /**
- * ============================================================
  * BAB 4 GENERATOR — HASIL PENELITIAN & PEMBAHASAN
- * ============================================================
- *
- * Generator markdown otomatis untuk BAB 4 skripsi.
- * Mengintegrasikan seluruh komponen akademik untuk menghasilkan
- * laporan penelitian yang lengkap dan siap digunakan.
- *
- * STRUKTUR BAB 4:
- * 4.1 Skenario Pengujian
- * 4.2 Metode Evaluasi
- * 4.3 Hasil Pengujian Similarity
- * 4.4 Hasil Pengujian Empathy
- * 4.5 Hasil Retrieval RAG
- * 4.6 Perbandingan RAG dan Non-RAG
- * 4.7 Analisis Kegagalan Sistem
- * 4.8 Kesimpulan Pengujian
  *
  * @author  Tim Skripsi
  * @version 1.0
- * ============================================================
  */
 
 import { TestScenario, EvaluationSession, RealComparisonSummary, MultiTurnSummary, FailureAnalysis } from "@/test/types"
@@ -37,9 +20,7 @@ import { generateAcademicFailureReport, AcademicFailureReport } from "./failure-
 import { generateAutoConclusion, AutoConclusion } from "./auto-conclusion"
 import { generateSummaryDashboard, SummaryDashboard } from "./evaluation-summary"
 
-// ================================================================
 // TIPE DATA OUTPUT
-// ================================================================
 
 export interface Bab4Output {
   /** Markdown lengkap BAB 4 */
@@ -50,9 +31,7 @@ export interface Bab4Output {
   abstraksi: string
 }
 
-// ================================================================
 // GENERATE BAB 4 LENGKAP
-// ================================================================
 
 /**
  * Menghasilkan markdown BAB 4 lengkap.
@@ -117,9 +96,7 @@ export function generateBab4(
   }
 }
 
-// ================================================================
 // 4.1 SKENARIO PENGUJIAN
-// ================================================================
 
 function generateBab41(scenarios: TestScenario[], stats: ResearchStats): string {
   const catMap = new Map<string, TestScenario[]>()
@@ -169,9 +146,7 @@ function generateBab41(scenarios: TestScenario[], stats: ResearchStats): string 
   return lines.join("\n")
 }
 
-// ================================================================
 // 4.2 METODE EVALUASI
-// ================================================================
 
 function generateBab42(): string {
   return (
@@ -205,9 +180,7 @@ function generateBab42(): string {
   )
 }
 
-// ================================================================
 // 4.3 HASIL SIMILARITY
-// ================================================================
 
 function generateBab43(session: EvaluationSession, stats: ResearchStats): string {
   const s = session.summary
@@ -241,9 +214,7 @@ function generateBab43(session: EvaluationSession, stats: ResearchStats): string
   return lines.join("\n")
 }
 
-// ================================================================
 // 4.4 HASIL EMPATI
-// ================================================================
 
 function generateBab44(session: EvaluationSession, stats: ResearchStats): string {
   const s = session.summary
@@ -272,9 +243,7 @@ function generateBab44(session: EvaluationSession, stats: ResearchStats): string
   )
 }
 
-// ================================================================
 // 4.5 HASIL RETRIEVAL
-// ================================================================
 
 function generateBab45(session: EvaluationSession, stats: ResearchStats): string {
   const s = session.summary
@@ -308,9 +277,7 @@ function generateBab45(session: EvaluationSession, stats: ResearchStats): string
   )
 }
 
-// ================================================================
 // 4.6 PERBANDINGAN RAG DAN NON-RAG
-// ================================================================
 
 function generateBab46(ragComparison?: RealComparisonSummary): string {
   if (!ragComparison) {
@@ -344,9 +311,7 @@ function generateBab46(ragComparison?: RealComparisonSummary): string {
   return lines.join("\n")
 }
 
-// ================================================================
 // 4.7 ANALISIS KEGAGALAN
-// ================================================================
 
 function generateBab47(failures: FailureAnalysis[]): string {
   if (failures.length === 0) {
@@ -386,9 +351,7 @@ function generateBab47(failures: FailureAnalysis[]): string {
   return lines.join("\n")
 }
 
-// ================================================================
 // 4.8 KESIMPULAN PENGUJIAN
-// ================================================================
 
 function generateBab48(
   conclusion: AutoConclusion,
@@ -435,9 +398,7 @@ function generateBab48(
   return lines.join("\n")
 }
 
-// ================================================================
 // ABSTRAKSI / RINGKASAN
-// ================================================================
 
 function generateAbstraksi(
   stats: ResearchStats,

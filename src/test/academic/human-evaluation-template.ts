@@ -1,7 +1,5 @@
 /**
- * ============================================================
  * HUMAN EVALUATION TEMPLATE — TEMPLATE EVALUASI MANUSIA
- * ============================================================
  *
  * Menghasilkan template evaluasi manual untuk responden
  * manusia dengan skala Likert 1-5.
@@ -17,14 +15,11 @@
  *
  * @author  Tim Skripsi
  * @version 1.0
- * ============================================================
  */
 
 import { TestScenario } from "@/test/types"
 
-// ================================================================
 // TIPE DATA
-// ================================================================
 
 export interface HumanEvaluationQuestion {
   /** ID pertanyaan */
@@ -59,9 +54,7 @@ export interface HumanEvaluationForm {
   suggestionField: string
 }
 
-// ================================================================
 // KONSTANTA
-// ================================================================
 
 const LIKERT_LABELS: [string, string, string, string, string] = [
   "Sangat Tidak Setuju",
@@ -71,9 +64,7 @@ const LIKERT_LABELS: [string, string, string, string, string] = [
   "Sangat Setuju",
 ]
 
-// ================================================================
 // GENERATE TEMPLATE
-// ================================================================
 
 /**
  * Menghasilkan template evaluasi manusia untuk responden.
@@ -161,9 +152,7 @@ export function generateHumanEvaluationTemplate(
   }
 }
 
-// ================================================================
 // QUESTIONS PER SKENARIO
-// ================================================================
 
 function generateQuestionsForScenario(
   scenario: TestScenario
@@ -207,9 +196,7 @@ function generateQuestionsForScenario(
   ]
 }
 
-// ================================================================
 // GENERATE MARKDOWN (PRINTABLE)
-// ================================================================
 
 export function generateHumanEvalMarkdown(
   form: HumanEvaluationForm
@@ -304,9 +291,7 @@ export function generateHumanEvalMarkdown(
   return lines.join("\n")
 }
 
-// ================================================================
 // GENERATE JSON
-// ================================================================
 
 export function generateHumanEvalJSON(
   form: HumanEvaluationForm
@@ -314,9 +299,7 @@ export function generateHumanEvalJSON(
   return JSON.stringify(form, null, 2)
 }
 
-// ================================================================
 // HELPERS
-// ================================================================
 
 function truncate(text: string, max: number): string {
   if (text.length <= max) return text

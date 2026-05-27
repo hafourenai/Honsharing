@@ -152,9 +152,7 @@ export function generateOutlierMarkdown(result: OutlierResult): string {
   return lines.join("\n")
 }
 
-// ================================================================
 // HELPERS
-// ================================================================
 
 function avg(values: number[]): number {
   return values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0

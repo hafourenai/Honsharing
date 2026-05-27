@@ -10,9 +10,7 @@ import {
   QualityLabel,
 } from "@/test/types"
 
-// ================================================================
 // TIPE VALIDASI
-// ================================================================
 
 export type ValidationLevel = "NORMAL" | "WARNING" | "CRITICAL"
 

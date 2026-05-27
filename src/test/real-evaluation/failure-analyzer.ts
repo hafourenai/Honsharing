@@ -28,13 +28,11 @@ import {
   QualityLabel,
   TestScenario,
   RetrievedChunkInfo,
-} from "@/test/types"
-import { textCosineSimilarity } from "@/test/types/utils/cosine-similarity"
-import { jaccardSimilarity } from "@/test/types/utils/text-overlap"
+} from "@/test/types";
+import { textCosineSimilarity } from "@/test/types/utils/cosine-similarity";
+import { jaccardSimilarity } from "@/test/types/utils/text-overlap";
 
-// ------------------------------------------------------------------
 // KATA KUNCI UNTUK DETEKSI
-// ------------------------------------------------------------------
 
 /**
  * Frasa yang menunjukkan respons generik/tidak spesifik.
@@ -55,7 +53,7 @@ const GENERIC_MARKERS = [
   "ga usah dipikirin",
   "pasti ada jalan",
   "yang penting kamu",
-]
+];
 
 /**
  * Frasa yang menunjukkan halusinasi ringan.
@@ -73,7 +71,7 @@ const HALLUCINATION_MARKERS = [
   "data menunjukkan",
   "saya sebagai AI",
   "sebagai asisten",
-]
+];
 
 /**
  * Frasa yang menunjukkan mismatch emosional.
@@ -87,7 +85,7 @@ const MISMATCH_POSITIVE = [
   "mantap",
   "keren",
   "happy",
-]
+];
 
 /**
  * Frasa yang harus dihindari untuk konteks sedih/cemas.
@@ -103,11 +101,9 @@ const JUDGEMENTAL_PHRASES = [
   "lemah",
   "males",
   "malas",
-]
+];
 
-// ------------------------------------------------------------------
 // DETEKSI IRRELEVAN
-// ------------------------------------------------------------------
 
 /**
  * Mendeteksi apakah respons tidak relevan dengan input user.
@@ -123,43 +119,44 @@ const JUDGEMENTAL_PHRASES = [
  */
 function detectIrrelevant(
   response: string,
-  userInput: string
+  userInput: string,
 ): { isIrrelevant: boolean; reason?: string } {
-  const cosineSim = textCosineSimilarity(response, userInput)
-  const jaccardSim = jaccardSimilarity(response, userInput)
+  const cosineSim = textCosineSimilarity(response, userInput);
+  const jaccardSim = jaccardSimilarity(response, userInput);
 
   if (cosineSim < 0.1 && jaccardSim < 0.05) {
     return {
       isIrrelevant: true,
       reason: `Cosine similarity sangat rendah (${cosineSim.toFixed(3)}), Jaccard sangat rendah (${jaccardSim.toFixed(3)}). Respons tidak terhubung dengan input user.`,
-    }
+    };
   }
 
   if (cosineSim < 0.2) {
     return {
       isIrrelevant: true,
       reason: `Cosine similarity rendah (${cosineSim.toFixed(3)}). Respons kurang relevan dengan konteks.`,
-    }
+    };
   }
 
   // Cek apakah ada kata dari input dalam respons
-  const inputWords = userInput.toLowerCase().split(/\s+/).filter(w => w.length > 3)
-  const responseLower = response.toLowerCase()
-  const matchedWords = inputWords.filter(w => responseLower.includes(w))
+  const inputWords = userInput
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((w) => w.length > 3);
+  const responseLower = response.toLowerCase();
+  const matchedWords = inputWords.filter((w) => responseLower.includes(w));
 
   if (inputWords.length > 2 && matchedWords.length === 0) {
     return {
       isIrrelevant: true,
       reason: "Tidak ada kata kunci dari input user yang muncul dalam respons.",
-    }
+    };
   }
 
-  return { isIrrelevant: false }
+  return { isIrrelevant: false };
 }
 
-// ------------------------------------------------------------------
 // DETEKSI WRONG CONTEXT
-// ------------------------------------------------------------------
 
 /**
  * Mendeteksi apakah retrieval mengambil konteks yang salah.
@@ -174,46 +171,43 @@ function detectIrrelevant(
  */
 function detectWrongContext(
   retrievedChunks: RetrievedChunkInfo[],
-  userInput: string
+  userInput: string,
 ): { isWrongContext: boolean; reason?: string } {
   if (retrievedChunks.length === 0) {
     return {
       isWrongContext: true,
       reason: "Tidak ada chunk yang diretrieve (retrieved context kosong).",
-    }
+    };
   }
 
-  const inputLower = userInput.toLowerCase()
+  const inputLower = userInput.toLowerCase();
 
   // Cek apakah chunk teratas relevan
-  const topChunk = retrievedChunks[0]
-  const chunkText = `${topChunk.topic} ${topChunk.situation}`
-  const similarity = textCosineSimilarity(chunkText, userInput)
+  const topChunk = retrievedChunks[0];
+  const chunkText = `${topChunk.topic} ${topChunk.situation}`;
+  const similarity = textCosineSimilarity(chunkText, userInput);
 
   if (similarity < 0.15 && topChunk.similarityScore < 0.3) {
     return {
       isWrongContext: true,
       reason: `Chunk teratas "${topChunk.topic}" memiliki similarity rendah (${similarity.toFixed(3)}) dengan input user. Retrieval tidak mengambil konteks yang tepat.`,
-    }
+    };
   }
 
   // Cek apakah ada chunk yang relevan
-  const relevantChunks = retrievedChunks.filter(
-    (c) => c.similarityScore > 0.3
-  )
+  const relevantChunks = retrievedChunks.filter((c) => c.similarityScore > 0.3);
   if (relevantChunks.length === 0) {
     return {
       isWrongContext: true,
-      reason: "Tidak ada chunk dengan similarity score di atas 0.3. Semua chunk yang diretrieve memiliki relevansi rendah.",
-    }
+      reason:
+        "Tidak ada chunk dengan similarity score di atas 0.3. Semua chunk yang diretrieve memiliki relevansi rendah.",
+    };
   }
 
-  return { isWrongContext: false }
+  return { isWrongContext: false };
 }
 
-// ------------------------------------------------------------------
 // DETEKSI GENERIC RESPONSE
-// ------------------------------------------------------------------
 
 /**
  * Mendeteksi apakah respons terlalu generic.
@@ -221,15 +215,16 @@ function detectWrongContext(
  * @param response - Respons chatbot
  * @returns { isGeneric, reason }
  */
-function detectGenericResponse(
-  response: string
-): { isGeneric: boolean; reason?: string } {
-  const responseLower = response.toLowerCase()
-  const matchedGeneric: string[] = []
+function detectGenericResponse(response: string): {
+  isGeneric: boolean;
+  reason?: string;
+} {
+  const responseLower = response.toLowerCase();
+  const matchedGeneric: string[] = [];
 
   for (const marker of GENERIC_MARKERS) {
     if (responseLower.includes(marker)) {
-      matchedGeneric.push(marker)
+      matchedGeneric.push(marker);
     }
   }
 
@@ -237,26 +232,24 @@ function detectGenericResponse(
     return {
       isGeneric: true,
       reason: `Respons mengandung ${matchedGeneric.length} frasa generik: ${matchedGeneric.slice(0, 3).join(", ")}. Jawaban terlalu umum.`,
-    }
+    };
   }
 
   if (matchedGeneric.length >= 1) {
     // Cek panjang respons — respons pendek + generic = sangat generik
-    const wordCount = response.split(/\s+/).length
+    const wordCount = response.split(/\s+/).length;
     if (wordCount < 15) {
       return {
         isGeneric: true,
         reason: `Respons pendek (${wordCount} kata) dan mengandung frasa generik "${matchedGeneric[0]}".`,
-      }
+      };
     }
   }
 
-  return { isGeneric: false }
+  return { isGeneric: false };
 }
 
-// ------------------------------------------------------------------
 // DETEKSI HALLUCINATION
-// ------------------------------------------------------------------
 
 /**
  * Mendeteksi halusinasi ringan dalam respons.
@@ -264,15 +257,16 @@ function detectGenericResponse(
  * @param response - Respons chatbot
  * @returns { isHallucination, evidence }
  */
-function detectHallucination(
-  response: string
-): { isHallucination: boolean; evidence?: string } {
-  const responseLower = response.toLowerCase()
-  const matchedHallucination: string[] = []
+function detectHallucination(response: string): {
+  isHallucination: boolean;
+  evidence?: string;
+} {
+  const responseLower = response.toLowerCase();
+  const matchedHallucination: string[] = [];
 
   for (const marker of HALLUCINATION_MARKERS) {
     if (responseLower.includes(marker)) {
-      matchedHallucination.push(marker)
+      matchedHallucination.push(marker);
     }
   }
 
@@ -280,15 +274,13 @@ function detectHallucination(
     return {
       isHallucination: true,
       evidence: `Respons mengandung frasa yang tidak seharusnya: ${matchedHallucination.join(", ")}. Chatbot curhat tidak boleh memberikan saran medis.`,
-    }
+    };
   }
 
-  return { isHallucination: false }
+  return { isHallucination: false };
 }
 
-// ------------------------------------------------------------------
 // DETEKSI EMOTIONAL MISMATCH
-// ------------------------------------------------------------------
 
 /**
  * Mendeteksi apakah konteks emosional respons tidak nyambung.
@@ -304,21 +296,21 @@ function detectHallucination(
  */
 function detectEmotionalMismatch(
   response: string,
-  scenario: TestScenario
+  scenario: TestScenario,
 ): { isMismatch: boolean; evidence?: string } {
-  const responseLower = response.toLowerCase()
-  const responseWords = responseLower.split(/\s+/)
+  const responseLower = response.toLowerCase();
+  const responseWords = responseLower.split(/\s+/);
 
   // Cek kata judgemental
   const matchedJudgemental = JUDGEMENTAL_PHRASES.filter((p) =>
-    responseLower.includes(p)
-  )
+    responseLower.includes(p),
+  );
 
   if (matchedJudgemental.length > 0) {
     return {
       isMismatch: true,
       evidence: `Respons mengandung kata judgemental: ${matchedJudgemental.join(", ")}. Chatbot menghakimi perasaan user.`,
-    }
+    };
   }
 
   // Cek apakah respons terlalu positif untuk skenario negatif
@@ -329,43 +321,41 @@ function detectEmotionalMismatch(
     "keluarga",
     "burnout",
     "loneliness",
-  ]
-  const isNegativeScenario = negativeScenarios.includes(scenario.category)
+  ];
+  const isNegativeScenario = negativeScenarios.includes(scenario.category);
 
   if (isNegativeScenario) {
     const positiveCount = MISMATCH_POSITIVE.filter((p) =>
-      responseLower.includes(p)
-    ).length
+      responseLower.includes(p),
+    ).length;
 
     if (positiveCount >= 2) {
       return {
         isMismatch: true,
         evidence: `Respons terlalu positif (${positiveCount} kata positif) untuk skenario negatif (${scenario.category}). User butuh validasi, bukan optimisme berlebihan.`,
-      }
+      };
     }
   }
 
   // Cek apakah respons sesuai dengan arah emosional
   const emotionalDirections = scenario.expectedEmotionalDirection.map((d) =>
-    d.toLowerCase()
-  )
+    d.toLowerCase(),
+  );
   const matchedDirections = emotionalDirections.filter((d) =>
-    responseLower.includes(d)
-  )
+    responseLower.includes(d),
+  );
 
   if (matchedDirections.length === 0) {
     return {
       isMismatch: true,
       evidence: `Respons tidak mengandung arah emosional yang diharapkan (${scenario.expectedEmotionalDirection.join(", ")}). Konteks emosional tidak nyambung.`,
-    }
+    };
   }
 
-  return { isMismatch: false }
+  return { isMismatch: false };
 }
 
-// ------------------------------------------------------------------
 // MAIN FAILURE ANALYSIS
-// ------------------------------------------------------------------
 
 /**
  * Menganalisis kegagalan respons chatbot secara lengkap.
@@ -378,38 +368,40 @@ function detectEmotionalMismatch(
 export function analyzeFailures(
   response: string,
   scenario: TestScenario,
-  retrievedChunks?: RetrievedChunkInfo[]
+  retrievedChunks?: RetrievedChunkInfo[],
 ): FailureAnalysis {
   // Deteksi berbagai jenis kegagalan
-  const irrelevant = detectIrrelevant(response, scenario.userInput)
+  const irrelevant = detectIrrelevant(response, scenario.userInput);
   const wrongContext = retrievedChunks
     ? detectWrongContext(retrievedChunks, scenario.userInput)
-    : { isWrongContext: false }
-  const generic = detectGenericResponse(response)
-  const hallucination = detectHallucination(response)
-  const mismatch = scenario ? detectEmotionalMismatch(response, scenario) : { isMismatch: false }
+    : { isWrongContext: false };
+  const generic = detectGenericResponse(response);
+  const hallucination = detectHallucination(response);
+  const mismatch = scenario
+    ? detectEmotionalMismatch(response, scenario)
+    : { isMismatch: false };
 
   // Hitung skor kualitas
-  let qualityScore = 100
+  let qualityScore = 100;
 
-  if (irrelevant.isIrrelevant) qualityScore -= 30
-  if (wrongContext.isWrongContext) qualityScore -= 20
-  if (generic.isGeneric) qualityScore -= 15
-  if (hallucination.isHallucination) qualityScore -= 25
-  if (mismatch.isMismatch) qualityScore -= 20
+  if (irrelevant.isIrrelevant) qualityScore -= 30;
+  if (wrongContext.isWrongContext) qualityScore -= 20;
+  if (generic.isGeneric) qualityScore -= 15;
+  if (hallucination.isHallucination) qualityScore -= 25;
+  if (mismatch.isMismatch) qualityScore -= 20;
 
-  qualityScore = Math.max(0, qualityScore)
+  qualityScore = Math.max(0, qualityScore);
 
   // Tentukan label
-  let label: QualityLabel
+  let label: QualityLabel;
   if (qualityScore >= 80) {
-    label = "GOOD"
+    label = "GOOD";
   } else if (qualityScore >= 60) {
-    label = "ACCEPTABLE"
+    label = "ACCEPTABLE";
   } else if (qualityScore >= 40) {
-    label = "WEAK"
+    label = "WEAK";
   } else {
-    label = "FAILED"
+    label = "FAILED";
   }
 
   return {
@@ -429,12 +421,10 @@ export function analyzeFailures(
       mismatchEvidence: mismatch.evidence,
     },
     qualityScore,
-  }
+  };
 }
 
-// ------------------------------------------------------------------
 // GENERATE FAILURE TABLE (MARKDOWN)
-// ------------------------------------------------------------------
 
 /**
  * Menghasilkan tabel analisis kegagalan dalam format Markdown.
@@ -442,21 +432,23 @@ export function analyzeFailures(
  * @param analyses - Array hasil analisis kegagalan
  * @returns String markdown
  */
-export function generateFailureTable(
-  analyses: FailureAnalysis[]
-): string {
-  const lines: string[] = []
+export function generateFailureTable(analyses: FailureAnalysis[]): string {
+  const lines: string[] = [];
 
-  lines.push(`### Analisis Kegagalan Respons`)
-  lines.push(``)
-  lines.push(`| Skenario | Label | Skor | Irrelevan | Salah Konteks | Generik | Halusinasi | Mismatch |`)
-  lines.push(`|----------|-------|------|-----------|---------------|---------|------------|----------|`)
+  lines.push(`### Analisis Kegagalan Respons`);
+  lines.push(``);
+  lines.push(
+    `| Skenario | Label | Skor | Irrelevan | Salah Konteks | Generik | Halusinasi | Mismatch |`,
+  );
+  lines.push(
+    `|----------|-------|------|-----------|---------------|---------|------------|----------|`,
+  );
   for (const a of analyses) {
     lines.push(
-      `| ${a.scenarioName} | ${a.label} | ${a.qualityScore} | ${a.isIrrelevant ? "⚠️" : "✅"} | ${a.isWrongContext ? "⚠️" : "✅"} | ${a.isGenericResponse ? "⚠️" : "✅"} | ${a.isHallucination ? "⚠️" : "✅"} | ${a.isEmotionalMismatch ? "⚠️" : "✅"} |`
-    )
+      `| ${a.scenarioName} | ${a.label} | ${a.qualityScore} | ${a.isIrrelevant ? "⚠️" : "✅"} | ${a.isWrongContext ? "⚠️" : "✅"} | ${a.isGenericResponse ? "⚠️" : "✅"} | ${a.isHallucination ? "⚠️" : "✅"} | ${a.isEmotionalMismatch ? "⚠️" : "✅"} |`,
+    );
   }
-  lines.push(``)
+  lines.push(``);
 
   // Ringkasan distribusi label
   const labelCount: Record<QualityLabel, number> = {
@@ -464,33 +456,36 @@ export function generateFailureTable(
     ACCEPTABLE: 0,
     WEAK: 0,
     FAILED: 0,
-  }
+  };
   for (const a of analyses) {
-    labelCount[a.label]++
+    labelCount[a.label]++;
   }
 
-  lines.push(`**Distribusi Label:**`)
-  lines.push(``)
-  lines.push(`| Label | Jumlah | Persentase |`)
-  lines.push(`|-------|--------|------------|`)
+  lines.push(`**Distribusi Label:**`);
+  lines.push(``);
+  lines.push(`| Label | Jumlah | Persentase |`);
+  lines.push(`|-------|--------|------------|`);
   for (const [label, count] of Object.entries(labelCount)) {
-    const pct = analyses.length > 0
-      ? ((count / analyses.length) * 100).toFixed(1)
-      : "0.0"
-    lines.push(`| ${label} | ${count} | ${pct}% |`)
+    const pct =
+      analyses.length > 0
+        ? ((count / analyses.length) * 100).toFixed(1)
+        : "0.0";
+    lines.push(`| ${label} | ${count} | ${pct}% |`);
   }
-  lines.push(``)
+  lines.push(``);
 
   // Skenario yang gagal
-  const failed = analyses.filter((a) => a.label === "FAILED")
+  const failed = analyses.filter((a) => a.label === "FAILED");
   if (failed.length > 0) {
-    lines.push(`**Skenario Gagal (FAILED):**`)
-    lines.push(``)
+    lines.push(`**Skenario Gagal (FAILED):**`);
+    lines.push(``);
     for (const f of failed) {
-      lines.push(`- **${f.scenarioName}**: ${f.details.irrelevantReason || f.details.wrongContextReason || f.details.genericReason || f.details.hallucinationEvidence || f.details.mismatchEvidence || "Alasan tidak diketahui"}`)
+      lines.push(
+        `- **${f.scenarioName}**: ${f.details.irrelevantReason || f.details.wrongContextReason || f.details.genericReason || f.details.hallucinationEvidence || f.details.mismatchEvidence || "Alasan tidak diketahui"}`,
+      );
     }
-    lines.push(``)
+    lines.push(``);
   }
 
-  return lines.join("\n")
+  return lines.join("\n");
 }

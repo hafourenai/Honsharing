@@ -7,9 +7,7 @@ import {
   QualityLabel,
 } from "@/test/types"
 
-// ================================================================
 // TIPE DATA STATISTIK
-// ================================================================
 
 export interface ResearchStats {
   totalScenarios: number
@@ -40,9 +38,7 @@ export interface CategoryStats {
   distribution: Record<QualityLabel, number>
 }
 
-// ================================================================
 // HITUNG STATISTIK
-// ================================================================
 
 export function calculateResearchStats(
   session: EvaluationSession,
@@ -123,9 +119,7 @@ export function calculateResearchStats(
   }
 }
 
-// ================================================================
 // TABEL MARKDOWN
-// ================================================================
 
 export function generateStatsTable(stats: ResearchStats): string {
   const lines: string[] = []
@@ -174,17 +168,13 @@ export function generateCategoryBreakdownTable(categories: CategoryStats[]): str
   return lines.join("\n")
 }
 
-// ================================================================
 // SUMMARY JSON
-// ================================================================
 
 export function generateStatsJSON(stats: ResearchStats): string {
   return JSON.stringify(stats, null, 2)
 }
 
-// ================================================================
 // CSV EXPORT
-// ================================================================
 
 export function generateStatsCSV(stats: ResearchStats): string {
   const rows: string[] = []

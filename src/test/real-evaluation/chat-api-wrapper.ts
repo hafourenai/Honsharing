@@ -23,11 +23,9 @@
  * ============================================================
  */
 
-import { ChatApiConfig, ChatApiResponse } from "@/test/types"
+import { ChatApiConfig, ChatApiResponse } from "@/test/types";
 
-// ------------------------------------------------------------------
 // DEFAULT CONFIGURATION
-// ------------------------------------------------------------------
 
 const DEFAULT_CONFIG: ChatApiConfig = {
   baseUrl: "http://localhost:3000",
@@ -35,11 +33,9 @@ const DEFAULT_CONFIG: ChatApiConfig = {
   maxRetries: 3,
   retryDelay: 1000, // 1 detik
   mode: "santai",
-}
+};
 
-// ------------------------------------------------------------------
 // CREATE SESSION
-// ------------------------------------------------------------------
 
 /**
  * Membuat sesi baru untuk autentikasi.
@@ -49,36 +45,34 @@ const DEFAULT_CONFIG: ChatApiConfig = {
  * @returns Session cookie string, atau null jika gagal
  */
 export async function createSession(
-  config: ChatApiConfig = DEFAULT_CONFIG
+  config: ChatApiConfig = DEFAULT_CONFIG,
 ): Promise<string | null> {
   try {
     const response = await fetch(`${config.baseUrl}/api/auth/session`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       signal: AbortSignal.timeout(5000),
-    })
+    });
 
     if (!response.ok) {
-      console.warn(`[ChatAPI] Gagal membuat session: ${response.status}`)
-      return null
+      console.warn(`[ChatAPI] Gagal membuat session: ${response.status}`);
+      return null;
     }
 
     // Ambil cookie dari response headers
-    const setCookie = response.headers.get("set-cookie")
+    const setCookie = response.headers.get("set-cookie");
     if (setCookie) {
-      return setCookie.split(";")[0] // Ambil cookie name=value saja
+      return setCookie.split(";")[0]; // Ambil cookie name=value saja
     }
 
-    return null
+    return null;
   } catch (error) {
-    console.warn(`[ChatAPI] Error membuat session: ${error}`)
-    return null
+    console.warn(`[ChatAPI] Error membuat session: ${error}`);
+    return null;
   }
 }
 
-// ------------------------------------------------------------------
 // PARSE SSE STREAM
-// ------------------------------------------------------------------
 
 /**
  * Parse Server-Sent Events stream dari response endpoint chat.
@@ -92,54 +86,52 @@ export async function createSession(
  */
 async function parseSSEStream(
   response: Response,
-  onToken?: (token: string) => void
+  onToken?: (token: string) => void,
 ): Promise<string> {
-  const reader = response.body!.getReader()
-  const decoder = new TextDecoder()
-  let fullText = ""
-  let buffer = ""
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+  let fullText = "";
+  let buffer = "";
 
   while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
+    const { done, value } = await reader.read();
+    if (done) break;
 
-    buffer += decoder.decode(value, { stream: true })
-    const lines = buffer.split("\n")
-    buffer = lines.pop() || "" // Sisakan buffer yang belum lengkap
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || ""; // Sisakan buffer yang belum lengkap
 
     for (const line of lines) {
-      const trimmed = line.trim()
-      if (!trimmed.startsWith("data: ")) continue
+      const trimmed = line.trim();
+      if (!trimmed.startsWith("data: ")) continue;
 
       try {
-        const data = JSON.parse(trimmed.slice(6))
+        const data = JSON.parse(trimmed.slice(6));
         if (data.type === "token" && data.content) {
-          fullText += data.content
-          if (onToken) onToken(data.content)
+          fullText += data.content;
+          if (onToken) onToken(data.content);
         }
         if (data.type === "done") {
           // Selesai
         }
         if (data.type === "error") {
-          console.error(`[ChatAPI] Error dari server:`, data.content)
+          console.error(`[ChatAPI] Error dari server:`, data.content);
         }
       } catch {
         // Jika bukan JSON, anggap sebagai teks biasa
-        const text = trimmed.slice(6)
+        const text = trimmed.slice(6);
         if (text) {
-          fullText += text
-          if (onToken) onToken(text)
+          fullText += text;
+          if (onToken) onToken(text);
         }
       }
     }
   }
 
-  return fullText
+  return fullText;
 }
 
-// ------------------------------------------------------------------
 // CALL CHAT API
-// ------------------------------------------------------------------
 
 /**
  * Memanggil endpoint /api/chat dengan pesan user.
@@ -160,16 +152,16 @@ export async function callChatApi(
   userMessage: string,
   history?: Array<{ role: string; content: string }>,
   config: ChatApiConfig = DEFAULT_CONFIG,
-  onToken?: (token: string) => void
+  onToken?: (token: string) => void,
 ): Promise<ChatApiResponse> {
-  const startTime = Date.now()
-  let retryCount = 0
-  let lastError: string | null = null
+  const startTime = Date.now();
+  let retryCount = 0;
+  let lastError: string | null = null;
 
   // Dapatkan session cookie
-  let sessionCookie: string | undefined | null = config.sessionCookie
+  let sessionCookie: string | undefined | null = config.sessionCookie;
   if (!sessionCookie) {
-    sessionCookie = await createSession(config)
+    sessionCookie = await createSession(config);
   }
 
   for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
@@ -177,14 +169,14 @@ export async function callChatApi(
       // Bangun pesan
       const messages = history
         ? [...history, { role: "user", content: userMessage }]
-        : [{ role: "user", content: userMessage }]
+        : [{ role: "user", content: userMessage }];
 
       // Header
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
-      }
+      };
       if (sessionCookie) {
-        headers["Cookie"] = sessionCookie
+        headers["Cookie"] = sessionCookie;
       }
 
       // Kirim request
@@ -196,34 +188,34 @@ export async function callChatApi(
           mode: config.mode || "santai",
         }),
         signal: AbortSignal.timeout(config.timeout),
-      })
+      });
 
       // Cek status
       if (!response.ok) {
-        const errorText = await response.text().catch(() => "Unknown error")
-        lastError = `HTTP ${response.status}: ${errorText}`
+        const errorText = await response.text().catch(() => "Unknown error");
+        lastError = `HTTP ${response.status}: ${errorText}`;
 
         if (response.status === 429) {
           // Rate limited — tunggu lebih lama
-          const delay = config.retryDelay * Math.pow(2, attempt) * 2
+          const delay = config.retryDelay * Math.pow(2, attempt) * 2;
           console.warn(
-            `[ChatAPI] Rate limited, menunggu ${delay}ms... (percobaan ${attempt + 1}/${config.maxRetries + 1})`
-          )
-          await new Promise((r) => setTimeout(r, delay))
-          retryCount++
-          continue
+            `[ChatAPI] Rate limited, menunggu ${delay}ms... (percobaan ${attempt + 1}/${config.maxRetries + 1})`,
+          );
+          await new Promise((r) => setTimeout(r, delay));
+          retryCount++;
+          continue;
         }
 
         if (response.status >= 500) {
           // Server error — retry
           console.warn(
-            `[ChatAPI] Server error, retry... (percobaan ${attempt + 1}/${config.maxRetries + 1})`
-          )
+            `[ChatAPI] Server error, retry... (percobaan ${attempt + 1}/${config.maxRetries + 1})`,
+          );
           await new Promise((r) =>
-            setTimeout(r, config.retryDelay * Math.pow(2, attempt))
-          )
-          retryCount++
-          continue
+            setTimeout(r, config.retryDelay * Math.pow(2, attempt)),
+          );
+          retryCount++;
+          continue;
         }
 
         // Client error (400, 401, dll) — jangan retry
@@ -234,11 +226,11 @@ export async function callChatApi(
           error: lastError,
           status: response.status,
           timestamp: new Date().toISOString(),
-        }
+        };
       }
 
       // Parse SSE stream
-      const fullResponse = await parseSSEStream(response, onToken)
+      const fullResponse = await parseSSEStream(response, onToken);
 
       return {
         response: fullResponse,
@@ -247,25 +239,25 @@ export async function callChatApi(
         error: null,
         status: response.status,
         timestamp: new Date().toISOString(),
-      }
+      };
     } catch (error) {
-      lastError = error instanceof Error ? error.message : String(error)
-      retryCount++
+      lastError = error instanceof Error ? error.message : String(error);
+      retryCount++;
 
       if (error instanceof DOMException && error.name === "TimeoutError") {
         console.warn(
-          `[ChatAPI] Timeout, retry... (percobaan ${attempt + 1}/${config.maxRetries + 1})`
-        )
+          `[ChatAPI] Timeout, retry... (percobaan ${attempt + 1}/${config.maxRetries + 1})`,
+        );
       } else {
         console.warn(
-          `[ChatAPI] Error: ${lastError}, retry... (percobaan ${attempt + 1}/${config.maxRetries + 1})`
-        )
+          `[ChatAPI] Error: ${lastError}, retry... (percobaan ${attempt + 1}/${config.maxRetries + 1})`,
+        );
       }
 
       if (attempt < config.maxRetries) {
         await new Promise((r) =>
-          setTimeout(r, config.retryDelay * Math.pow(2, attempt))
-        )
+          setTimeout(r, config.retryDelay * Math.pow(2, attempt)),
+        );
       }
     }
   }
@@ -278,12 +270,10 @@ export async function callChatApi(
     error: lastError || "Max retries exceeded",
     status: 0,
     timestamp: new Date().toISOString(),
-  }
+  };
 }
 
-// ------------------------------------------------------------------
 // CALL EMBED API
-// ------------------------------------------------------------------
 
 /**
  * Memanggil endpoint /api/embed untuk mendapatkan embedding.
@@ -294,7 +284,7 @@ export async function callChatApi(
  */
 export async function callEmbedApi(
   text: string,
-  config: ChatApiConfig = DEFAULT_CONFIG
+  config: ChatApiConfig = DEFAULT_CONFIG,
 ): Promise<number[] | null> {
   try {
     const response = await fetch(`${config.baseUrl}/api/embed`, {
@@ -302,24 +292,22 @@ export async function callEmbedApi(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
       signal: AbortSignal.timeout(10000),
-    })
+    });
 
     if (!response.ok) {
-      console.warn(`[ChatAPI] Embed API error: ${response.status}`)
-      return null
+      console.warn(`[ChatAPI] Embed API error: ${response.status}`);
+      return null;
     }
 
-    const data = await response.json()
-    return data.embedding || data.embeddings || null
+    const data = await response.json();
+    return data.embedding || data.embeddings || null;
   } catch (error) {
-    console.warn(`[ChatAPI] Embed API error: ${error}`)
-    return null
+    console.warn(`[ChatAPI] Embed API error: ${error}`);
+    return null;
   }
 }
 
-// ------------------------------------------------------------------
 // CALL TITLE API
-// ------------------------------------------------------------------
 
 /**
  * Memanggil endpoint /api/title untuk generate judul percakapan.
@@ -330,7 +318,7 @@ export async function callEmbedApi(
  */
 export async function callTitleApi(
   message: string,
-  config: ChatApiConfig = DEFAULT_CONFIG
+  config: ChatApiConfig = DEFAULT_CONFIG,
 ): Promise<string | null> {
   try {
     const response = await fetch(`${config.baseUrl}/api/title`, {
@@ -338,20 +326,18 @@ export async function callTitleApi(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message }),
       signal: AbortSignal.timeout(10000),
-    })
+    });
 
-    if (!response.ok) return null
+    if (!response.ok) return null;
 
-    const data = await response.json()
-    return data.title || data.judul || null
+    const data = await response.json();
+    return data.title || data.judul || null;
   } catch {
-    return null
+    return null;
   }
 }
 
-// ------------------------------------------------------------------
 // PING — CEK APLIKASI BERJALAN
-// ------------------------------------------------------------------
 
 /**
  * Mengecek apakah aplikasi sedang berjalan.
@@ -360,17 +346,17 @@ export async function callTitleApi(
  * @returns true jika aplikasi berjalan
  */
 export async function pingAPI(
-  config: ChatApiConfig = DEFAULT_CONFIG
+  config: ChatApiConfig = DEFAULT_CONFIG,
 ): Promise<boolean> {
   try {
     const response = await fetch(config.baseUrl, {
       method: "GET",
       signal: AbortSignal.timeout(5000),
-    })
-    return response.ok
+    });
+    return response.ok;
   } catch {
-    return false
+    return false;
   }
 }
 
-export { DEFAULT_CONFIG }
+export { DEFAULT_CONFIG };

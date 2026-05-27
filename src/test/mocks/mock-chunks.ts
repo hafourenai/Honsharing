@@ -26,11 +26,9 @@
  * ============================================================
  */
 
-import { Chunk } from "@/lib/rag/promptBuilder"
+import { Chunk } from "@/lib/rag/promptBuilder";
 
-// ------------------------------------------------------------------
 // OVER-THINKING CHUNKS
-// ------------------------------------------------------------------
 
 export const overthinkingChunk1: Chunk = {
   id: "test_overthinking_001",
@@ -65,7 +63,7 @@ export const overthinkingChunk1: Chunk = {
     intensity: "medium",
     topic: "overthinking",
   },
-}
+};
 
 export const overthinkingChunk2: Chunk = {
   id: "test_overthinking_002",
@@ -100,11 +98,9 @@ export const overthinkingChunk2: Chunk = {
     intensity: "medium",
     topic: "overthinking",
   },
-}
+};
 
-// ------------------------------------------------------------------
 // ANXIETY CHUNKS
-// ------------------------------------------------------------------
 
 export const anxietyChunk1: Chunk = {
   id: "test_anxiety_001",
@@ -139,7 +135,7 @@ export const anxietyChunk1: Chunk = {
     intensity: "high",
     topic: "anxiety",
   },
-}
+};
 
 export const anxietyChunk2: Chunk = {
   id: "test_anxiety_002",
@@ -174,11 +170,9 @@ export const anxietyChunk2: Chunk = {
     intensity: "high",
     topic: "anxiety",
   },
-}
+};
 
-// ------------------------------------------------------------------
 // RELATIONSHIP PROBLEM CHUNKS
-// ------------------------------------------------------------------
 
 export const relationshipChunk1: Chunk = {
   id: "test_relationship_001",
@@ -213,7 +207,7 @@ export const relationshipChunk1: Chunk = {
     intensity: "medium-high",
     topic: "relationship",
   },
-}
+};
 
 export const relationshipChunk2: Chunk = {
   id: "test_relationship_002",
@@ -248,11 +242,9 @@ export const relationshipChunk2: Chunk = {
     intensity: "high",
     topic: "relationship",
   },
-}
+};
 
-// ------------------------------------------------------------------
 // LONELINESS CHUNKS
-// ------------------------------------------------------------------
 
 export const lonelinessChunk1: Chunk = {
   id: "test_loneliness_001",
@@ -287,7 +279,7 @@ export const lonelinessChunk1: Chunk = {
     intensity: "medium-high",
     topic: "loneliness",
   },
-}
+};
 
 export const lonelinessChunk2: Chunk = {
   id: "test_loneliness_002",
@@ -322,11 +314,9 @@ export const lonelinessChunk2: Chunk = {
     intensity: "high",
     topic: "loneliness",
   },
-}
+};
 
-// ------------------------------------------------------------------
 // MOTIVATION LOSS CHUNKS
-// ------------------------------------------------------------------
 
 export const motivationChunk1: Chunk = {
   id: "test_motivation_001",
@@ -361,11 +351,9 @@ export const motivationChunk1: Chunk = {
     intensity: "medium",
     topic: "motivation",
   },
-}
+};
 
-// ------------------------------------------------------------------
 // ACADEMIC STRESS CHUNKS
-// ------------------------------------------------------------------
 
 export const stressChunk1: Chunk = {
   id: "test_stress_001",
@@ -400,7 +388,7 @@ export const stressChunk1: Chunk = {
     intensity: "high",
     topic: "academic stress",
   },
-}
+};
 
 export const stressChunk2: Chunk = {
   id: "test_stress_002",
@@ -414,11 +402,7 @@ export const stressChunk2: Chunk = {
   response_strategy: {
     tone: "gentle",
     style: "caring friend",
-    approach: [
-      "validate burnout",
-      "normalize rest",
-      "encourage balance",
-    ],
+    approach: ["validate burnout", "normalize rest", "encourage balance"],
     conversation_pattern: [
       "warm opening",
       "validate exhaustion",
@@ -435,11 +419,9 @@ export const stressChunk2: Chunk = {
     intensity: "high",
     topic: "academic stress",
   },
-}
+};
 
-// ------------------------------------------------------------------
 // COLLECTION AGREGASI
-// ------------------------------------------------------------------
 
 /**
  * Kumpulan semua mock chunks untuk testing.
@@ -456,7 +438,7 @@ export const ALL_MOCK_CHUNKS: Chunk[] = [
   motivationChunk1,
   stressChunk1,
   stressChunk2,
-]
+];
 
 /**
  * Mendapatkan mock chunks berdasarkan topik.
@@ -465,7 +447,7 @@ export const ALL_MOCK_CHUNKS: Chunk[] = [
  * @returns Array chunk yang sesuai
  */
 export function getMockChunksByTopic(topic: string): Chunk[] {
-  return ALL_MOCK_CHUNKS.filter((chunk) => chunk.metadata.topic === topic)
+  return ALL_MOCK_CHUNKS.filter((chunk) => chunk.metadata.topic === topic);
 }
 
 /**
@@ -476,6 +458,6 @@ export function getMockChunksByTopic(topic: string): Chunk[] {
  */
 export function getMockChunksByEmotion(emotion: string): Chunk[] {
   return ALL_MOCK_CHUNKS.filter((chunk) =>
-    chunk.metadata.emotion.includes(emotion)
-  )
+    chunk.metadata.emotion.includes(emotion),
+  );
 }

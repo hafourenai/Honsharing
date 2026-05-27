@@ -28,13 +28,14 @@ import {
   MultiTurnSummary,
   EvaluationMode,
   QualityLabel,
-} from "@/test/types"
-import { getDeterministicResponse } from "@/test/mocks"
-import { createEvaluationMode, EvaluationModeHandler } from "./evaluation-modes"
+} from "@/test/types";
+import { getDeterministicResponse } from "@/test/mocks";
+import {
+  createEvaluationMode,
+  EvaluationModeHandler,
+} from "./evaluation-modes";
 
-// ------------------------------------------------------------------
 // EVALUASI MEMORY CONSISTENCY
-// ------------------------------------------------------------------
 
 /**
  * Mengevaluasi apakah chatbot mengingat informasi dari turn sebelumnya.
@@ -45,25 +46,23 @@ import { createEvaluationMode, EvaluationModeHandler } from "./evaluation-modes"
  */
 function evaluateMemoryConsistency(
   botResponse: string,
-  memoryHints: string[]
+  memoryHints: string[],
 ): number {
-  if (memoryHints.length === 0) return 100 // Tidak ada yang harus diingat
+  if (memoryHints.length === 0) return 100; // Tidak ada yang harus diingat
 
-  const responseLower = botResponse.toLowerCase()
-  let matchedHints = 0
+  const responseLower = botResponse.toLowerCase();
+  let matchedHints = 0;
 
   for (const hint of memoryHints) {
     if (responseLower.includes(hint.toLowerCase())) {
-      matchedHints++
+      matchedHints++;
     }
   }
 
-  return Math.round((matchedHints / memoryHints.length) * 100)
+  return Math.round((matchedHints / memoryHints.length) * 100);
 }
 
-// ------------------------------------------------------------------
 // EVALUASI EMOTIONAL CONTINUITY
-// ------------------------------------------------------------------
 
 /**
  * Mengevaluasi apakah emosi dalam respons sesuai dengan
@@ -75,23 +74,21 @@ function evaluateMemoryConsistency(
  */
 function evaluateEmotionalContinuity(
   botResponse: string,
-  expectedState: string
+  expectedState: string,
 ): number {
-  const responseLower = botResponse.toLowerCase()
+  const responseLower = botResponse.toLowerCase();
   const stateWords = expectedState
     .toLowerCase()
     .split(/[,\s]+/)
-    .filter((w) => w.length > 2)
+    .filter((w) => w.length > 2);
 
-  if (stateWords.length === 0) return 100
+  if (stateWords.length === 0) return 100;
 
-  const matched = stateWords.filter((w) => responseLower.includes(w))
-  return Math.round((matched.length / stateWords.length) * 100)
+  const matched = stateWords.filter((w) => responseLower.includes(w));
+  return Math.round((matched.length / stateWords.length) * 100);
 }
 
-// ------------------------------------------------------------------
 // EVALUASI CONTEXT RETENTION
-// ------------------------------------------------------------------
 
 /**
  * Mengevaluasi apakah chatbot masih mempertahankan konteks
@@ -103,24 +100,27 @@ function evaluateEmotionalContinuity(
  */
 function evaluateContextRetention(
   botResponse: string,
-  allPreviousHints: string[]
+  allPreviousHints: string[],
 ): number {
-  if (allPreviousHints.length === 0) return 100
+  if (allPreviousHints.length === 0) return 100;
 
-  const responseLower = botResponse.toLowerCase()
+  const responseLower = botResponse.toLowerCase();
 
   // Ambil subset dari memory hints (fokus pada yang lebih lama)
-  const oldHints = allPreviousHints.slice(0, Math.min(3, allPreviousHints.length))
-  const matched = oldHints.filter((h) => responseLower.includes(h.toLowerCase()))
+  const oldHints = allPreviousHints.slice(
+    0,
+    Math.min(3, allPreviousHints.length),
+  );
+  const matched = oldHints.filter((h) =>
+    responseLower.includes(h.toLowerCase()),
+  );
 
   // Bobot: semakin lama semakin berharga (karena lebih sulit diingat)
-  const weight = matched.length / oldHints.length
-  return Math.round(weight * 100)
+  const weight = matched.length / oldHints.length;
+  return Math.round(weight * 100);
 }
 
-// ------------------------------------------------------------------
 // EVALUASI TOPIC TRACKING
-// ------------------------------------------------------------------
 
 /**
  * Mengevaluasi apakah chatbot mengikuti alur topik percakapan.
@@ -131,23 +131,21 @@ function evaluateContextRetention(
  */
 function evaluateTopicTracking(
   botResponse: string,
-  expectedTopic: string
+  expectedTopic: string,
 ): number {
-  const responseLower = botResponse.toLowerCase()
+  const responseLower = botResponse.toLowerCase();
   const topicWords = expectedTopic
     .toLowerCase()
     .split(/\s+/)
-    .filter((w) => w.length > 2)
+    .filter((w) => w.length > 2);
 
-  if (topicWords.length === 0) return 100
+  if (topicWords.length === 0) return 100;
 
-  const matched = topicWords.filter((w) => responseLower.includes(w))
-  return Math.round((matched.length / topicWords.length) * 100)
+  const matched = topicWords.filter((w) => responseLower.includes(w));
+  return Math.round((matched.length / topicWords.length) * 100);
 }
 
-// ------------------------------------------------------------------
 // EVALUASI SATU PERCAKAPAN MULTI-TURN
-// ------------------------------------------------------------------
 
 /**
  * Mengevaluasi satu percakapan multi-turn secara lengkap.
@@ -159,54 +157,57 @@ function evaluateTopicTracking(
  */
 export async function evaluateMultiTurnScenario(
   scenario: MultiTurnScenario,
-  mode: EvaluationModeHandler
+  mode: EvaluationModeHandler,
 ): Promise<MultiTurnResult> {
-  const turnDetails: MultiTurnResult["turnDetails"] = []
-  const failures: string[] = []
+  const turnDetails: MultiTurnResult["turnDetails"] = [];
+  const failures: string[] = [];
 
   // Kumpulkan semua memory hints dari turn sebelumnya
-  const allPreviousHints: string[] = []
+  const allPreviousHints: string[] = [];
 
   for (let i = 0; i < scenario.turns.length; i++) {
-    const turn = scenario.turns[i]
+    const turn = scenario.turns[i];
 
     // Dapatkan respons chatbot (menggunakan mock untuk konsistensi)
     // TODO: Untuk REAL mode, gunakan mode.getResponse()
-    const botResponse = getDeterministicResponse(scenario.id) || ""
+    const botResponse = getDeterministicResponse(scenario.id) || "";
 
     // Evaluasi
     const memoryScore = evaluateMemoryConsistency(
       botResponse,
-      turn.memoryHints
-    )
+      turn.memoryHints,
+    );
     const emotionalScore = evaluateEmotionalContinuity(
       botResponse,
-      turn.expectedEmotionalState
-    )
-    const contextScore = evaluateContextRetention(botResponse, allPreviousHints)
-    const topicScore = evaluateTopicTracking(botResponse, turn.topic)
+      turn.expectedEmotionalState,
+    );
+    const contextScore = evaluateContextRetention(
+      botResponse,
+      allPreviousHints,
+    );
+    const topicScore = evaluateTopicTracking(botResponse, turn.topic);
 
     // Catat semua hints untuk turn berikutnya
-    allPreviousHints.push(...turn.memoryHints)
+    allPreviousHints.push(...turn.memoryHints);
 
     // Deteksi kegagalan
     if (memoryScore < 50) {
       failures.push(
         `Turn ${i + 1}: Memory consistency rendah (${memoryScore}). ` +
-        `Chatbot tidak mengingat: "${turn.memoryHints.join(", ")}"`
-      )
+          `Chatbot tidak mengingat: "${turn.memoryHints.join(", ")}"`,
+      );
     }
     if (emotionalScore < 50) {
       failures.push(
         `Turn ${i + 1}: Emotional continuity rendah (${emotionalScore}). ` +
-        `Emosi yang diharapkan: "${turn.expectedEmotionalState}"`
-      )
+          `Emosi yang diharapkan: "${turn.expectedEmotionalState}"`,
+      );
     }
     if (topicScore < 50) {
       failures.push(
         `Turn ${i + 1}: Topic tracking rendah (${topicScore}). ` +
-        `Topik yang diharapkan: "${turn.topic}"`
-      )
+          `Topik yang diharapkan: "${turn.topic}"`,
+      );
     }
 
     // Simulasikan respons untuk demo (dengan mock response)
@@ -214,8 +215,8 @@ export async function evaluateMultiTurnScenario(
     const mockResponseForTurn = getTurnMockResponse(
       scenario.id,
       i,
-      turn.userInput
-    )
+      turn.userInput,
+    );
 
     turnDetails.push({
       turnIndex: i + 1,
@@ -225,29 +226,29 @@ export async function evaluateMultiTurnScenario(
       emotionalScore,
       contextScore,
       topicScore,
-    })
+    });
   }
 
   // Skor akhir
   const avgMemory =
-    turnDetails.reduce((s, t) => s + t.memoryScore, 0) / turnDetails.length
+    turnDetails.reduce((s, t) => s + t.memoryScore, 0) / turnDetails.length;
   const avgEmotional =
-    turnDetails.reduce((s, t) => s + t.emotionalScore, 0) / turnDetails.length
+    turnDetails.reduce((s, t) => s + t.emotionalScore, 0) / turnDetails.length;
   const avgContext =
-    turnDetails.reduce((s, t) => s + t.contextScore, 0) / turnDetails.length
+    turnDetails.reduce((s, t) => s + t.contextScore, 0) / turnDetails.length;
   const avgTopic =
-    turnDetails.reduce((s, t) => s + t.topicScore, 0) / turnDetails.length
+    turnDetails.reduce((s, t) => s + t.topicScore, 0) / turnDetails.length;
 
   const overallScore = Math.round(
-    (avgMemory + avgEmotional + avgContext + avgTopic) / 4
-  )
+    (avgMemory + avgEmotional + avgContext + avgTopic) / 4,
+  );
 
   // Label
-  let label: QualityLabel
-  if (overallScore >= 80) label = "GOOD"
-  else if (overallScore >= 60) label = "ACCEPTABLE"
-  else if (overallScore >= 40) label = "WEAK"
-  else label = "FAILED"
+  let label: QualityLabel;
+  if (overallScore >= 80) label = "GOOD";
+  else if (overallScore >= 60) label = "ACCEPTABLE";
+  else if (overallScore >= 40) label = "WEAK";
+  else label = "FAILED";
 
   return {
     scenarioId: scenario.id,
@@ -260,12 +261,10 @@ export async function evaluateMultiTurnScenario(
     label,
     turnDetails,
     failures,
-  }
+  };
 }
 
-// ------------------------------------------------------------------
 // RESPONS PER TURN (MOCK)
-// ------------------------------------------------------------------
 
 /**
  * Mendapatkan respons mock untuk setiap turn dalam percakapan.
@@ -279,7 +278,7 @@ export async function evaluateMultiTurnScenario(
 function getTurnMockResponse(
   scenarioId: string,
   turnIndex: number,
-  userInput: string
+  userInput: string,
 ): string {
   // Template respons berdasarkan skenario dan turn
   const turnResponses: Record<string, string[]> = {
@@ -347,20 +346,18 @@ function getTurnMockResponse(
       "Eksplorasi itu bagus. Masa muda emang waktunya buat nyoba berbagai hal.",
       "Internship adalah langkah awal yang bagus. Dapet pengalaman sambil liat cocok atau ga. Semoga berhasil!",
     ],
-  }
+  };
 
-  const responses = turnResponses[scenarioId]
+  const responses = turnResponses[scenarioId];
   if (responses && responses[turnIndex]) {
-    return responses[turnIndex]
+    return responses[turnIndex];
   }
 
   // Fallback
-  return `Makasih udah cerita. Aku denger dan paham perasaan kamu. Pelan-pelan aja, aku temani.`
+  return `Makasih udah cerita. Aku denger dan paham perasaan kamu. Pelan-pelan aja, aku temani.`;
 }
 
-// ------------------------------------------------------------------
 // EVALUASI SEMUA SKENARIO MULTI-TURN
-// ------------------------------------------------------------------
 
 /**
  * Mengevaluasi semua skenario multi-turn.
@@ -370,38 +367,45 @@ function getTurnMockResponse(
  */
 export async function evaluateAllMultiTurn(
   scenarios: MultiTurnScenario[],
-  mode: EvaluationModeHandler
+  mode: EvaluationModeHandler,
 ): Promise<MultiTurnSummary> {
-  const details: MultiTurnResult[] = []
+  const details: MultiTurnResult[] = [];
 
-  console.log("=".repeat(70))
-  console.log("EVALUASI MULTI-TURN CONVERSATION")
-  console.log("=".repeat(70))
+  console.log("=".repeat(70));
+  console.log("EVALUASI MULTI-TURN CONVERSATION");
+  console.log("=".repeat(70));
 
   for (const scenario of scenarios) {
-    console.log(`\n  Percakapan: ${scenario.name} (${scenario.turns.length} turn)...`)
-    const result = await evaluateMultiTurnScenario(scenario, mode)
-    details.push(result)
+    console.log(
+      `\n  Percakapan: ${scenario.name} (${scenario.turns.length} turn)...`,
+    );
+    const result = await evaluateMultiTurnScenario(scenario, mode);
+    details.push(result);
 
     console.log(
       `  Memory: ${result.memoryConsistency} | Emosi: ${result.emotionalContinuity} | ` +
-      `Konteks: ${result.contextRetention} | Topik: ${result.topicTracking} | ` +
-      `Overall: ${result.overallScore} (${result.label})`
-    )
+        `Konteks: ${result.contextRetention} | Topik: ${result.topicTracking} | ` +
+        `Overall: ${result.overallScore} (${result.label})`,
+    );
 
     if (result.failures.length > 0) {
       for (const f of result.failures) {
-        console.log(`    ⚠ ${f}`)
+        console.log(`    ⚠ ${f}`);
       }
     }
   }
 
   // Rata-rata
-  const avgMem = details.reduce((s, d) => s + d.memoryConsistency, 0) / details.length
-  const avgEmo = details.reduce((s, d) => s + d.emotionalContinuity, 0) / details.length
-  const avgCtx = details.reduce((s, d) => s + d.contextRetention, 0) / details.length
-  const avgTop = details.reduce((s, d) => s + d.topicTracking, 0) / details.length
-  const avgOverall = details.reduce((s, d) => s + d.overallScore, 0) / details.length
+  const avgMem =
+    details.reduce((s, d) => s + d.memoryConsistency, 0) / details.length;
+  const avgEmo =
+    details.reduce((s, d) => s + d.emotionalContinuity, 0) / details.length;
+  const avgCtx =
+    details.reduce((s, d) => s + d.contextRetention, 0) / details.length;
+  const avgTop =
+    details.reduce((s, d) => s + d.topicTracking, 0) / details.length;
+  const avgOverall =
+    details.reduce((s, d) => s + d.overallScore, 0) / details.length;
 
   return {
     totalConversations: details.length,
@@ -411,12 +415,10 @@ export async function evaluateAllMultiTurn(
     averageTopicTracking: Math.round(avgTop),
     averageOverallScore: Math.round(avgOverall),
     details,
-  }
+  };
 }
 
-// ------------------------------------------------------------------
 // GENERATE MULTI-TURN TABLE (MARKDOWN)
-// ------------------------------------------------------------------
 
 /**
  * Menghasilkan tabel evaluasi multi-turn dalam format Markdown.
@@ -425,73 +427,81 @@ export async function evaluateAllMultiTurn(
  * @returns String markdown
  */
 export function generateMultiTurnTable(summary: MultiTurnSummary): string {
-  const lines: string[] = []
+  const lines: string[] = [];
 
-  lines.push(`## Evaluasi Multi-Turn Conversation`)
-  lines.push(``)
-  lines.push(`**Total Percakapan:** ${summary.totalConversations}`)
-  lines.push(``)
+  lines.push(`## Evaluasi Multi-Turn Conversation`);
+  lines.push(``);
+  lines.push(`**Total Percakapan:** ${summary.totalConversations}`);
+  lines.push(``);
 
-  lines.push(`### Ringkasan`)
-  lines.push(``)
-  lines.push(`| Dimensi | Rata-rata |`)
-  lines.push(`|---------|-----------|`)
-  lines.push(`| Memory Consistency | ${summary.averageMemoryConsistency}/100 |`)
-  lines.push(`| Emotional Continuity | ${summary.averageEmotionalContinuity}/100 |`)
-  lines.push(`| Context Retention | ${summary.averageContextRetention}/100 |`)
-  lines.push(`| Topic Tracking | ${summary.averageTopicTracking}/100 |`)
-  lines.push(`| Overall | ${summary.averageOverallScore}/100 |`)
-  lines.push(``)
-  lines.push(``)
+  lines.push(`### Ringkasan`);
+  lines.push(``);
+  lines.push(`| Dimensi | Rata-rata |`);
+  lines.push(`|---------|-----------|`);
+  lines.push(
+    `| Memory Consistency | ${summary.averageMemoryConsistency}/100 |`,
+  );
+  lines.push(
+    `| Emotional Continuity | ${summary.averageEmotionalContinuity}/100 |`,
+  );
+  lines.push(`| Context Retention | ${summary.averageContextRetention}/100 |`);
+  lines.push(`| Topic Tracking | ${summary.averageTopicTracking}/100 |`);
+  lines.push(`| Overall | ${summary.averageOverallScore}/100 |`);
+  lines.push(``);
+  lines.push(``);
 
-  lines.push(`### Detail per Percakapan`)
-  lines.push(``)
-  lines.push(`| Percakapan | Turn | Memory | Emosi | Konteks | Topik | Overall | Label |`)
-  lines.push(`|------------|------|--------|-------|---------|-------|---------|-------|`)
+  lines.push(`### Detail per Percakapan`);
+  lines.push(``);
+  lines.push(
+    `| Percakapan | Turn | Memory | Emosi | Konteks | Topik | Overall | Label |`,
+  );
+  lines.push(
+    `|------------|------|--------|-------|---------|-------|---------|-------|`,
+  );
   for (const d of summary.details) {
     lines.push(
-      `| ${d.scenarioName} | ${d.turnDetails.length} | ${d.memoryConsistency} | ${d.emotionalContinuity} | ${d.contextRetention} | ${d.topicTracking} | ${d.overallScore} | ${d.label} |`
-    )
+      `| ${d.scenarioName} | ${d.turnDetails.length} | ${d.memoryConsistency} | ${d.emotionalContinuity} | ${d.contextRetention} | ${d.topicTracking} | ${d.overallScore} | ${d.label} |`,
+    );
   }
-  lines.push(``)
-  lines.push(``)
+  lines.push(``);
+  lines.push(``);
 
   // Kegagalan
-  const allFailures = summary.details.flatMap((d) => d.failures)
+  const allFailures = summary.details.flatMap((d) => d.failures);
   if (allFailures.length > 0) {
-    lines.push(`### Analisis Kegagalan Multi-Turn`)
-    lines.push(``)
+    lines.push(`### Analisis Kegagalan Multi-Turn`);
+    lines.push(``);
     for (const f of allFailures) {
-      lines.push(`- ⚠️ ${f}`)
+      lines.push(`- ⚠️ ${f}`);
     }
-    lines.push(``)
-    lines.push(``)
+    lines.push(``);
+    lines.push(``);
   }
 
-  lines.push(`### Interpretasi`)
-  lines.push(``)
+  lines.push(`### Interpretasi`);
+  lines.push(``);
   if (summary.averageOverallScore >= 70) {
     lines.push(
       `Hasil evaluasi multi-turn menunjukkan bahwa chatbot mampu mempertahankan ` +
-      `kesinambungan percakapan dengan baik. Memory consistency yang tinggi ` +
-      `menunjukkan bahwa chatbot dapat mengingat informasi dari turn sebelumnya, ` +
-      `yang sangat penting untuk chatbot curhat.`
-    )
+        `kesinambungan percakapan dengan baik. Memory consistency yang tinggi ` +
+        `menunjukkan bahwa chatbot dapat mengingat informasi dari turn sebelumnya, ` +
+        `yang sangat penting untuk chatbot curhat.`,
+    );
   } else if (summary.averageOverallScore >= 50) {
     lines.push(
       `Hasil evaluasi multi-turn menunjukkan bahwa chatbot cukup mampu ` +
-      `mempertahankan kesinambungan percakapan, namun masih terdapat beberapa ` +
-      `kegagalan dalam memory consistency dan topic tracking. Perlu peningkatan ` +
-      `pada mekanisme context retention.`
-    )
+        `mempertahankan kesinambungan percakapan, namun masih terdapat beberapa ` +
+        `kegagalan dalam memory consistency dan topic tracking. Perlu peningkatan ` +
+        `pada mekanisme context retention.`,
+    );
   } else {
     lines.push(
       `Hasil evaluasi multi-turn menunjukkan bahwa chatbot masih kurang dalam ` +
-      `mempertahankan kesinambungan percakapan. Perbaikan pada sistem prompt ` +
-      `dan context management sangat disarankan.`
-    )
+        `mempertahankan kesinambungan percakapan. Perbaikan pada sistem prompt ` +
+        `dan context management sangat disarankan.`,
+    );
   }
-  lines.push(``)
+  lines.push(``);
 
-  return lines.join("\n")
+  return lines.join("\n");
 }

@@ -1,27 +1,14 @@
 /**
- * ============================================================
  * AUTO CONCLUSION GENERATOR — KESIMPULAN OTOMATIS
- * ============================================================
- *
- * Menghasilkan kesimpulan otomatis berdasarkan hasil evaluasi.
- *
- * OUTPUT:
- * - Kesimpulan umum
- * - Summary efektivitas sistem
- * - Interpretasi performa chatbot
- * - Saran pengembangan
  *
  * @author  Tim Skripsi
  * @version 1.0
- * ============================================================
  */
 
 import { EvaluationSession, RealComparisonSummary, MultiTurnSummary } from "@/test/types"
 import { ResearchStats } from "./research-statistics"
 
-// ================================================================
 // TIPE DATA
-// ================================================================
 
 export interface AutoConclusion {
   /** Ringkasan satu paragraf */
@@ -49,9 +36,7 @@ export interface RAGEffectivenessConclusion {
   penjelasan: string
 }
 
-// ================================================================
 // INTERPOLASI / AMBANG BATAS
-// ================================================================
 
 function kategorikan(score: number): string {
   if (score >= 85) return "sangat baik"
@@ -61,9 +46,7 @@ function kategorikan(score: number): string {
   return "sangat kurang"
 }
 
-// ================================================================
 // GENERATE KESIMPULAN LENGKAP
-// ================================================================
 
 export function generateAutoConclusion(
   session: EvaluationSession,
@@ -106,9 +89,7 @@ export function generateAutoConclusion(
   }
 }
 
-// ================================================================
 // RINGKASAN
-// ================================================================
 
 function generateRingkasan(stats: ResearchStats, overall: number): string {
   const baik = overall >= 70 ? "baik" : overall >= 55 ? "cukup" : "perlu ditingkatkan"
@@ -127,9 +108,7 @@ function generateRingkasan(stats: ResearchStats, overall: number): string {
   )
 }
 
-// ================================================================
 // TEMUAN UTAMA
-// ================================================================
 
 function generateTemuanUtama(
   stats: ResearchStats,
@@ -175,9 +154,7 @@ function generateTemuanUtama(
   return temuan
 }
 
-// ================================================================
 // INTERPRETASI PERFORMA
-// ================================================================
 
 function generateInterpretasiPerforma(stats: ResearchStats): string {
   const s = stats.averageScores
@@ -205,9 +182,7 @@ function generateInterpretasiPerforma(stats: ResearchStats): string {
   return interpretation
 }
 
-// ================================================================
 // EFEKTIVITAS RAG
-// ================================================================
 
 function generateEfektivitasRAGConclusion(
   ragComparison?: RealComparisonSummary
@@ -249,9 +224,7 @@ function generateEfektivitasRAGConclusion(
   return { efektif, peningkatan, penjelasan }
 }
 
-// ================================================================
 // MULTI-TURN CONCLUSION
-// ================================================================
 
 function generateMultiTurnConclusion(
   multiTurnSummary?: MultiTurnSummary
@@ -282,9 +255,7 @@ function generateMultiTurnConclusion(
   )
 }
 
-// ================================================================
 // SARAN
-// ================================================================
 
 function generateSaran(stats: ResearchStats): string[] {
   const saran: string[] = []
@@ -327,9 +298,7 @@ function generateSaran(stats: ResearchStats): string[] {
   return saran
 }
 
-// ================================================================
 // PENUTUP
-// ================================================================
 
 function generatePenutup(): string {
   return (

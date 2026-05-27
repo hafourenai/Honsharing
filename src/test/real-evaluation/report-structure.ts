@@ -25,29 +25,25 @@ import {
   MultiTurnSummary,
   FailureAnalysis,
   QualityLabel,
-} from "@/test/types"
+} from "@/test/types";
 
-// ------------------------------------------------------------------
 // TIPE LAPORAN
-// ------------------------------------------------------------------
 
 export interface ReportSection {
-  title: string
-  content: string
-  subsections?: ReportSection[]
+  title: string;
+  content: string;
+  subsections?: ReportSection[];
 }
 
 export interface EvaluationReport {
-  title: string
-  subtitle: string
-  date: string
-  mode: string
-  sections: ReportSection[]
+  title: string;
+  subtitle: string;
+  date: string;
+  mode: string;
+  sections: ReportSection[];
 }
 
-// ------------------------------------------------------------------
 // GENERATE REPORT
-// ------------------------------------------------------------------
 
 /**
  * Menghasilkan laporan evaluasi lengkap berbahasa Indonesia formal.
@@ -64,33 +60,37 @@ export function generateEvaluationReport(
   interpretation: AcademicInterpretation,
   comparisons?: RealComparisonSummary,
   multiTurn?: MultiTurnSummary,
-  failures?: FailureAnalysis[]
+  failures?: FailureAnalysis[],
 ): EvaluationReport {
-  const s = session.summary
+  const s = session.summary;
   const avgOverall = Math.round(
-    (s.averageSimilarity + s.averageEmpathy + s.averageRelevance + s.averageRetrieval) / 4
-  )
+    (s.averageSimilarity +
+      s.averageEmpathy +
+      s.averageRelevance +
+      s.averageRetrieval) /
+      4,
+  );
 
   const sections: ReportSection[] = [
     generatePendahuluan(avgOverall, s.totalScenarios, session.mode),
     generateMetodeEvaluasi(s.totalScenarios, session.mode),
     generateHasilEvaluasi(s, interpretation),
     generateDistribusiLabel(s.labelDistribution, interpretation),
-  ]
+  ];
 
   if (comparisons) {
-    sections.push(generatePerbandingan(comparisons, interpretation))
+    sections.push(generatePerbandingan(comparisons, interpretation));
   }
 
   if (multiTurn) {
-    sections.push(generateMultiTurnSection(multiTurn, interpretation))
+    sections.push(generateMultiTurnSection(multiTurn, interpretation));
   }
 
   if (failures && failures.length > 0) {
-    sections.push(generateAnalisisKegagalan(failures, interpretation))
+    sections.push(generateAnalisisKegagalan(failures, interpretation));
   }
 
-  sections.push(generateKesimpulan(interpretation))
+  sections.push(generateKesimpulan(interpretation));
 
   return {
     title: "LAPORAN EVALUASI SISTEM",
@@ -103,17 +103,15 @@ export function generateEvaluationReport(
     }),
     mode: session.mode,
     sections,
-  }
+  };
 }
 
-// ------------------------------------------------------------------
 // 1. PENDAHULUAN
-// ------------------------------------------------------------------
 
 function generatePendahuluan(
   avgOverall: number,
   totalScenarios: number,
-  mode: string
+  mode: string,
 ): ReportSection {
   return {
     title: "1. Pendahuluan Evaluasi",
@@ -133,16 +131,14 @@ function generatePendahuluan(
       `dengan rata-rata skor keseluruhan **${avgOverall}/100**. Laporan ini akan ` +
       `membahas secara detail hasil evaluasi per dimensi, analisis perbandingan, ` +
       `serta saran pengembangan untuk penelitian selanjutnya.`,
-  }
+  };
 }
 
-// ------------------------------------------------------------------
 // 2. METODE EVALUASI
-// ------------------------------------------------------------------
 
 function generateMetodeEvaluasi(
   totalScenarios: number,
-  mode: string
+  mode: string,
 ): ReportSection {
   return {
     title: "2. Metode Evaluasi",
@@ -169,21 +165,22 @@ function generateMetodeEvaluasi(
       "Alat ukur yang digunakan meliputi cosine similarity untuk mengukur kesamaan " +
       "vektor, text overlap analysis untuk mengukur kecocokan kata kunci emosional, " +
       "serta keyword matching untuk mendeteksi empati dan relevansi.",
-  }
+  };
 }
 
-// ------------------------------------------------------------------
 // 3. HASIL EVALUASI
-// ------------------------------------------------------------------
 
 function generateHasilEvaluasi(
   s: EvaluationSession["summary"],
-  interpretation: AcademicInterpretation
+  interpretation: AcademicInterpretation,
 ): ReportSection {
   const overallAvg = Math.round(
-    (s.averageSimilarity + s.averageEmpathy + s.averageRelevance + s.averageRetrieval) /
-      4
-  )
+    (s.averageSimilarity +
+      s.averageEmpathy +
+      s.averageRelevance +
+      s.averageRetrieval) /
+      4,
+  );
 
   return {
     title: "3. Hasil Evaluasi",
@@ -198,9 +195,15 @@ function generateHasilEvaluasi(
       `| Relevansi | ${s.averageRelevance}/100 | ${kategori(s.averageRelevance)} |\n` +
       `| Retrieval | ${s.averageRetrieval}/100 | ${kategori(s.averageRetrieval)} |\n` +
       `| **Rata-rata** | **${overallAvg}/100** | ${kategori(overallAvg)} |\n\n` +
-      "**3.1 Analisis Similarity**\n\n" + interpretation.similarityAnalysis + "\n\n" +
-      "**3.2 Analisis Empati**\n\n" + interpretation.empathyAnalysis + "\n\n" +
-      "**3.3 Analisis Retrieval**\n\n" + interpretation.retrievalAnalysis + "\n\n",
+      "**3.1 Analisis Similarity**\n\n" +
+      interpretation.similarityAnalysis +
+      "\n\n" +
+      "**3.2 Analisis Empati**\n\n" +
+      interpretation.empathyAnalysis +
+      "\n\n" +
+      "**3.3 Analisis Retrieval**\n\n" +
+      interpretation.retrievalAnalysis +
+      "\n\n",
     subsections: [
       {
         title: "3.1 Analisis Similarity",
@@ -215,25 +218,23 @@ function generateHasilEvaluasi(
         content: interpretation.retrievalAnalysis,
       },
     ],
-  }
+  };
 }
 
-// ------------------------------------------------------------------
 // 4. DISTRIBUSI LABEL
-// ------------------------------------------------------------------
 
 function generateDistribusiLabel(
   labelDistribution: Record<string, number>,
-  interpretation: AcademicInterpretation
+  interpretation: AcademicInterpretation,
 ): ReportSection {
-  const total = Object.values(labelDistribution).reduce((a, b) => a + b, 0)
+  const total = Object.values(labelDistribution).reduce((a, b) => a + b, 0);
 
-  const goodCount = (labelDistribution.GOOD || 0) +
-    (labelDistribution.ACCEPTABLE || 0)
-  const weakCount = (labelDistribution.WEAK || 0) +
-    (labelDistribution.FAILED || 0)
-  const goodPct = total > 0 ? ((goodCount / total) * 100).toFixed(1) : "0.0"
-  const weakPct = total > 0 ? ((weakCount / total) * 100).toFixed(1) : "0.0"
+  const goodCount =
+    (labelDistribution.GOOD || 0) + (labelDistribution.ACCEPTABLE || 0);
+  const weakCount =
+    (labelDistribution.WEAK || 0) + (labelDistribution.FAILED || 0);
+  const goodPct = total > 0 ? ((goodCount / total) * 100).toFixed(1) : "0.0";
+  const weakPct = total > 0 ? ((weakCount / total) * 100).toFixed(1) : "0.0";
 
   return {
     title: "4. Distribusi Label Kualitas",
@@ -250,16 +251,14 @@ function generateDistribusiLabel(
       `untuk sebagian besar skenario. Sementara **${weakPct}%** sisanya berada pada ` +
       `kategori WEAK atau FAILED yang memerlukan perbaikan lebih lanjut.\n\n` +
       `${interpretation.executiveSummary}`,
-  }
+  };
 }
 
-// ------------------------------------------------------------------
 // 5. PERBANDINGAN RAG VS NON-RAG
-// ------------------------------------------------------------------
 
 function generatePerbandingan(
   comparisons: RealComparisonSummary,
-  interpretation: AcademicInterpretation
+  interpretation: AcademicInterpretation,
 ): ReportSection {
   return {
     title: "5. Analisis Perbandingan RAG vs Non-RAG",
@@ -278,16 +277,14 @@ function generatePerbandingan(
         content: interpretation.ragComparisonAnalysis,
       },
     ],
-  }
+  };
 }
 
-// ------------------------------------------------------------------
 // 6. MULTI-TURN
-// ------------------------------------------------------------------
 
 function generateMultiTurnSection(
   summary: MultiTurnSummary,
-  interpretation: AcademicInterpretation
+  interpretation: AcademicInterpretation,
 ): ReportSection {
   return {
     title: "6. Evaluasi Multi-Turn Conversation",
@@ -309,29 +306,25 @@ function generateMultiTurnSection(
         content: interpretation.multiTurnAnalysis,
       },
     ],
-  }
+  };
 }
 
-// ------------------------------------------------------------------
 // 7. ANALISIS KEGAGALAN
-// ------------------------------------------------------------------
 
 function generateAnalisisKegagalan(
   failures: FailureAnalysis[],
-  interpretation: AcademicInterpretation
+  interpretation: AcademicInterpretation,
 ): ReportSection {
   return {
     title: "7. Analisis Kegagalan",
     content: interpretation.failureAnalysis,
-  }
+  };
 }
 
-// ------------------------------------------------------------------
 // 8. KESIMPULAN
-// ------------------------------------------------------------------
 
 function generateKesimpulan(
-  interpretation: AcademicInterpretation
+  interpretation: AcademicInterpretation,
 ): ReportSection {
   return {
     title: "8. Kesimpulan dan Saran",
@@ -351,16 +344,14 @@ function generateKesimpulan(
           .join("\n\n"),
       },
     ],
-  }
+  };
 }
 
-// ------------------------------------------------------------------
 // HELPERS
-// ------------------------------------------------------------------
 
 function kategori(score: number): string {
-  if (score >= 80) return "Sangat Baik"
-  if (score >= 65) return "Baik"
-  if (score >= 50) return "Cukup"
-  return "Kurang"
+  if (score >= 80) return "Sangat Baik";
+  if (score >= 65) return "Baik";
+  if (score >= 50) return "Cukup";
+  return "Kurang";
 }
