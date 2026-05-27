@@ -276,10 +276,141 @@ async function main(): Promise<void> {
   await evaluateSingleScenario()
   await evaluateAllScenarios()
   evaluateCustomResponse()
+  await runRealEvaluationExample()
 }
 
 // Uncomment untuk menjalankan:
 // main().catch(console.error)
+
+// ------------------------------------------------------------------
+// CONTOH 4: REAL EVALUATION SYSTEM (LENGKAP)
+// ------------------------------------------------------------------
+
+/**
+ * Contoh penggunaan Real Evaluation System yang baru.
+ *
+ * Sistem ini mengintegrasikan:
+ * - Multi-turn conversation evaluation
+ * - RAG vs Non-RAG comparison
+ * - Academic interpretation (Bahasa Indonesia formal)
+ * - Evaluation report generation
+ * - Failure analysis
+ *
+ * Cara menjalankan:
+ *   npx tsx src/test/examples/usage-example.ts
+ */
+async function runRealEvaluationExample(): Promise<void> {
+  console.log("\n" + "=".repeat(60))
+  console.log("CONTOH 4: REAL EVALUATION SYSTEM")
+  console.log("=".repeat(60))
+
+  // 4a. Mock Evaluation — tanpa API, cepat
+  console.log("\n--- 4a: Mock Evaluation ---")
+  const { runMockEvaluation } = await import(
+    "@/test/real-evaluation/real-evaluation-runner"
+  )
+  const mockResult = await runMockEvaluation({
+    enableRetrievalInspection: true,
+    enableQualityAnalysis: true,
+    enableFailureAnalysis: true,
+    enableComparison: true,
+    enableMultiTurn: true,
+    enableAcademicInterpretation: true,
+    enableReportGeneration: true,
+  })
+
+  console.log(
+    `Sesi: ${mockResult.session.evaluationId} | Mode: ${mockResult.session.mode}`
+  )
+  console.log(
+    `Skor Similarity: ${mockResult.session.summary.averageSimilarity.toFixed(1)}`
+  )
+  console.log(
+    `Skor Empati: ${mockResult.session.summary.averageEmpathy.toFixed(1)}`
+  )
+  console.log(
+    `Skor Relevansi: ${mockResult.session.summary.averageRelevance.toFixed(1)}`
+  )
+  console.log(
+    `Skor Retrieval: ${mockResult.session.summary.averageRetrieval.toFixed(1)}`
+  )
+
+  // 4b. Multi-turn evaluation
+  if (mockResult.multiTurnSummary) {
+    console.log("\n--- Multi-turn Results ---")
+    console.log(
+      `Total conversasi: ${mockResult.multiTurnSummary.totalConversations}`
+    )
+    console.log(
+      `Memory Consistency: ${mockResult.multiTurnSummary.averageMemoryConsistency.toFixed(1)}`
+    )
+    console.log(
+      `Emotional Continuity: ${mockResult.multiTurnSummary.averageEmotionalContinuity.toFixed(1)}`
+    )
+    console.log(
+      `Rata-rata skor: ${mockResult.multiTurnSummary.averageOverallScore.toFixed(1)}`
+    )
+  }
+
+  // 4c. RAG vs Non-RAG
+  if (mockResult.comparisonSummary) {
+    console.log("\n--- RAG vs Non-RAG ---")
+    console.log(
+      `RAG Contextual Fit: ${mockResult.comparisonSummary.averageRagContextualFit.toFixed(1)}`
+    )
+    console.log(
+      `Non-RAG Contextual Fit: ${mockResult.comparisonSummary.averageNonRagContextualFit.toFixed(1)}`
+    )
+    console.log(
+      `Peningkatan: ${mockResult.comparisonSummary.averageImprovement.toFixed(1)} poin`
+    )
+  }
+
+  // 4d. Academic Interpretation (Bahasa Indonesia formal)
+  if (mockResult.interpretation) {
+    console.log("\n--- Academic Interpretation (Preview) ---")
+    console.log(mockResult.interpretation.executiveSummary.slice(0, 500))
+    console.log("\n--- Suggestions ---")
+    mockResult.interpretation.suggestions.forEach((s, i) => {
+      console.log(`${i + 1}. ${s}`)
+    })
+  }
+
+  // 4e. Failure Analysis
+  if (mockResult.failureResults.length > 0) {
+    const failed = mockResult.failureResults.filter(
+      (f) => f.label === "FAILED"
+    ).length
+    const weak = mockResult.failureResults.filter(
+      (f) => f.label === "WEAK"
+    ).length
+    const good = mockResult.failureResults.filter(
+      (f) => f.label === "GOOD"
+    ).length
+
+    console.log("\n--- Failure Analysis ---")
+    console.log(`GOOD: ${good} | WEAK: ${weak} | FAILED: ${failed}`)
+  }
+
+  // 4f. Report
+  if (mockResult.report) {
+    console.log("\n--- Evaluation Report ---")
+    console.log(`Title: ${mockResult.report.title}`)
+    console.log(`Tanggal: ${mockResult.report.date}`)
+    console.log(`Sections: ${mockResult.report.sections.map((s) => s.title).join(", ")}`)
+  }
+
+  console.log(
+    `\nDurasi: ${mockResult.durationMs}ms`
+  )
+
+  // Simpan log ke file (opsional)
+  const { saveSessionLogs } = await import(
+    "@/test/real-evaluation/evaluation-session-logger"
+  )
+  await saveSessionLogs(mockResult.session)
+  console.log("\nLog tersimpan di folder generated-reports/")
+}
 
 /**
  * ============================================================

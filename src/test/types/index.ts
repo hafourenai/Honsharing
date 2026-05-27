@@ -316,3 +316,450 @@ export interface MockLLMConfig {
   /** Variasi respons (untuk mode template) */
   responseVariation: "low" | "medium" | "high"
 }
+
+// ================================================================
+// TIPE REAL EVALUATION — EVALUASI RESPON CHATBOT NYATA
+// ================================================================
+
+/**
+ * Mode evaluasi untuk real evaluation.
+ *
+ * - MOCK  : Respons simulasi penuh (tidak panggil API)
+ * - HYBRID: Retrieval real, respons mock
+ * - REAL  : Respons asli dari chatbot
+ */
+export type EvaluationMode = "MOCK" | "HYBRID" | "REAL"
+
+/**
+ * Label kualitas respons untuk failure analysis.
+ */
+export type QualityLabel = "GOOD" | "ACCEPTABLE" | "WEAK" | "FAILED"
+
+// ------------------------------------------------------------------
+// TIPE MULTI-TURN SCENARIO
+// ------------------------------------------------------------------
+
+/**
+ * Satu putaran percakapan dalam multi-turn scenario.
+ */
+export interface ConversationTurn {
+  /** Input user pada turn ini */
+  userInput: string
+  /** Keadaan emosional yang diharapkan pada turn ini */
+  expectedEmotionalState: string
+  /** Topik yang dibahas pada turn ini */
+  topic: string
+  /** Petunjuk memori — hal yang harus diingat chatbot dari turn sebelumnya */
+  memoryHints: string[]
+  /** Kata kunci yang harus muncul dalam respons (opsional) */
+  requiredKeywords?: string[]
+  /** Kata kunci terlarang (opsional) */
+  forbiddenKeywords?: string[]
+}
+
+/**
+ * Skenario multi-turn — percakapan panjang dengan perkembangan emosi.
+ */
+export interface MultiTurnScenario {
+  /** ID unik skenario multi-turn */
+  id: string
+  /** Nama skenario */
+  name: string
+  /** Deskripsi panjang skenario */
+  description: string
+  /** Kategori emosional utama */
+  category: string
+  /** Tingkat keparahan awal (1-5) */
+  initialSeverity: 1 | 2 | 3 | 4 | 5
+  /** Semua putaran percakapan */
+  turns: ConversationTurn[]
+  /** Hasil yang diharapkan dari keseluruhan percakapan */
+  expectedOutcomes: {
+    /** Progresi emosional yang diharapkan */
+    emotionalProgression: string[]
+    /** Apakah topik berkesinambungan */
+    topicContinuity: boolean
+    /** Penanda memori yang harus muncul */
+    memoryMarkers: string[]
+    /** Arah akhir percakapan */
+    finalEmotionalDirection: string[]
+  }
+}
+
+// ------------------------------------------------------------------
+// TIPE CHAT API WRAPPER
+// ------------------------------------------------------------------
+
+/**
+ * Informasi chunk yang diretrieve untuk inspection.
+ */
+export interface RetrievedChunkInfo {
+  /** ID chunk */
+  chunkId: string
+  /** Skor similarity */
+  similarityScore: number
+  /** Peringkat dalam hasil retrieval */
+  rank: number
+  /** Konten/topik chunk */
+  topic: string
+  /** Situasi chunk */
+  situation: string
+  /** Emosi yang terkandung */
+  emotions: string[]
+  /** Apakah chunk berkontribusi pada respons */
+  contributedToResponse: boolean
+}
+
+/**
+ * Konfigurasi untuk Chat API Wrapper.
+ */
+export interface ChatApiConfig {
+  /** Base URL aplikasi (default: http://localhost:3000) */
+  baseUrl: string
+  /** Timeout dalam ms (default: 30000) */
+  timeout: number
+  /** Jumlah maksimal retry (default: 3) */
+  maxRetries: number
+  /** Delay antar retry dalam ms (default: 1000) */
+  retryDelay: number
+  /** Session cookie untuk autentikasi */
+  sessionCookie?: string
+  /** Mode chatting: "santai" | "formal" */
+  mode?: string
+}
+
+/**
+ * Respons dari Chat API Wrapper.
+ */
+export interface ChatApiResponse {
+  /** Respons teks dari chatbot */
+  response: string
+  /** Waktu respons dalam ms */
+  responseTimeMs: number
+  /** Jumlah retry yang dilakukan */
+  retryCount: number
+  /** Apakah ada error */
+  error: string | null
+  /** Status HTTP */
+  status: number
+  /** Timestamp */
+  timestamp: string
+}
+
+// ------------------------------------------------------------------
+// TIPE EVALUATION SESSION LOGGER
+// ------------------------------------------------------------------
+
+/**
+ * Satu entry dalam session log evaluasi.
+ */
+export interface SessionLogEntry {
+  /** ID unik sesi */
+  sessionId: string
+  /** Mode evaluasi */
+  mode: EvaluationMode
+  /** ID skenario yang dievaluasi */
+  scenarioId: string
+  /** Nama skenario */
+  scenarioName: string
+  /** Kategori skenario */
+  category: string
+  /** Input user */
+  userInput: string
+  /** Konteks yang diretrieve */
+  retrievedContext: RetrievedChunkInfo[]
+  /** Respons yang dihasilkan chatbot */
+  generatedResponse: string
+  /** Skor similarity */
+  similarityScore: number
+  /** Skor empati */
+  empathyScore: number
+  /** Skor relevansi */
+  relevanceScore: number
+  /** Skor retrieval */
+  retrievalScore: number
+  /** Label kualitas */
+  qualityLabel: QualityLabel
+  /** Waktu respons (ms) */
+  responseTimeMs: number
+  /** Timestamp */
+  timestamp: string
+  /** Catatan tambahan */
+  notes: string
+}
+
+/**
+ * Koleksi session log untuk satu sesi evaluasi.
+ */
+export interface EvaluationSession {
+  /** ID unik sesi evaluasi */
+  evaluationId: string
+  /** Mode evaluasi */
+  mode: EvaluationMode
+  /** Tanggal evaluasi */
+  date: string
+  /** Semua entry log */
+  entries: SessionLogEntry[]
+  /** Ringkasan sesi */
+  summary: {
+    totalScenarios: number
+    averageSimilarity: number
+    averageEmpathy: number
+    averageRelevance: number
+    averageRetrieval: number
+    averageResponseTimeMs: number
+    labelDistribution: Record<QualityLabel, number>
+  }
+}
+
+// ------------------------------------------------------------------
+// TIPE FAILURE ANALYSIS
+// ------------------------------------------------------------------
+
+/**
+ * Hasil analisis kegagalan untuk satu respons.
+ */
+export interface FailureAnalysis {
+  /** ID skenario */
+  scenarioId: string
+  /** Nama skenario */
+  scenarioName: string
+  /** Label kualitas akhir */
+  label: QualityLabel
+  /** Apakah respons tidak relevan */
+  isIrrelevant: boolean
+  /** Apakah retrieval salah konteks */
+  isWrongContext: boolean
+  /** Apakah jawaban terlalu generic */
+  isGenericResponse: boolean
+  /** Apakah ada hallucination ringan */
+  isHallucination: boolean
+  /** Apakah konteks emosional tidak nyambung */
+  isEmotionalMismatch: boolean
+  /** Detail analisis */
+  details: {
+    irrelevantReason?: string
+    wrongContextReason?: string
+    genericReason?: string
+    hallucinationEvidence?: string
+    mismatchEvidence?: string
+  }
+  /** Skor kualitas akhir (0-100) */
+  qualityScore: number
+}
+
+// ------------------------------------------------------------------
+// TIPE RESPONSE QUALITY ANALYZER
+// ------------------------------------------------------------------
+
+/**
+ * Hasil analisis kualitas respons.
+ */
+export interface ResponseQualityResult {
+  /** Skor kesesuaian konteks (0-100) */
+  contextualFit: number
+  /** Skor empati (0-100) */
+  empathyScore: number
+  /** Skor konsistensi (0-100) */
+  consistencyScore: number
+  /** Skor kekhususan (0-100) — 100 = sangat spesifik */
+  specificityScore: number
+  /** Apakah menggunakan konteks retrieval */
+  usesRetrievalContext: boolean
+  /** Persentase overlap dengan retrieval context */
+  retrievalOverlapPercent: number
+  /** Detail analisis */
+  details: {
+    contextualMarkers: string[]
+    empathyMarkers: string[]
+    genericPhrases: string[]
+    retrievalPhrases: string[]
+  }
+}
+
+// ------------------------------------------------------------------
+// TIPE COMPARATIVE EVALUATION
+// ------------------------------------------------------------------
+
+/**
+ * Hasil perbandingan RAG vs Non-RAG untuk satu skenario.
+ */
+export interface RealComparisonResult {
+  /** ID skenario */
+  scenarioId: string
+  /** Nama skenario */
+  scenarioName: string
+  /** Kategori */
+  category: string
+  /** Respons Non-RAG */
+  nonRagResponse: string
+  /** Respons RAG */
+  ragResponse: string
+  /** Skor kualitas Non-RAG */
+  nonRagScore: ResponseQualityResult
+  /** Skor kualitas RAG */
+  ragScore: ResponseQualityResult
+  /** Selisih kualitas konteks */
+  contextualImprovement: number
+  /** Selisih empati */
+  empathyImprovement: number
+  /** Selisih kekhususan */
+  specificityImprovement: number
+  /** Kesimpulan */
+  conclusion: string
+}
+
+/**
+ * Ringkasan perbandingan RAG vs Non-RAG untuk real evaluation.
+ */
+export interface RealComparisonSummary {
+  /** Jumlah skenario */
+  totalScenarios: number
+  /** Rata-rata skor Non-RAG */
+  averageNonRagContextualFit: number
+  /** Rata-rata skor RAG */
+  averageRagContextualFit: number
+  /** Rata-rata peningkatan */
+  averageImprovement: number
+  /** Detail per skenario */
+  details: RealComparisonResult[]
+}
+
+// ------------------------------------------------------------------
+// TIPE MULTI-TURN EVALUATION
+// ------------------------------------------------------------------
+
+/**
+ * Hasil evaluasi untuk satu percakapan multi-turn.
+ */
+export interface MultiTurnResult {
+  /** ID skenario multi-turn */
+  scenarioId: string
+  /** Nama skenario */
+  scenarioName: string
+  /** Skor memory consistency (0-100) */
+  memoryConsistency: number
+  /** Skor emotional continuity (0-100) */
+  emotionalContinuity: number
+  /** Skor context retention (0-100) */
+  contextRetention: number
+  /** Skor topic tracking (0-100) */
+  topicTracking: number
+  /** Skor keseluruhan (0-100) */
+  overallScore: number
+  /** Label kualitas */
+  label: QualityLabel
+  /** Detail per turn */
+  turnDetails: Array<{
+    turnIndex: number
+    userInput: string
+    botResponse: string
+    memoryScore: number
+    emotionalScore: number
+    contextScore: number
+    topicScore: number
+  }>
+  /** Analisis kegagalan */
+  failures: string[]
+}
+
+/**
+ * Ringkasan evaluasi multi-turn.
+ */
+export interface MultiTurnSummary {
+  totalConversations: number
+  averageMemoryConsistency: number
+  averageEmotionalContinuity: number
+  averageContextRetention: number
+  averageTopicTracking: number
+  averageOverallScore: number
+  details: MultiTurnResult[]
+}
+
+// ------------------------------------------------------------------
+// TIPE ACADEMIC INTERPRETATION
+// ------------------------------------------------------------------
+
+/**
+ * Bagian interpretasi akademik.
+ */
+export interface AcademicInterpretation {
+  /** Ringkasan eksekutif */
+  executiveSummary: string
+  /** Analisis similarity */
+  similarityAnalysis: string
+  /** Analisis empati */
+  empathyAnalysis: string
+  /** Analisis retrieval */
+  retrievalAnalysis: string
+  /** Analisis kegagalan */
+  failureAnalysis: string
+  /** Analisis RAG vs Non-RAG */
+  ragComparisonAnalysis: string
+  /** Analisis multi-turn */
+  multiTurnAnalysis: string
+  /** Kesimpulan */
+  conclusion: string
+  /** Saran pengembangan */
+  suggestions: string[]
+}
+
+// ------------------------------------------------------------------
+// TIPE EVALUATION REPORT STRUCTURE
+// ------------------------------------------------------------------
+
+/**
+ * Struktur laporan evaluasi lengkap.
+ */
+export interface AcademicReportStructure {
+  /** Pendahuluan */
+  pendahuluan: {
+    latarBelakang: string
+    tujuanPengujian: string[]
+    ruangLingkup: string
+  }
+  /** Metode evaluasi */
+  metode: {
+    jenisEvaluasi: string
+    dimensiEvaluasi: Array<{
+      nama: string
+      deskripsi: string
+      metrik: string
+    }>
+    skalaPenilaian: Array<{
+      range: string
+      kategori: string
+      interpretasi: string
+    }>
+    dataset: {
+      totalSkenario: number
+      kategori: Array<{
+        nama: string
+        jumlah: number
+      }>
+    }
+  }
+  /** Hasil pengujian */
+  hasil: {
+    ringkasan: string
+    tabelSimilarity: string
+    tabelEmpati: string
+    tabelRetrieval: string
+    tabelPerbandinganRAG?: string
+    tabelMultiTurn?: string
+  }
+  /** Analisis */
+  analisis: {
+    similarity: string
+    empati: string
+    retrieval: string
+    ragEffectiveness: string
+    kegagalan: string
+  }
+  /** Kesimpulan */
+  kesimpulan: {
+    ringkasan: string
+    temuanUtama: string[]
+    saran: string[]
+  }
+}

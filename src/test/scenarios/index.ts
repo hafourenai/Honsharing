@@ -4,7 +4,7 @@
  * ============================================================
  *
  * Registry semua skenario pengujian chatbot curhat.
- * Total: 33 skenario dari 10 kategori emosional.
+ * Total: 33 skenario single-turn + 10 skenario multi-turn.
  *
  * @author  Tim Skripsi
  * @version 2.0
@@ -12,6 +12,7 @@
  */
 
 import { TestScenario } from "@/test/types"
+import type { MultiTurnScenario } from "@/test/types"
 
 // Import semua skenario — existing
 import {
@@ -52,6 +53,10 @@ import {
   stressBurnoutScenario,
   stressProcrastinationScenario,
 } from "./stress-kuliah"
+
+// Import multi-turn scenarios
+export { ALL_MULTI_TURN_SCENARIOS } from "./multi-turn"
+import { ALL_MULTI_TURN_SCENARIOS } from "./multi-turn"
 
 // Import skenario baru
 import {
@@ -144,6 +149,12 @@ export const ALL_SCENARIOS: TestScenario[] = [
   burnoutOrganizationScenario,
   burnoutOverworkScenario,
 ]
+
+/**
+ * Export ALL_SCENARIOS sebagai `scenarios` untuk kompatibilitas
+ * dengan real-evaluation yang menggunakan nama `scenarios`.
+ */
+export const scenarios = ALL_SCENARIOS
 
 /**
  * Mendapatkan skenario berdasarkan ID.

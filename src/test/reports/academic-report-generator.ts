@@ -176,7 +176,7 @@ function generateHasilPengujian(report: EvaluationReport): string {
     ["Retrieval Accuracy", dims.retrievalAccuracy],
   ]
   for (const [name, score] of dimData) {
-    const cat = score >= 85 ? "Sangat Baik" : score >= 70 ? "Baik" : score >= 55 ? "Cukup" : "Kurang"
+    const cat = Number(score) >= 85 ? "Sangat Baik" : Number(score) >= 70 ? "Baik" : Number(score) >= 55 ? "Cukup" : "Kurang"
     lines.push(`| ${name} | ${score} | ${cat} |`)
   }
   lines.push(``)
