@@ -253,7 +253,7 @@ async function main(): Promise<void> {
 }
 
 // Uncomment untuk menjalankan:
-main().catch(console.error)
+// main().catch(console.error)
 
 // CONTOH 4: REAL EVALUATION SYSTEM (LENGKAP)
 
