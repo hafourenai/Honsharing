@@ -11,13 +11,13 @@ export const overthinkingScenario: TestScenario = {
 
   expectedRetrievedContext: [
     {
-      chunkId: "emotion_0002",
-      topic: "overthinking relationship",
+      chunkId: "emotion_0019",
+      topic: "overthinking",
       situation:
-        "User merasa pikirannya tidak bisa berhenti berputar-putar saat malam hari, memikirkan perubahan dan ketidakpastian",
+        "User merasa pikirannya tidak bisa berhenti berputar-putar saat malam hari, memikirkan berbagai hal",
       expectedRelevanceScore: 0.85,
-      emotions: ["anxiety", "overthinking", "fear_of_abandonment"],
-      needs: ["reassurance", "clarity"],
+      emotions: ["overthinking", "mental_fatigue", "anxiety", "restlessness"],
+      needs: ["mental rest", "reassurance", "grounding"],
     },
     {
       chunkId: "emotion_0005",
@@ -76,13 +76,13 @@ export const overthinkingSocialScenario: TestScenario = {
 
   expectedRetrievedContext: [
     {
-      chunkId: "emotion_0005",
-      topic: "self comparison",
+      chunkId: "emotion_0019",
+      topic: "overthinking",
       situation:
-        "User terus-menerus menganalisis perkataan dan tindakan orang lain, merasa tertinggal dan tidak cukup",
+        "User terus-menerus menganalisis perkataan dan tindakan orang lain, overthinking sosial",
       expectedRelevanceScore: 0.9,
-      emotions: ["insecure", "envy", "self_pressure"],
-      needs: ["self acceptance", "reassurance"],
+      emotions: ["overthinking", "mental_fatigue", "anxiety", "restlessness"],
+      needs: ["mental rest", "reassurance", "grounding"],
     },
   ],
 

@@ -9,7 +9,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Honey — Teman Curhat",
+  title: "Honey | Teman Curhat",
   description: "2am di kamar yang gelap, tapi ada satu lilin menyala.",
 }
 
