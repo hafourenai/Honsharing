@@ -12,6 +12,9 @@ const DEFAULT_CONFIG: ChatApiConfig = {
   mode: "santai",
 };
 
+// Session cookie cache — dipakai ulang untuk semua request dalam satu sesi evaluasi
+let cachedSessionCookie: string | null = null;
+
 // CREATE SESSION
 
 /**
@@ -23,7 +26,12 @@ const DEFAULT_CONFIG: ChatApiConfig = {
  */
 export async function createSession(
   config: ChatApiConfig = DEFAULT_CONFIG,
+  forceFresh = false,
 ): Promise<string | null> {
+  if (!forceFresh && cachedSessionCookie) {
+    return cachedSessionCookie;
+  }
+
   try {
     const response = await fetch(`${config.baseUrl}/api/auth/session`, {
       method: "POST",
@@ -39,7 +47,8 @@ export async function createSession(
     // Ambil cookie dari response headers
     const setCookie = response.headers.get("set-cookie");
     if (setCookie) {
-      return setCookie.split(";")[0]; // Ambil cookie name=value saja
+      cachedSessionCookie = setCookie.split(";")[0]; // Ambil cookie name=value saja
+      return cachedSessionCookie;
     }
 
     return null;
@@ -54,8 +63,9 @@ export async function createSession(
 /**
  * Parse Server-Sent Events stream dari response endpoint chat.
  * Endpoint /api/chat mengirim response dalam format:
- *   data: {"type":"token","content":"..."}
- *   data: {"type":"done","content":"..."}
+ *   data: {"content":"..."}       — token teks
+ *   data: [DONE]                  — sinyal selesai
+ *   data: {"error":"..."}         — error dari server
  *
  * @param response - Fetch Response object
  * @param onToken - Callback untuk setiap token (opsional)
@@ -82,24 +92,25 @@ async function parseSSEStream(
       const trimmed = line.trim();
       if (!trimmed.startsWith("data: ")) continue;
 
+      const raw = trimmed.slice(6);
+
+      // Skip [DONE] — bukan konten respons
+      if (raw === "[DONE]") continue;
+
       try {
-        const data = JSON.parse(trimmed.slice(6));
-        if (data.type === "token" && data.content) {
+        const data = JSON.parse(raw);
+        if (typeof data.content === "string" && data.content) {
           fullText += data.content;
           if (onToken) onToken(data.content);
         }
-        if (data.type === "done") {
-          // Selesai
-        }
-        if (data.type === "error") {
-          console.error(`[ChatAPI] Error dari server:`, data.content);
+        if (data.error) {
+          console.error(`[ChatAPI] Error dari server:`, data.error);
         }
       } catch {
-        // Jika bukan JSON, anggap sebagai teks biasa
-        const text = trimmed.slice(6);
-        if (text) {
-          fullText += text;
-          if (onToken) onToken(text);
+        // Fallback: teks biasa (non-JSON selain [DONE])
+        if (raw) {
+          fullText += raw;
+          if (onToken) onToken(raw);
         }
       }
     }
@@ -183,6 +194,20 @@ export async function callChatApi(
           continue;
         }
 
+        if (response.status === 401) {
+          // Session expired — buat session baru dan retry
+          console.warn(
+            `[ChatAPI] Session expired, buat session baru... (percobaan ${attempt + 1}/${config.maxRetries + 1})`,
+          );
+          cachedSessionCookie = null; // Hapus cache
+          sessionCookie = await createSession(config, true);
+          await new Promise((r) =>
+            setTimeout(r, config.retryDelay),
+          );
+          retryCount++;
+          continue;
+        }
+
         if (response.status >= 500) {
           // Server error â€” retry
           console.warn(
@@ -195,7 +220,7 @@ export async function callChatApi(
           continue;
         }
 
-        // Client error (400, 401, dll) â€” jangan retry
+        // Client error lainnya (400, 422, dll) â€” jangan retry
         return {
           response: "",
           responseTimeMs: Date.now() - startTime,
