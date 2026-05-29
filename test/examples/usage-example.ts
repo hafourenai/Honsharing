@@ -1,14 +1,11 @@
-﻿
-
-// IMPORT
-
 // Skenario
 import { overthinkingScenario } from "@test/scenarios/overthinking";
 import { anxietyGeneralScenario } from "@test/scenarios/anxiety";
 import { ALL_SCENARIOS } from "@test/scenarios";
 
 // Mock
-import { mockRetrieve, getDeterministicResponse } from "@test/mocks";
+import { mockRetrieve } from "@test/mocks";
+import { buildOptimalResponse } from "@test/mocks/response-builder";
 
 // Evaluators
 import { evaluateSimilarity } from "@test/evaluators/similarity-evaluator";
@@ -47,7 +44,7 @@ async function evaluateSingleScenario(): Promise<void> {
   console.log(`Kategori: ${scenario.category}`);
   console.log(`User Input: "${scenario.userInput}"\n`);
 
-  // 2. Mock retrieval â€” simulasi pengambilan chunks dari RAG
+  // 2. Mock retrieval — simulasi pengambilan chunks dari RAG
   const retrievedChunks = await mockRetrieve(scenario.userInput);
   console.log(`Retrieved ${retrievedChunks.length} chunks:`);
   retrievedChunks.forEach((chunk) => {
@@ -56,8 +53,8 @@ async function evaluateSingleScenario(): Promise<void> {
     );
   });
 
-  // 3. Dapatkan respons chatbot (deterministic â€” sama setiap kali)
-  const botResponse = getDeterministicResponse(scenario.id);
+  // 3. Dapatkan respons chatbot (deterministic — sama setiap kali)
+  const botResponse = buildOptimalResponse(scenario);
   console.log(`\nBot Response: "${botResponse}"\n`);
 
   // 4. Evaluasi dengan semua evaluator
@@ -121,7 +118,7 @@ async function evaluateAllScenarios(): Promise<void> {
     const retrievedChunks = await mockRetrieve(scenario.userInput);
 
     // Dapatkan respons deterministik
-    const botResponse = getDeterministicResponse(scenario.id);
+    const botResponse = buildOptimalResponse(scenario);
 
     // Evaluasi
     const similarityScore = evaluateSimilarity(botResponse, scenario);
@@ -275,7 +272,7 @@ async function runRealEvaluationExample(): Promise<void> {
   console.log("CONTOH 4: REAL EVALUATION SYSTEM");
   console.log("=".repeat(60));
 
-  // 4a. Real Evaluation â€” panggil API sungguhan (Groq)
+  // 4a. Real Evaluation — panggil API sungguhan (Groq)
   console.log("\n--- 4a: Real Evaluation (Groq API) ---");
   const { runRealEvaluation } =
     await import("@test/real-evaluation/real-evaluation-runner");

@@ -88,13 +88,13 @@ export class RealMode implements EvaluationModeHandler {
   }> {
     const startTime = Date.now();
 
+    const retrievedChunks = await mockRetrieve(userInput);
+
     const apiResponse: ChatApiResponse = await callChatApi(
       userInput,
       undefined,
-      this.apiConfig,
+      { ...this.apiConfig, retrievedChunks },
     );
-
-    const retrievedChunks = await mockRetrieve(userInput);
 
     return {
       response: apiResponse.response,

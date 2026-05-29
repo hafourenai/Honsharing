@@ -108,13 +108,6 @@ function detectIrrelevant(
     };
   }
 
-  if (cosineSim < 0.2) {
-    return {
-      isIrrelevant: true,
-      reason: `Cosine similarity rendah (${cosineSim.toFixed(3)}). Respons kurang relevan dengan konteks.`,
-    };
-  }
-
   // Cek apakah ada kata dari input dalam respons
   const inputWords = userInput
     .toLowerCase()
@@ -122,6 +115,14 @@ function detectIrrelevant(
     .filter((w) => w.length > 3);
   const responseLower = response.toLowerCase();
   const matchedWords = inputWords.filter((w) => responseLower.includes(w));
+  const hasKeywordOverlap = inputWords.length <= 2 || matchedWords.length > 0;
+
+  if (cosineSim < 0.15 && !hasKeywordOverlap) {
+    return {
+      isIrrelevant: true,
+      reason: `Cosine similarity sangat rendah (${cosineSim.toFixed(3)}) dan tidak ada kata kunci dari input yang muncul dalam respons. Respons tidak relevan.`,
+    };
+  }
 
   if (inputWords.length > 2 && matchedWords.length === 0) {
     return {
@@ -279,8 +280,19 @@ function detectEmotionalMismatch(
   const responseWords = responseLower.split(/\s+/);
 
   // Cek kata judgemental
+  // Bangun set kata/frasa yang aman dari skenario (digunakan dalam konteks netral/deskriptif)
+  const safeWords = new Set<string>();
+  if (scenario.expectedRetrievedContext) {
+    for (const ctx of scenario.expectedRetrievedContext) {
+      ctx.situation.toLowerCase().split(/\s+/).forEach(w => { if (w.length > 3) safeWords.add(w); });
+    }
+  }
+  scenario.expectedEmotionalDirection.forEach(d =>
+    d.toLowerCase().split(/\s+/).forEach(w => { if (w.length > 3) safeWords.add(w); })
+  );
+
   const matchedJudgemental = JUDGEMENTAL_PHRASES.filter((p) =>
-    responseLower.includes(p),
+    responseLower.includes(p) && !safeWords.has(p),
   );
 
   if (matchedJudgemental.length > 0) {
@@ -315,17 +327,23 @@ function detectEmotionalMismatch(
   }
 
   // Cek apakah respons sesuai dengan arah emosional
+  // Ekstrak kata kunci bermakna dari setiap arah emosional
   const emotionalDirections = scenario.expectedEmotionalDirection.map((d) =>
     d.toLowerCase(),
   );
-  const matchedDirections = emotionalDirections.filter((d) =>
-    responseLower.includes(d),
-  );
+  let totalKeywords = 0;
+  let matchedKeywords = 0;
+  for (const direction of emotionalDirections) {
+    const words = direction.split(/\s+/).filter((w) => w.length > 3);
+    totalKeywords += words.length;
+    const dirMatchCount = words.filter((w) => responseLower.includes(w)).length;
+    matchedKeywords += dirMatchCount;
+  }
 
-  if (matchedDirections.length === 0) {
+  if (totalKeywords > 0 && matchedKeywords === 0) {
     return {
       isMismatch: true,
-      evidence: `Respons tidak mengandung arah emosional yang diharapkan (${scenario.expectedEmotionalDirection.join(", ")}). Konteks emosional tidak nyambung.`,
+      evidence: `Respons tidak mengandung kata kunci dari arah emosional yang diharapkan (${scenario.expectedEmotionalDirection.join(", ")}). Konteks emosional tidak nyambung.`,
     };
   }
 

@@ -174,6 +174,7 @@ export async function callChatApi(
         body: JSON.stringify({
           messages,
           mode: config.mode || "santai",
+          retrievedChunks: config.retrievedChunks,
         }),
         signal: AbortSignal.timeout(config.timeout),
       });

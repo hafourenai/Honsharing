@@ -404,6 +404,8 @@ export interface ChatApiConfig {
   sessionCookie?: string;
   /** Mode chatting: "santai" | "formal" */
   mode?: string;
+  /** Retrieved chunks untuk konteks RAG */
+  retrievedChunks?: unknown[];
 }
 
 /**
