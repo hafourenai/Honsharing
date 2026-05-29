@@ -11,12 +11,12 @@ export const anxietyGeneralScenario: TestScenario = {
 
   expectedRetrievedContext: [
     {
-      chunkId: "emotion_0010",
-      topic: "academic",
+      chunkId: "emotion_0017",
+      topic: "general anxiety",
       situation: "User merasa cemas tanpa pemicu yang jelas, ada gejala fisik dan tekanan",
       expectedRelevanceScore: 0.9,
-      emotions: ["stress", "overwhelmed", "self_doubt", "fear_of_failure"],
-      needs: ["validation", "emotional support", "clarity"],
+      emotions: ["anxiety", "panic", "fear", "overwhelmed"],
+      needs: ["grounding", "reassurance", "emotional safety"],
     },
   ],
 
@@ -68,13 +68,13 @@ export const anxietySocialScenario: TestScenario = {
 
   expectedRetrievedContext: [
     {
-      chunkId: "emotion_0001",
-      topic: "romantic insecurity",
+      chunkId: "emotion_0018",
+      topic: "social anxiety",
       situation:
-        "User merasa takut dan cemas ketika harus berinteraksi sosial, merasa tidak pantas",
+        "User merasa takut dan cemas ketika harus berinteraksi sosial, merasa dinilai",
       expectedRelevanceScore: 0.95,
-      emotions: ["insecure", "fear_of_rejection", "self_doubt"],
-      needs: ["reassurance", "emotional safety"],
+      emotions: ["social_anxiety", "fear_of_judgment", "insecurity", "self_conscious"],
+      needs: ["validation", "emotional safety", "acceptance"],
     },
   ],
 
@@ -122,13 +122,13 @@ export const anxietyHealthScenario: TestScenario = {
 
   expectedRetrievedContext: [
     {
-      chunkId: "emotion_0014",
-      topic: "loss",
+      chunkId: "emotion_0017",
+      topic: "general anxiety",
       situation:
-        "User merasa cemas berlebihan tentang kesehatannya, takut kehilangan sesuatu yang berharga",
+        "User merasa cemas berlebihan tentang kesehatannya, khawatir meski hasil medis baik",
       expectedRelevanceScore: 0.85,
-      emotions: ["grief", "sadness", "guilt", "disbelief"],
-      needs: ["presence", "validation", "space to grieve"],
+      emotions: ["anxiety", "panic", "fear", "overwhelmed"],
+      needs: ["grounding", "reassurance", "emotional safety"],
     },
   ],
 

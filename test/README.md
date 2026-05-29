@@ -1,9 +1,5 @@
 # Sistem Testing & Evaluasi RAG Chatbot Curhat
 
-**Versi:** 1.0
-**Tujuan:** Evaluasi akademik skripsi — Sistem Retrieval-Augmented Generation (RAG) pada Chatbot Curhat
-**Bahasa:** Indonesia
-
 ---
 
 ## Daftar Isi
