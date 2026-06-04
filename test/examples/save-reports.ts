@@ -16,7 +16,7 @@ mkdirSync(OUT, { recursive: true })
 
 async function main() {
   const { report, academicMarkdown, visualizationData } =
-    await runFullEvaluation({ useDeterministic: true, verbose: true, saveToFile: false, outputPath: "./generated-reports" })
+    await runFullEvaluation({ mode: "legacy", useDeterministic: true, verbose: true, saveToFile: false, outputPath: "./generated-reports" })
 
   const ragComparison = await compareAllScenarios()
   const comparisonTable = generateComparisonTable(ragComparison)

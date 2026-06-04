@@ -2,6 +2,11 @@
 
 import { TestScenario } from "@test/types"
 import type { MultiTurnScenario } from "@test/types"
+import {
+  GENERATED_SCENARIOS as GENERATED,
+  getGeneratedScenarios,
+  getGeneratedScenarioByChunkId,
+} from "./generated-from-chunks"
 
 // Import semua skenario â€” existing
 import {
@@ -163,6 +168,13 @@ export function getScenarioDistribution(): Record<string, number> {
   }
   return distribution
 }
+
+/**
+ * Export skenario yang di-generate dari rag-chunks.json
+ * Menjamin 100% coverage terhadap semua chunk
+ */
+export const GENERATED_SCENARIOS = GENERATED
+export { getGeneratedScenarios, getGeneratedScenarioByChunkId }
 
 // Re-export untuk kemudahan akses â€” overthinking
 export {

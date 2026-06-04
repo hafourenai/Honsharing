@@ -21,6 +21,13 @@ import { generateAcademicReport } from "@test/reports/academic-report-generator"
 // Types
 import { EvaluationResult } from "@test/types";
 
+// Chunk-Driven
+import {
+  GENERATED_SCENARIOS,
+  getGeneratedScenarioByChunkId,
+} from "@test/scenarios"
+import { generateCoverageReport } from "@test/coverage/coverage-report"
+
 // CONTOH 1: EVALUASI SATU SKENARIO
 
 /**
@@ -231,22 +238,150 @@ function evaluateCustomResponse(): void {
   console.log(`  Keyword Match: ${similarityScore.keywordMatch}`);
 }
 
+// CONTOH 5: EVALUASI CHUNK-DRIVEN (DARI RAG-CHUNKS.JSON)
+
+async function evaluateChunkDriven(): Promise<void> {
+  console.log("\n" + "=".repeat(60))
+  console.log("CONTOH 5: EVALUASI CHUNK-DRIVEN")
+  console.log("=".repeat(60))
+
+  console.log(`\nTotal generated scenarios: ${GENERATED_SCENARIOS.length}`)
+  console.log("Skenario di-generate otomatis dari 19 chunk di rag-chunks.json")
+  console.log("Setiap scenario menggunakan trigger_phrases chunk sebagai input\n")
+
+  for (const scenario of GENERATED_SCENARIOS) {
+    const expectedChunkIds = scenario.expectedRetrievedContext.map(
+      (c) => c.chunkId,
+    )
+    console.log(
+      `  [${scenario.id}] ${scenario.name} (${scenario.category})`,
+    )
+    console.log(`    Input: "${scenario.userInput.slice(0, 60)}..."`)
+    console.log(`    Expected chunk: ${expectedChunkIds.join(", ")}`)
+  }
+
+  console.log(
+    `\n✅ 100% coverage: semua ${GENERATED_SCENARIOS.length} chunk memiliki test case.`,
+  )
+  console.log("✅ Input selalu on-topic: bersumber dari trigger_phrases chunk.")
+  console.log("")
+  console.log("📌 TAPI: ini masih MOCK (respons sintetis). Untuk akurasi real:")
+  console.log("   Jalankan dengan Groq API:")
+  console.log("   npx tsx -e \"")
+  console.log("     import { runChunkDrivenRealEvaluation } from './test/real-evaluation/real-evaluation-runner'")
+  console.log("     runChunkDrivenRealEvaluation({ saveReport: true }).catch(console.error)")
+  console.log("   \"")
+}
+
+// CONTOH 6: COVERAGE REPORT
+
+async function showCoverageReport(): Promise<void> {
+  console.log("\n" + "=".repeat(60))
+  console.log("CONTOH 6: COVERAGE REPORT")
+  console.log("=".repeat(60))
+
+  const report = generateCoverageReport()
+
+  console.log(`\n${report.summary}`)
+  console.log(`Legacy coverage    : ${report.legacyCoveragePercent}`)
+  console.log(`Chunk-driven cover : ${report.generatedCoveragePercent}`)
+  console.log(`Overall coverage   : ${report.overallCoveragePercent}`)
+
+  if (report.uncoveredChunks.length > 0) {
+    console.log("\nUncovered chunks (sebelum chunk-driven):")
+    for (const c of report.uncoveredChunks) {
+      console.log(`  ❌ ${c.chunkId} — ${c.topic}`)
+    }
+    console.log(`\n✅ Chunk-driven mode otomatis menutupi ${report.uncoveredChunks.length} celah ini`)
+  }
+
+  console.log("\n--- Preview Coverage Report (200 chars) ---")
+  console.log(report.markdown.slice(0, 200) + "...")
+}
+
+// CONTOH 7: MODE PERBANDINGAN
+
+async function compareModes(): Promise<void> {
+  console.log("\n" + "=".repeat(60))
+  console.log("CONTOH 7: PERBANDINGAN LEGACY VS CHUNK-DRIVEN")
+  console.log("=".repeat(60))
+
+  const { evaluateAllScenarios, evaluateChunkDriven } =
+    await import("@test/runner/evaluation-runner")
+
+  console.log("\n--- Legacy Mode ---")
+  console.log(`Scenarios: manual (32 skenario)`)
+  console.log(`Risiko   : beberapa topik chunk mungkin tidak ter-cover`)
+
+  console.log("\n--- Chunk-Driven Mode ---")
+  console.log(`Scenarios: auto-generated dari chunks (19 skenario)`)
+  console.log(`Keuntungan: 100% coverage, input selalu on-topic`)
+  console.log(`           otomatis sinkron dengan perubahan rag-chunks.json`)
+}
+
 // MAIN
 
 /**
  * Jalankan semua contoh.
  *
  * Cara menjalankan:
- *   npx ts-node test/examples/usage-example.ts
+ *   npx tsx test/examples/usage-example.ts
  *
  * Atau jika menggunakan tsx:
  *   npx tsx test/examples/usage-example.ts
  */
+async function tryRealEvaluation(): Promise<void> {
+  console.log("\n" + "=".repeat(60))
+  console.log("CONTOH 8: REAL EVALUASI DENGAN GROQ API")
+  console.log("=".repeat(60))
+
+  // Cek apakah server lokal berjalan
+  try {
+    const res = await fetch("http://localhost:3000", { signal: AbortSignal.timeout(3000) })
+    if (!res.ok) throw new Error("Server tidak merespon OK")
+  } catch {
+    console.log("\n⚠️  Server tidak terdeteksi di localhost:3000.")
+    console.log("   Untuk evaluasi real, jalankan: npm run dev")
+    console.log("   Lalu jalankan: npx tsx test/examples/evaluate-chunks-with-groq.ts")
+    return
+  }
+
+  console.log("\n✅ Server terdeteksi! Menjalankan evaluasi real dengan Groq API...")
+  console.log(`   (19 skenario dari rag-chunks.json — 100% on-topic)\n`)
+
+  const { runChunkDrivenRealEvaluation } =
+    await import("@test/real-evaluation/real-evaluation-runner")
+
+  const result = await runChunkDrivenRealEvaluation({
+    enableRetrievalInspection: true,
+    enableQualityAnalysis: true,
+    enableFailureAnalysis: true,
+    enableAcademicInterpretation: true,
+    enableReportGeneration: false,
+  })
+
+  const s = result.session.summary
+  console.log("\n" + "-".repeat(50))
+  console.log("RINGKASAN EVALUASI REAL")
+  console.log("-".repeat(50))
+  console.log(`Similarity : ${s.averageSimilarity.toFixed(1)}`)
+  console.log(`Empathy    : ${s.averageEmpathy.toFixed(1)}`)
+  console.log(`Relevance  : ${s.averageRelevance.toFixed(1)}`)
+  console.log(`Retrieval  : ${s.averageRetrieval.toFixed(1)}`)
+  console.log(`Durasi     : ${result.durationMs}ms`)
+  console.log("")
+  console.log("Detail lengkap ada di file session log dan interpretation.")
+  console.log(`✅ Selesai!`)
+}
+
 async function main(): Promise<void> {
   await evaluateSingleScenario();
   await evaluateAllScenarios();
   evaluateCustomResponse();
-  await runRealEvaluationExample();
+  await evaluateChunkDriven()
+  await showCoverageReport()
+  await compareModes()
+  await tryRealEvaluation()
 }
 
 // Uncomment untuk menjalankan:

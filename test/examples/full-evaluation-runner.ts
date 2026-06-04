@@ -29,6 +29,7 @@ async function main(): Promise<void> {
   console.log("\n[1/5] Menjalankan evaluasi semua skenario...\n");
   const { report, academicMarkdown, visualizationData } =
     await runFullEvaluation({
+      mode: "legacy",
       useDeterministic: true,
       verbose: true,
       saveToFile: false,

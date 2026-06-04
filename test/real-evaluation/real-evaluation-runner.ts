@@ -21,7 +21,7 @@ import { evaluateMultiTurnScenario, evaluateAllMultiTurn } from "./multi-turn-ev
 import { generateAcademicInterpretation } from "./academic-interpretation"
 import { generateEvaluationReport, EvaluationReport } from "./report-structure"
 import { ALL_MULTI_TURN_SCENARIOS } from "@test/scenarios/multi-turn"
-import { scenarios as singleTurnScenarios } from "@test/scenarios"
+import { scenarios as singleTurnScenarios, GENERATED_SCENARIOS } from "@test/scenarios"
 import { evaluateSimilarity } from "@test/evaluators/similarity-evaluator"
 import { evaluateEmpathy } from "@test/evaluators/empathy-evaluator"
 import { evaluateRelevance } from "@test/evaluators/relevance-evaluator"
@@ -39,6 +39,8 @@ export interface RunConfig {
   enableAcademicInterpretation?: boolean
   enableReportGeneration?: boolean
   outputDir?: string
+  /** true = pakai GENERATED_SCENARIOS (dari rag-chunks.json), false = legacy 32 skenario */
+  useChunkDriven?: boolean
 }
 
 const DEFAULT_CONFIG: RunConfig = {
@@ -82,7 +84,13 @@ export async function runEvaluation(
 
   const MODE_DELAY_MS = 2500
 
-  for (const scenario of singleTurnScenarios) {
+  const scenariosToEvaluate = cfg.useChunkDriven ? GENERATED_SCENARIOS : singleTurnScenarios
+
+  if (cfg.useChunkDriven) {
+    console.log(`\n[MODE CHUNK-DRIVEN] ${GENERATED_SCENARIOS.length} skenario dari rag-chunks.json`)
+  }
+
+  for (const scenario of scenariosToEvaluate) {
     const result = await mode.getResponse(scenario.userInput, scenario)
     const botResponse = result.response
     const responseTimeMs = result.responseTimeMs
@@ -159,7 +167,7 @@ export async function runEvaluation(
   let comparisonResults: RealComparisonResult[] | undefined
   let comparisonSummary: import("@test/types").RealComparisonSummary | undefined
 
-  if (cfg.enableComparison) {
+  if (cfg.enableComparison && !cfg.useChunkDriven) {
     comparisonSummary = await compareRealAllScenarios(singleTurnScenarios)
     comparisonResults = comparisonSummary.details
   }
@@ -167,7 +175,7 @@ export async function runEvaluation(
   let multiTurnResults: MultiTurnResult[] | undefined
   let multiTurnSummary: import("@test/types").MultiTurnSummary | undefined
 
-  if (cfg.enableMultiTurn) {
+  if (cfg.enableMultiTurn && !cfg.useChunkDriven) {
     multiTurnSummary = await evaluateAllMultiTurn(ALL_MULTI_TURN_SCENARIOS, mode)
     multiTurnResults = multiTurnSummary.details
   }
@@ -224,4 +232,10 @@ export async function runHybridEvaluation(
   config?: Partial<RunConfig>
 ): Promise<RunResult> {
   return runEvaluation({ ...config, mode: "HYBRID" })
+}
+
+export async function runChunkDrivenRealEvaluation(
+  config?: Partial<RunConfig>
+): Promise<RunResult> {
+  return runEvaluation({ ...config, mode: "REAL", useChunkDriven: true })
 }

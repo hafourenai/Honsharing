@@ -86,6 +86,22 @@ export const TEST_CONFIG = {
     maxKeywords: 10,
   },
 
+  /** ------------------------------------------------------------------
+   *  KONFIGURASI CHUNK-DRIVEN
+   *  ------------------------------------------------------------------
+   */
+
+  chunkDriven: {
+    /** Aktifkan mode chunk-driven */
+    enabled: true,
+    /** true = gunakan trigger_phrases sebagai userInput, false = pakai example_dialog */
+    useTriggerPhrasesAsInput: true,
+    /** true = pilih random trigger_phrase, false = pakai yang pertama */
+    randomizeInput: false,
+    /** Default expectedRelevanceScore untuk self-reference chunk */
+    expectedRelevanceScore: 0.85,
+  },
+
   /** 
    *  KONFIGURASI REPORT
    */
