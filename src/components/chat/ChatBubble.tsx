@@ -14,30 +14,28 @@ interface ChatBubbleProps {
 export default function ChatBubble({ text, isBot, delay = 0 }: ChatBubbleProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: isBot ? 10 : 0, x: isBot ? 0 : 12, scale: isBot ? 0.97 : 1 }}
-      animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
-      transition={{ 
-        duration: isBot ? 0.25 : 0.18, 
-        ease: isBot ? [0.16, 1, 0.3, 1] : "easeOut",
-        delay
-      }}
-      className={cn("mb-4 flex w-full", isBot ? "justify-start" : "justify-end")}
+      initial={{ opacity: 0, y: 8, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1], delay }}
+      className={cn("mb-2.5 flex w-full", isBot ? "justify-start" : "justify-end")}
     >
-      {isBot && (
-        <div className="mr-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-[1.5px] border-honey-accent-lavender bg-honey-bg-elevated self-end mb-1 overflow-hidden">
-          <Image src="/Logo.jpg" alt="Honey Logo" width={24} height={24} className="object-cover w-full h-full" />
-        </div>
-      )}
-
-      <div
-        className={cn(
-          "relative max-w-[80%] px-4 py-3 leading-relaxed",
-          isBot
-            ? "rounded-[4px_16px_16px_16px] border-[0.5px] border-honey-bg-user bg-honey-bg-bot text-[13px] text-honey-text-bot font-inter shadow-sm"
-            : "rounded-[16px_4px_16px_16px] border-[0.5px] border-honey-accent-lavender bg-honey-bg-user text-[13px] text-honey-text-user font-inter font-medium shadow-sm"
+      <div className={cn("flex items-end gap-2 max-w-[78%]", isBot ? "flex-row" : "flex-row-reverse")}>
+        {isBot && (
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-honey-surface border border-honey-border self-end mb-0.5 overflow-hidden">
+            <Image src="/Logo.jpg" alt="Honey" width={28} height={28} className="object-cover w-full h-full" />
+          </div>
         )}
-      >
-        <div className="whitespace-pre-wrap">{text}</div>
+
+        <div
+          className={cn(
+            "relative px-3.5 py-2.5 text-[14px] leading-relaxed",
+            isBot
+              ? "bg-honey-surface text-honey-text-primary rounded-[18px_18px_18px_4px] border border-honey-border shadow-glow"
+              : "bg-honey-accent text-honey-bg rounded-[18px_18px_4px_18px] shadow-glow-strong"
+          )}
+        >
+          <div className="whitespace-pre-wrap">{text}</div>
+        </div>
       </div>
     </motion.div>
   )

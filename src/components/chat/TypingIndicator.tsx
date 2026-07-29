@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import Image from "next/image"
 
-const dotStyle = "h-[5px] w-[5px] rounded-full bg-honey-accent-lavender animate-typing-bounce"
+const dotStyle = "h-[6px] w-[6px] rounded-full bg-honey-accent/60 animate-typing-bounce"
 
 export default function TypingIndicator() {
   return (
@@ -12,17 +12,19 @@ export default function TypingIndicator() {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -4 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
-      className="mb-4 flex w-full justify-start"
+      className="mb-2.5 flex w-full justify-start"
     >
-      <div className="mr-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-[1.5px] border-honey-accent-lavender bg-honey-bg-elevated self-end mb-1 overflow-hidden">
-        <Image src="/Logo.jpg" alt="Honey Logo" width={24} height={24} className="object-cover w-full h-full" />
-      </div>
+      <div className="flex items-end gap-2">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-honey-surface border border-honey-border self-end mb-0.5 overflow-hidden">
+          <Image src="/Logo.jpg" alt="Honey" width={28} height={28} className="object-cover w-full h-full" />
+        </div>
 
-      <div className="flex items-center justify-center rounded-[4px_16px_16px_16px] border-[0.5px] border-honey-bg-user bg-honey-bg-bot px-4 py-3 h-[42px] shadow-sm">
-        <div className="flex items-center justify-center space-x-[3px]">
-          <div className={dotStyle} style={{ animationDelay: "0s" }} />
-          <div className={dotStyle} style={{ animationDelay: "0.2s" }} />
-          <div className={dotStyle} style={{ animationDelay: "0.4s" }} />
+        <div className="flex items-center justify-center rounded-[18px_18px_18px_4px] border border-honey-border bg-honey-surface px-4 py-3 h-[38px] shadow-glow">
+          <div className="flex items-center gap-[4px]">
+            <div className={dotStyle} style={{ animationDelay: "0s" }} />
+            <div className={dotStyle} style={{ animationDelay: "0.2s" }} />
+            <div className={dotStyle} style={{ animationDelay: "0.4s" }} />
+          </div>
         </div>
       </div>
     </motion.div>

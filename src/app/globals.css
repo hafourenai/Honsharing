@@ -4,8 +4,12 @@
 
 @layer base {
   body {
-    @apply bg-honey-bg-outer text-honey-text-primary antialiased;
+    @apply bg-honey-bg text-honey-text-primary antialiased font-outfit;
     overscroll-behavior-y: none;
+  }
+
+  ::selection {
+    background-color: rgba(212, 163, 115, 0.3);
   }
 }
 
@@ -15,4 +19,20 @@
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+@layer utilities {
+  .honey-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .honey-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .honey-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+  }
+  .honey-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
 }

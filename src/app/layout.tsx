@@ -1,11 +1,18 @@
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Outfit, Playfair_Display } from "next/font/google"
 import "./globals.css"
 
-const inter = Inter({
+const outfit = Outfit({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-outfit",
   weight: ["300", "400", "500", "600"],
+})
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
 })
 
 export const metadata: Metadata = {
@@ -16,7 +23,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id">
-      <body className={`${inter.variable} bg-honey-bg-outer text-honey-text-primary h-screen w-screen overflow-hidden`}>
+      <body className={`${outfit.variable} ${playfair.variable} bg-honey-bg text-honey-text-primary antialiased font-outfit h-screen w-screen overflow-hidden`}>
         {children}
       </body>
     </html>

@@ -98,7 +98,7 @@ export function useChat({ activeId, userProfile, loadData, createConversation }:
       const errMsg: Message = {
         id: uuidv4(),
         role: "bot",
-        content: `Aduh, ada masalah teknis: ${error.message}. Coba lagi ya 🙏`,
+        content: `Aduh, ada masalah teknis: ${error.message}. Coba lagi ya.`,
         timestamp: Date.now(),
       }
       await db.appendMessage(targetId, errMsg)

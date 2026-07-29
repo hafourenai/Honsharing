@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Pencil } from "lucide-react"
+import { X, Pencil, MessageCircle, Bell, Shield } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useSettings } from "@/hooks/useSettings"
 import Toggle from "./Toggle"
 import ConfirmModal from "./ConfirmModal"
-
 import { UserProfile } from "@/lib/db"
 
 interface SettingsPanelProps {
@@ -31,13 +30,11 @@ export default function SettingsPanel({ isOpen, onClose, userProfile, updateProf
   }, [userProfile])
 
   const handleNameSave = async () => {
-    if (tempName.trim()) {
-      await updateProfileName(tempName.trim())
-    }
+    if (tempName.trim()) await updateProfileName(tempName.trim())
     setIsEditingName(false)
   }
 
-  const joiningDate = userProfile?.onboardedAt 
+  const joiningDate = userProfile?.onboardedAt
     ? Math.floor((Date.now() - userProfile.onboardedAt) / (1000 * 60 * 60 * 24))
     : 0
 
@@ -50,146 +47,161 @@ export default function SettingsPanel({ isOpen, onClose, userProfile, updateProf
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-[80] bg-black/30 backdrop-blur-[2px]"
+            className="fixed inset-0 z-[80] bg-black/30"
           />
 
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed inset-y-0 right-0 z-[90] flex h-full w-full flex-col bg-honey-bg-outer border-l-[0.5px] border-honey-bg-user md:w-[320px]"
+            transition={{ type: "spring", stiffness: 400, damping: 35 }}
+            className="fixed inset-y-0 right-0 z-[90] flex h-full w-full flex-col bg-honey-surface border-l border-honey-border/40 md:w-[340px]"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between border-b-[0.5px] border-honey-bg-user px-6 py-5">
-              <h2 className="font-playfair text-lg italic text-honey-text-primary">pengaturan</h2>
-              <button onClick={onClose} className="text-honey-text-ghost hover:text-honey-text-primary transition-colors">
-                <X className="h-5 w-5" />
+            <div className="flex items-center justify-between px-5 h-[44px] border-b border-honey-border/40 shrink-0">
+              <h2 className="text-[15px] font-medium text-honey-text-primary">Pengaturan</h2>
+              <button onClick={onClose} className="flex h-7 w-7 items-center justify-center rounded-md text-honey-text-muted/50 hover:text-honey-text-primary hover:bg-white/[0.06] transition-colors">
+                <X className="h-[17px] w-[17px]" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
-              <div className="mb-10 flex flex-col items-center">
-                <div className="mb-4 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-honey-bg-user text-xl font-bold uppercase text-honey-accent-primary shadow-lg">
-                  {userProfile?.name?.charAt(0) || "K"}
+            <div className="flex-1 overflow-y-auto honey-scrollbar px-4 py-5">
+              <div className="flex flex-col items-center mb-8">
+                <div className="mb-3 flex h-[60px] w-[60px] items-center justify-center rounded-xl bg-gradient-to-br from-honey-accent/10 to-honey-accent-glow/10 border border-honey-accent/10 shadow-sm">
+                  <span className="text-xl font-medium text-honey-accent">{userProfile?.name?.charAt(0) || "K"}</span>
                 </div>
-                
+
                 {isEditingName ? (
-                  <div className="flex flex-col items-center w-full">
-                    <input
-                      autoFocus
-                      value={tempName}
-                      onChange={(e) => setTempName(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleNameSave()}
-                      onBlur={handleNameSave}
-                      maxLength={20}
-                      className="bg-transparent border-b-[0.5px] border-honey-accent-primary text-center text-[16px] text-honey-text-primary font-jakarta w-full outline-none py-1"
-                    />
-                  </div>
+                  <input
+                    autoFocus
+                    value={tempName}
+                    onChange={(e) => setTempName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleNameSave()}
+                    onBlur={handleNameSave}
+                    maxLength={20}
+                    className="bg-transparent border-b border-honey-accent text-center text-[15px] text-honey-text-primary font-outfit w-full max-w-[200px] outline-none py-0.5"
+                  />
                 ) : (
-                  <div 
-                    onClick={() => setIsEditingName(true)}
-                    className="group flex cursor-pointer items-center gap-2"
-                  >
-                    <span className="text-[16px] text-honey-text-primary font-medium">{userProfile?.name || "kamu"}</span>
-                    <Pencil className="h-3 w-3 text-honey-text-ghost group-hover:text-honey-accent-primary transition-colors" />
+                  <div onClick={() => setIsEditingName(true)} className="group flex cursor-pointer items-center gap-2">
+                    <span className="text-[15px] text-honey-text-primary font-medium">{userProfile?.name || "kamu"}</span>
+                    <Pencil className="h-3 w-3 text-honey-text-muted/40 group-hover:text-honey-accent transition-colors" />
                   </div>
                 )}
-                
-                <span className="mt-1 text-[10px] text-honey-text-ghost">bergabung {joiningDate} hari lalu</span>
+                <span className="mt-1 text-[11px] text-honey-text-muted/60">bergabung {joiningDate} hari lalu</span>
               </div>
 
-              <div className="mb-8 flex flex-col gap-6">
-                <div className="text-[10px] font-jakarta uppercase tracking-wider text-honey-text-ghost">Preferensi Percakapan</div>
-                
-                {/* Bahasa */}
-                <div className="flex items-center justify-between group">
-                  <div className="flex flex-col">
-                    <span className="text-[13px] text-honey-text-primary">Bahasa Honey</span>
-                    <span className="text-[11px] text-honey-text-ghost">
-                      {preferences.language === "santai" ? "Santai (default)" : "Formal"}
-                    </span>
+              <div className="space-y-6">
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <MessageCircle className="h-[15px] w-[15px] text-honey-text-muted/50" />
+                    <span className="text-[12px] font-medium text-honey-text-muted/70">Preferensi Percakapan</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-honey-bg-bot rounded-full p-1 border border-honey-bg-user">
-                    <button 
-                      onClick={() => updatePreferences({ language: "santai" })}
-                      className={cn(
-                        "px-3 py-1 text-[10px] rounded-full transition-all",
-                        preferences.language === "santai" ? "bg-honey-bg-user text-honey-text-primary" : "text-honey-text-ghost"
-                      )}
+
+                  <div className="space-y-3 pl-7">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-[14px] text-honey-text-primary">Bahasa Honey</span>
+                        <span className="text-[12px] text-honey-text-muted/60">
+                          {preferences.language === "santai" ? "Santai" : "Formal"}
+                        </span>
+                      </div>
+                      <div className="flex items-center rounded-lg border border-honey-border/40 p-0.5 bg-honey-input">
+                        <button
+                          onClick={() => updatePreferences({ language: "santai" })}
+                          className={cn(
+                            "px-3 py-1 text-[12px] rounded-md transition-colors",
+                            preferences.language === "santai" ? "bg-honey-accent text-honey-bg shadow-sm" : "text-honey-text-muted/60 hover:text-honey-text-primary"
+                          )}
+                        >
+                          Santai
+                        </button>
+                        <button
+                          onClick={() => updatePreferences({ language: "formal" })}
+                          className={cn(
+                            "px-3 py-1 text-[12px] rounded-md transition-colors",
+                            preferences.language === "formal" ? "bg-honey-accent text-honey-bg shadow-sm" : "text-honey-text-muted/60 hover:text-honey-text-primary"
+                          )}
+                        >
+                          Formal
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between opacity-60">
+                      <div className="flex flex-col">
+                        <span className="text-[14px] text-honey-text-primary">Call Dengan Honey</span>
+                        <span className="text-[12px] text-honey-text-muted/60">Mau coba interaksi dengan ku?</span>
+                        <span className="text-[11px] italic text-honey-text-muted/40 mt-0.5">fitur ini masih dalam tahap pengembangan</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Bell className="h-[15px] w-[15px] text-honey-text-muted/50" />
+                    <span className="text-[12px] font-medium text-honey-text-muted/70">Notifikasi</span>
+                  </div>
+
+                  <div className="space-y-3 pl-7">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-[14px] text-honey-text-primary">Suara notifikasi</span>
+                        <span className="text-[12px] text-honey-text-muted/60">subtle chime saat membalas</span>
+                      </div>
+                      <Toggle
+                        isOn={preferences.soundNotif}
+                        onToggle={() => updatePreferences({ soundNotif: !preferences.soundNotif })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Shield className="h-[15px] w-[15px] text-honey-text-muted/50" />
+                    <span className="text-[12px] font-medium text-honey-text-muted/70">Privasi</span>
+                  </div>
+
+                  <div className="space-y-2 pl-7">
+                    <button
+                      onClick={() => setShowClearModal(true)}
+                      className="w-full rounded-lg border border-honey-danger-border bg-honey-danger-bg px-4 py-2.5 text-left text-[13px] text-honey-danger-text hover:bg-honey-danger-bg/80 transition-colors"
                     >
-                      Santai
+                      Hapus Semua Riwayat
                     </button>
-                    <button 
-                      onClick={() => updatePreferences({ language: "formal" })}
-                      className={cn(
-                        "px-3 py-1 text-[10px] rounded-full transition-all",
-                        preferences.language === "formal" ? "bg-honey-bg-user text-honey-text-primary" : "text-honey-text-ghost"
-                      )}
+                    <button
+                      onClick={() => setShowResetModal(true)}
+                      className="w-full rounded-lg border border-honey-danger-border bg-honey-danger-bg px-4 py-2.5 text-left text-[13px] text-honey-danger-text hover:bg-honey-danger-bg/80 transition-colors"
                     >
-                      Formal
+                      Hard Reset Aplikasi
                     </button>
                   </div>
                 </div>
-
-                <div className="flex items-center justify-between opacity-60">
-                  <div className="flex flex-col">
-                    <span className="text-[13px] text-honey-text-primary">Call Dengan Honey</span>
-                    <span className="text-[11px] text-honey-text-ghost">Mau Coba Interaksi Dengan ku?</span>
-                    <span className="mt-0.5 text-[11px] italic text-amber-500">fitur ini masih dalam tahap pengembangan sampai developer punya duit</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-[13px] text-honey-text-primary">Suara notifikasi</span>
-                    <span className="text-[11px] text-honey-text-ghost">subtle chime saat membalas</span>
-                  </div>
-                  <Toggle 
-                    isOn={preferences.soundNotif} 
-                    onToggle={() => updatePreferences({ soundNotif: !preferences.soundNotif })} 
-                  />
-                </div>
               </div>
 
-              <div className="mb-10 flex flex-col gap-4">
-                <div className="text-[10px] font-jakarta uppercase tracking-wider text-honey-text-ghost">Privasi</div>
-                <button 
-                  onClick={() => setShowClearModal(true)}
-                  className="w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-left text-[12px] text-red-500 hover:bg-red-100 transition-colors"
-                >
-                  hapus semua riwayat percakapan
-                </button>
-                <button
-                  onClick={() => setShowResetModal(true)}
-                  className="w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-left text-[12px] text-red-500 hover:bg-red-100 transition-colors"
-                >
-                  hard reset aplikasi
-                </button>
-              </div>
-              <ConfirmModal
-                isOpen={showClearModal}
-                onClose={() => setShowClearModal(false)}
-                onConfirm={clearAllHistory}
-                title="Hapus Semua Riwayat?"
-                message="ini akan menghapus semua percakapanmu secara permanen."
-                confirmLabel="Hapus Semua"
-              />
-              <ConfirmModal
-                isOpen={showResetModal}
-                onClose={() => setShowResetModal(false)}
-                onConfirm={onHardReset}
-                title="Hard Reset Aplikasi?"
-                message="Semua data lokal akan dihapus termasuk percakapan, preferensi, dan cache. Akun kamu tetap aman. Tindakan ini tidak bisa dibatalkan."
-                confirmLabel="Hard Reset"
-              />
-
-              <div className="flex flex-col gap-1 border-t border-honey-bg-user pt-6 opacity-60">
-                <span className="text-[11px] text-honey-text-primary">Honey v1.2</span>
-                <span className="text-[10px] text-honey-text-ghost">dibuat dengan ❤ untuk kamu yang butuh teman</span>
+              <div className="mt-8 pt-4 border-t border-honey-border/30 flex flex-col gap-0.5 items-center">
+                <span className="text-[12px] text-honey-text-muted/50">Honey v1.2</span>
+                <span className="text-[11px] text-honey-text-muted/40">dibuat untuk kamu yang butuh teman</span>
               </div>
             </div>
           </motion.div>
+
+          <ConfirmModal
+            isOpen={showClearModal}
+            onClose={() => setShowClearModal(false)}
+            onConfirm={clearAllHistory}
+            title="Hapus Semua Riwayat?"
+            message="ini akan menghapus semua percakapanmu secara permanen."
+            confirmLabel="Hapus Semua"
+          />
+          <ConfirmModal
+            isOpen={showResetModal}
+            onClose={() => setShowResetModal(false)}
+            onConfirm={onHardReset}
+            title="Hard Reset Aplikasi?"
+            message="Semua data lokal akan dihapus termasuk percakapan, preferensi, dan cache."
+            confirmLabel="Hard Reset"
+          />
         </>
       )}
     </AnimatePresence>

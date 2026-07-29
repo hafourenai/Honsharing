@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from "react"
-import PhoneShell from "./chat/PhoneShell"
-import Header from "./chat/Header"
+import TopBar from "./layout/TopBar"
 import ChatBubble from "./chat/ChatBubble"
 import TypingIndicator from "./chat/TypingIndicator"
 
@@ -107,38 +106,41 @@ function ChatContent() {
   if (!isLoaded) return null
 
   return (
-    <PhoneShell className="flex-row">
-      <Sidebar
-        conversations={conversations}
-        activeId={activeId}
-        isOpenMobile={isSidebarOpen}
-        isPinned={isSidebarPinned}
-        onCloseMobile={() => setSidebarOpen(false)}
-        onSelectChat={(id) => {
-          selectConversation(id)
-          setSidebarOpen(false)
+    <div className="flex h-screen w-screen flex-col bg-honey-bg">
+      <TopBar
+        currentChatTitle={isLanding ? "Honey" : activeConversation?.title}
+        showHistory={hasHistory}
+        isSidebarPinned={isSidebarPinned}
+        onToggleSidebarPinned={() => {
+          setIsSidebarPinned((v) => !v)
+          setSidebarOpen(true) // On mobile, this will open the sidebar overlay
         }}
-        onNewChat={() => {
-          createConversation()
-          setSidebarOpen(false)
-        }}
-        onRenameChat={renameConversation}
-        onDeleteChat={deleteConversation}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        userProfile={userProfile}
+        onOpenHistory={() => setIsHistoryOpen((v) => !v)}
+        clockRef={clockRef}
       />
 
-      <div className="flex-1 flex flex-col relative h-full w-full min-w-0 bg-honey-bg-outer">
-        <div className="relative shrink-0">
-          <Header
-            onOpenSidebar={() => setSidebarOpen(true)}
-            showHistory={hasHistory}
-            isSidebarPinned={isSidebarPinned}
-            onToggleSidebarPinned={() => setIsSidebarPinned((v) => !v)}
-            onOpenHistory={() => setIsHistoryOpen((v) => !v)}
-            clockRef={clockRef}
-          />
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar
+          conversations={conversations}
+          activeId={activeId}
+          isOpenMobile={isSidebarOpen}
+          isPinned={isSidebarPinned}
+          onCloseMobile={() => setSidebarOpen(false)}
+          onSelectChat={(id) => {
+            selectConversation(id)
+            setSidebarOpen(false)
+          }}
+          onNewChat={() => {
+            createConversation()
+            setSidebarOpen(false)
+          }}
+          onRenameChat={renameConversation}
+          onDeleteChat={deleteConversation}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          userProfile={userProfile}
+        />
 
+        <div className="flex-1 flex flex-col relative h-full w-full min-w-0 bg-honey-bg">
           <HistoryPanel
             isOpen={isHistoryOpen}
             onClose={() => setIsHistoryOpen(false)}
@@ -149,77 +151,76 @@ function ChatContent() {
             }}
             anchorRef={clockRef}
           />
-        </div>
 
-        <AnimatePresence mode="wait">
-          {isLanding ? (
-            <motion.div
-              key="empty"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, transition: { duration: 0.08, ease: "easeOut" } }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
-              className="flex-1 overflow-hidden flex flex-col items-center justify-center"
-            >
+          <AnimatePresence mode="wait">
+            {isLanding ? (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, transition: { duration: 0.08, ease: "easeOut" } }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
+                className="flex-1 overflow-hidden flex flex-col items-center justify-center"
+              >
                 <EmptyState onSuggest={handleSend} />
 
-              <div className="w-full max-w-[520px]">
+                <div className="w-full max-w-[520px]">
+                  <InputArea onSend={handleSend} disabled={loading} stopAiSpeech={stopSpeaking} />
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key={`chat-${activeId}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, transition: { duration: 0.08, ease: "easeOut" } }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
+                className="flex-1 overflow-y-auto overflow-x-hidden p-4 scrollbar-hide relative flex flex-col pt-6 pb-2"
+              >
+                <DateDivider date="hari ini" />
+
+                {activeConversation.messages.map((msg, index) => {
+                  const isNew = Date.now() - msg.timestamp < 2000
+                  return (
+                    <ChatBubble
+                      key={msg.id}
+                      id={msg.id}
+                      text={msg.content}
+                      isBot={msg.role === "bot"}
+                      delay={isNew ? 0 : Math.min(index * 0.05, 0.5)}
+                    />
+                  )
+                })}
+
+                {streamingText && (
+                  <ChatBubble
+                    id="streaming"
+                    text={streamingText}
+                    isBot={true}
+                    delay={0}
+                  />
+                )}
+
+                {loading && !streamingText && <TypingIndicator />}
+
+                <div ref={messagesEndRef} className="h-4 w-full flex-shrink-0" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {!isLanding && (
+            <motion.div
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.25, delay: 0.1, ease: "easeOut" }}
+              className="flex flex-col z-30 shrink-0"
+            >
+              <div className="relative">
                 <InputArea onSend={handleSend} disabled={loading} stopAiSpeech={stopSpeaking} />
               </div>
             </motion.div>
-          ) : (
-            <motion.div
-              key={`chat-${activeId}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, transition: { duration: 0.08, ease: "easeOut" } }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
-              className="flex-1 overflow-y-auto overflow-x-hidden p-4 scrollbar-hide relative flex flex-col pt-6 pb-2"
-            >
-              <DateDivider date="hari ini" />
-
-              {activeConversation.messages.map((msg, index) => {
-                const isNew = Date.now() - msg.timestamp < 2000
-                return (
-                  <ChatBubble
-                    key={msg.id}
-                    id={msg.id}
-                    text={msg.content}
-                    isBot={msg.role === "bot"}
-                    delay={isNew ? 0 : Math.min(index * 0.05, 0.5)}
-                  />
-                )
-              })}
-
-              {streamingText && (
-                <ChatBubble
-                  id="streaming"
-                  text={streamingText}
-                  isBot={true}
-                  delay={0}
-                />
-              )}
-
-              {loading && !streamingText && <TypingIndicator />}
-
-              <div ref={messagesEndRef} className="h-4 w-full flex-shrink-0" />
-            </motion.div>
           )}
-        </AnimatePresence>
-
-        {!isLanding && (
-          <motion.div
-            initial={{ y: 10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.25, delay: 0.1, ease: "easeOut" }}
-            className="flex flex-col z-30 shrink-0"
-          >
-            <div className="relative">
-              <div className="absolute left-0 top-[-20px] h-[20px] w-full bg-gradient-to-t from-honey-bg-outer to-transparent pointer-events-none" />
-              <InputArea onSend={handleSend} disabled={loading} stopAiSpeech={stopSpeaking} />
-            </div>
-          </motion.div>
-        )}
+        </div>
       </div>
 
       <SettingsPanel
@@ -230,6 +231,6 @@ function ChatContent() {
         clearAllHistory={clearAllConversations}
         onHardReset={hardReset}
       />
-    </PhoneShell>
+    </div>
   )
 }

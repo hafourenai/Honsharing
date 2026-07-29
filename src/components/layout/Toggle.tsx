@@ -14,18 +14,14 @@ export default function Toggle({ isOn, onToggle }: ToggleProps) {
     <button
       onClick={onToggle}
       className={cn(
-        "relative h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors duration-180",
-        isOn ? "bg-honey-accent-primary" : "bg-honey-bg-user"
+        "relative h-[22px] w-[38px] shrink-0 cursor-pointer rounded-full transition-colors duration-200",
+        isOn ? "bg-honey-status-online" : "bg-honey-border"
       )}
     >
       <motion.div
-        className={cn(
-          "absolute top-[2px] h-4 w-4 rounded-full transition-colors duration-180",
-          isOn ? "bg-white" : "bg-honey-text-ghost"
-        )}
-        initial={false}
+        className="absolute top-[2px] h-[18px] w-[18px] rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.15)]"
         animate={{ x: isOn ? 18 : 2 }}
-        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        transition={{ type: "spring", stiffness: 500, damping: 30, mass: 0.8 }}
       />
     </button>
   )

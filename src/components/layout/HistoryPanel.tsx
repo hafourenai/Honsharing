@@ -29,25 +29,18 @@ export default function HistoryPanel({
   const isToday = (ts: number) => {
     const d = new Date(ts)
     const today = new Date()
-    return (
-      d.getDate() === today.getDate() &&
-      d.getMonth() === today.getMonth() &&
-      d.getFullYear() === today.getFullYear()
-    )
+    return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear()
   }
 
   const formatTime = (ts: number) => {
     const d = new Date(ts)
-    const hh = d.getHours().toString().padStart(2, "0")
-    const mm = d.getMinutes().toString().padStart(2, "0")
-    return `${hh}.${mm}`
+    return `${d.getHours().toString().padStart(2, "0")}.${d.getMinutes().toString().padStart(2, "0")}`
   }
 
   const filteredConversations = conversations.filter((conv) =>
     conv.title.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  // Close on outside click
   useEffect(() => {
     if (!isOpen) return
     const handleClickOutside = (e: MouseEvent) => {
@@ -56,72 +49,57 @@ export default function HistoryPanel({
         !panelRef.current.contains(e.target as Node) &&
         anchorRef?.current &&
         !anchorRef.current.contains(e.target as Node)
-      ) {
-        onClose()
-      }
+      ) onClose()
     }
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [isOpen, onClose, anchorRef])
 
-  // Reset search on close
-  useEffect(() => {
-    if (!isOpen) setSearchQuery("")
-  }, [isOpen])
+  useEffect(() => { if (!isOpen) setSearchQuery("") }, [isOpen])
 
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
           ref={panelRef}
-          initial={{ opacity: 0, y: -8, scale: 0.96 }}
+          initial={{ opacity: 0, y: -4, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -8, scale: 0.96 }}
-          transition={{ duration: 0.18, ease: "easeOut" }}
-          className="absolute top-[56px] right-2 z-[80] w-[300px] rounded-xl bg-honey-bg-outer border border-honey-bg-user shadow-xl flex flex-col overflow-hidden"
-          style={{ maxHeight: "min(420px, calc(100vh - 80px))" }}
+          exit={{ opacity: 0, y: -4, scale: 0.96 }}
+          transition={{ duration: 0.15, ease: "easeOut" }}
+          className="absolute top-[48px] right-3 z-[80] w-[300px] rounded-xl bg-honey-surface border border-honey-border/50 shadow-glow flex flex-col overflow-hidden"
+          style={{ maxHeight: "min(400px, calc(100vh - 90px))" }}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-honey-bg-user">
-            <div className="flex items-center gap-2">
-              <span className="font-playfair text-honey-text-bot text-[13px] font-medium">Riwayat Chat</span>
-            </div>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-honey-border/30">
+            <span className="text-[14px] font-medium text-honey-text-primary">Riwayat Chat</span>
             <button
               onClick={onClose}
-              className="flex h-6 w-6 items-center justify-center rounded-full text-honey-text-muted transition-colors hover:text-honey-accent-lavender hover:bg-honey-bg-elevated"
+              className="flex h-6 w-6 items-center justify-center rounded-md text-honey-text-muted/40 hover:text-honey-text-primary hover:bg-white/[0.06] transition-colors"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-[14px] w-[14px]" />
             </button>
           </div>
 
-          {/* Search */}
-          <div className="px-3 py-2.5 border-b border-honey-bg-user">
+          <div className="px-3 py-2.5 border-b border-honey-border/30">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-honey-text-muted" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-[14px] w-[14px] text-honey-text-muted/40" />
               <input
                 type="text"
                 placeholder="Cari chat..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 autoFocus
-                className="w-full bg-honey-bg-bot border border-honey-bg-user rounded-lg pl-9 pr-3 py-1.5 text-[11px] text-honey-text-primary placeholder-honey-text-ghost outline-none focus:border-honey-accent-primary transition-colors"
+                className="w-full bg-honey-bg border border-honey-border/40 rounded-lg pl-8 pr-3 py-1.5 text-[13px] text-honey-text-primary placeholder:text-honey-text-muted/50 outline-none focus:border-honey-accent/50 transition-colors"
               />
             </div>
           </div>
 
-          {/* List */}
-          <div className="flex-1 overflow-y-auto py-2 px-2 scrollbar-hide">
+          <div className="flex-1 overflow-y-auto honey-scrollbar py-1.5 px-1.5">
             {filteredConversations.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 gap-2">
-                <MessageSquare className="h-8 w-8 text-honey-bg-user" />
-                <p className="text-[11px] text-honey-text-ghost text-center">
-                  {searchQuery ? "Tidak ada chat ditemukan" : "Belum ada riwayat Chat"}
+              <div className="flex flex-col items-center justify-center py-10 gap-2">
+                <MessageSquare className="h-8 w-8 text-honey-border/60" />
+                <p className="text-[13px] text-honey-text-muted/60 text-center">
+                  {searchQuery ? "Tidak ada chat ditemukan" : "Belum ada riwayat chat"}
                 </p>
-                {!searchQuery && (
-                  <p className="text-[10px] text-honey-text-ghost text-center">
-                    Mulai Chat baru untuk percakapan<br />
-                  </p>
-                )}
               </div>
             ) : (
               <div className="flex flex-col gap-0.5">
@@ -134,31 +112,20 @@ export default function HistoryPanel({
                   return (
                     <button
                       key={conv.id}
-                      onClick={() => {
-                        onSelectChat(conv.id)
-                        onClose()
-                      }}
+                      onClick={() => { onSelectChat(conv.id); onClose() }}
                       className={cn(
-                        "flex flex-col items-start px-3 py-2 rounded-lg text-left transition-all duration-150 w-full",
+                        "flex flex-col items-start px-3 py-2 rounded-lg text-left transition-colors duration-150 w-full",
                         active
-                          ? "bg-honey-bg-elevated border border-honey-bg-user"
-                          : "hover:bg-honey-bg-input border border-transparent"
+                          ? "bg-honey-accent/10"
+                          : "hover:bg-white/[0.06]"
                       )}
                     >
                       <div className="flex items-center gap-2 w-full">
-                        <span className={cn("text-[9px] shrink-0", active ? "text-honey-accent-lavender" : "text-honey-text-ghost")}>
-                          {active ? "●" : "○"}
-                        </span>
-                        <span
-                          className={cn(
-                            "text-[12px] font-jakarta truncate flex-1",
-                            active ? "text-honey-text-primary" : "text-honey-text-bot"
-                          )}
-                        >
+                        <span className={cn("text-[13px] truncate flex-1 leading-tight", active ? "text-honey-accent font-medium" : "text-honey-text-primary")}>
                           {conv.title}
                         </span>
                       </div>
-                      <div className="text-[10px] text-honey-text-ghost pl-4 mt-0.5">{meta}</div>
+                      <div className="text-[11px] text-honey-text-muted/60 pl-0 mt-0.5">{meta}</div>
                     </button>
                   )
                 })}
