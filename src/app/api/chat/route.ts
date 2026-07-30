@@ -23,11 +23,15 @@ const ChatRequestSchema = z.object({
   retrievedChunks: z.array(z.any()).optional(),
 });
 
+interface ErrorWithStatus extends Error {
+  status: number;
+}
+
 function isQuotaError(error: unknown): boolean {
   return (
     error instanceof Error &&
     "status" in error &&
-    (error as any).status === 429
+    (error as ErrorWithStatus).status === 429
   );
 }
 
