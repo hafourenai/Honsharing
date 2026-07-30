@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { Plus, X, Pencil, Trash2 } from "lucide-react"
+import { X, Pencil, Trash2 } from "lucide-react"
 import { Conversation, UserProfile } from "@/lib/db"
 import Image from "next/image"
 
@@ -24,7 +24,7 @@ interface SidebarProps {
 export default function Sidebar({
   conversations,
   activeId,
-  isOpenMobile, // Keep isOpenMobile for now to simplify
+  isOpenMobile,
   isPinned,
   onCloseMobile,
   onSelectChat,
@@ -37,23 +37,9 @@ export default function Sidebar({
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [renameInput, setRenameInput] = useState("")
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [sidebarWidth, setSidebarWidth] = useState(240)
+  const [sidebarWidth, setSidebarWidth] = useState(280)
   const [isResizing, setIsResizing] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const savedWidth = localStorage.getItem('sidebarWidth')
-    if (savedWidth) {
-      const width = parseInt(savedWidth, 10)
-      if (width >= 200 && width <= 500) setSidebarWidth(width)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (sidebarWidth >= 200 && sidebarWidth <= 500) {
-      localStorage.setItem('sidebarWidth', sidebarWidth.toString())
-    }
-  }, [sidebarWidth])
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -114,127 +100,151 @@ export default function Sidebar({
   }
 
   const SidebarContent = (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between px-4 h-[44px] border-b border-honey-border/40 shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="h-[18px] w-[18px] rounded-md overflow-hidden">
-            <Image src="/Logo.jpg" alt="Honey" width={18} height={18} className="object-cover w-full h-full" />
-          </div>
-          <span className="font-playfair italic text-[15px] text-honey-text-primary">Honey</span>
+    <div className="flex h-full flex-col" style={{ background: "linear-gradient(180deg, #241a2c, #1a1220)" }}>
+      <div className="flex items-center gap-2.5 px-5 pt-6 pb-7">
+        <div className="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center text-[15px] shrink-0"
+          style={{
+            background: "radial-gradient(circle at 35% 30%, #f2d4a3, #d99ba6 75%)",
+            boxShadow: "0 4px 16px rgba(232,155,166,0.35)",
+          }}
+        >
+          <Image src="/Logo.jpg" alt="Honey" width={18} height={18} className="object-cover rounded-[6px]" />
         </div>
-        <button onClick={onCloseMobile} className="md:hidden text-honey-text-muted/50 hover:text-honey-text-primary transition-colors">
+        <span className="font-display italic font-medium text-[22px] text-honey-accent-soft leading-none tracking-[0.2px]">
+          honey
+        </span>
+        <button onClick={onCloseMobile} className="md:hidden ml-auto text-honey-text-muted hover:text-honey-text-primary transition-colors">
           <X className="h-4 w-4" />
         </button>
       </div>
 
-      <div className="px-3 pt-3 pb-2">
+      <div className="px-4 pb-3">
         <button
           onClick={onNewChat}
-          className="w-full flex items-center gap-2 rounded-lg bg-honey-accent/10 border border-honey-accent/15 px-3 py-2 hover:bg-honey-accent/15 transition-colors"
+          className="flex w-full items-center gap-2.5 px-3.5 py-3 rounded-[14px] text-[14px] font-semibold text-honey-accent-soft transition-all duration-200"
+          style={{
+            border: "1px solid rgba(232,185,120,0.35)",
+            background: "rgba(232,185,120,0.08)",
+          }}
         >
-          <Plus className="h-4 w-4 text-honey-accent shrink-0" />
-          <span className="text-[13px] text-honey-accent font-medium">Percakapan Baru</span>
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+            <path d="M7.5 1V14M1 7.5H14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+          </svg>
+          Percakapan baru
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto scrollbar-hide px-2 pb-2">
-        <div className="flex flex-col gap-0.5">
-          <AnimatePresence initial={false} mode="popLayout">
-            {conversations.map((conv) => {
-              const active = conv.id === activeId
-              const meta = isToday(conv.updatedAt)
-                ? `hari ini · ${formatTime(conv.updatedAt)}`
-                : formatTime(conv.updatedAt)
+      <div className="px-4 pb-2">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-honey-text-muted px-1.5">Riwayat</span>
+      </div>
 
-              const isRenaming = renamingId === conv.id
-              const isDeleting = deletingId === conv.id
+      <div className="flex-1 overflow-y-auto honey-scrollbar px-3 pb-2">
+        <div className="flex flex-col gap-1">
+          {conversations.length === 0 && (
+            <div className="px-3 py-6 text-center">
+              <p className="text-[13px] text-honey-text-muted/60">Belum ada percakapan</p>
+            </div>
+          )}
 
-              if (isDeleting) {
-                return (
-                  <motion.div
-                    key={conv.id}
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="flex flex-col items-center justify-center p-3 rounded-lg bg-honey-danger-bg border border-honey-danger-border w-full mb-0.5 overflow-hidden"
-                  >
-                    <span className="text-[12px] text-honey-danger-text mb-2.5 font-medium">hapus percakapan ini?</span>
-                    <div className="flex gap-2">
-                      <button onClick={(e) => { e.stopPropagation(); setDeletingId(null); }} className="text-[11px] text-honey-accent hover:text-honey-text-primary px-3 py-1 rounded-md bg-honey-bg/80 transition-colors">batal</button>
-                      <button onClick={(e) => { e.stopPropagation(); confirmDelete(conv.id); }} className="text-[11px] text-white px-3 py-1 rounded-md bg-honey-danger-solid hover:bg-honey-danger-text transition-colors">hapus</button>
-                    </div>
-                  </motion.div>
-                )
-              }
+          {conversations.map((conv) => {
+            const active = conv.id === activeId
+            const meta = isToday(conv.updatedAt)
+              ? `baru saja`
+              : formatTime(conv.updatedAt)
 
+            const isRenaming = renamingId === conv.id
+            const isDeleting = deletingId === conv.id
+
+            if (isDeleting) {
               return (
-                <motion.button
+                <motion.div
                   key={conv.id}
-                  layout="position"
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
-                  onClick={() => { if (!isRenaming) onSelectChat(conv.id) }}
-                  className={cn(
-                    "flex flex-col items-start rounded-lg px-3 py-2.5 text-left transition-colors duration-150 relative group/item w-full",
-                    active
-                      ? "bg-honey-accent/10"
-                      : "hover:bg-white/[0.06]"
-                  )}
+                  className="flex flex-col items-center justify-center p-3 rounded-[14px] bg-honey-danger-bg border border-honey-danger-border w-full mb-0.5 overflow-hidden"
                 >
-                  <div className="flex items-center gap-2.5 w-full">
-                    <div className="flex-1 overflow-hidden min-w-0">
-                      {isRenaming ? (
-                        <input
-                          autoFocus
-                          value={renameInput}
-                          onChange={(e) => setRenameInput(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") handleRenameConfirm()
-                            if (e.key === "Escape") handleRenameConfirm()
-                          }}
-                          onBlur={handleRenameConfirm}
-                          maxLength={40}
-                          className="bg-transparent border-b border-honey-accent text-honey-text-primary text-[13px] font-outfit w-full outline-none p-0"
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      ) : (
-                        <div className={cn("truncate text-[13px] leading-tight", active ? "text-honey-accent font-medium" : "text-honey-text-primary")}>
-                          {conv.title}
-                        </div>
-                      )}
-                      <div className="text-[11px] text-honey-text-muted/60 mt-0.5">{meta}</div>
-                    </div>
+                  <span className="text-[12px] text-honey-danger-text mb-2.5 font-medium">hapus percakapan ini?</span>
+                  <div className="flex gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); setDeletingId(null); }} className="text-[11px] text-honey-accent hover:text-honey-text-primary px-3 py-1 rounded-md bg-honey-bg/80 transition-colors">batal</button>
+                    <button onClick={(e) => { e.stopPropagation(); confirmDelete(conv.id); }} className="text-[11px] text-white px-3 py-1 rounded-md bg-honey-danger-solid hover:bg-honey-danger-text transition-colors">hapus</button>
+                  </div>
+                </motion.div>
+              )
+            }
 
-                    {!isRenaming && (
-                      <div className="flex items-center gap-0.5 opacity-0 group-hover/item:opacity-100 transition-opacity duration-150 shrink-0">
-                        <div onClick={(e) => { e.stopPropagation(); startRename(conv); }} className="p-1 hover:bg-white/[0.08] rounded-md transition-colors">
-                          <Pencil className="w-[13px] h-[13px] text-honey-text-muted/50" />
-                        </div>
-                        <div onClick={(e) => { e.stopPropagation(); startDelete(conv); }} className="p-1 hover:bg-white/[0.08] rounded-md transition-colors">
-                          <Trash2 className="w-[13px] h-[13px] text-honey-text-muted/50" />
-                        </div>
+            return (
+              <motion.button
+                key={conv.id}
+                layout="position"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                onClick={() => { if (!isRenaming) onSelectChat(conv.id) }}
+                className={cn(
+                  "flex flex-col items-start rounded-[14px] px-3 py-2.5 text-left transition-all duration-150 relative group/item w-full border border-transparent",
+                  active
+                    ? "bg-honey-elevated border-honey-border"
+                    : "hover:bg-white/[0.06]"
+                )}
+              >
+                <div className="flex items-center gap-2.5 w-full">
+                  <div className="flex-1 overflow-hidden min-w-0">
+                    {isRenaming ? (
+                      <input
+                        autoFocus
+                        value={renameInput}
+                        onChange={(e) => setRenameInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleRenameConfirm()
+                          if (e.key === "Escape") handleRenameConfirm()
+                        }}
+                        onBlur={handleRenameConfirm}
+                        maxLength={40}
+                        className="bg-transparent border-b border-honey-accent text-honey-text-primary text-[13.5px] font-sans w-full outline-none p-0"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    ) : (
+                      <div className={cn("truncate text-[13.5px] leading-tight font-medium", active ? "text-honey-accent-soft" : "text-honey-text-primary")}>
+                        {conv.title}
                       </div>
                     )}
+                    <div className="text-[11.5px] text-honey-text-muted mt-0.5">{meta}</div>
                   </div>
-                </motion.button>
-              )
-            })}
-          </AnimatePresence>
+
+                  {!isRenaming && (
+                    <div className="flex items-center gap-0.5 opacity-0 group-hover/item:opacity-100 transition-opacity duration-150 shrink-0">
+                      <div onClick={(e) => { e.stopPropagation(); startRename(conv); }} className="p-1 hover:bg-white/[0.08] rounded-md transition-colors">
+                        <Pencil className="w-[13px] h-[13px] text-honey-text-muted" />
+                      </div>
+                      <div onClick={(e) => { e.stopPropagation(); startDelete(conv); }} className="p-1 hover:bg-white/[0.08] rounded-md transition-colors">
+                        <Trash2 className="w-[13px] h-[13px] text-honey-text-muted" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </motion.button>
+            )
+          })}
         </div>
       </div>
 
       <button
         onClick={onOpenSettings}
-        className="w-full text-left flex items-center gap-2.5 px-4 py-2.5 border-t border-honey-border/40 hover:bg-white/[0.06] transition-colors shrink-0"
+        className="w-full flex items-center gap-2.5 px-5 py-3.5 border-t border-honey-border hover:bg-white/[0.04] transition-colors shrink-0"
       >
-        <div className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-md bg-honey-accent/10 text-honey-accent text-[10px] font-medium uppercase">
-          {userProfile?.name ? userProfile.name.charAt(0) : "K"}
+        <div className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold shrink-0"
+          style={{
+            background: "linear-gradient(135deg, #d99ba6, #e8b978)",
+            color: "#2a1c12",
+          }}
+        >
+          {userProfile?.name ? userProfile.name.charAt(0).toUpperCase() : "K"}
         </div>
-        <div className="flex flex-col overflow-hidden">
-          <span className="text-[13px] text-honey-text-primary truncate leading-tight">{userProfile?.name || "kamu"}</span>
-          <span className="text-[11px] text-honey-text-muted/60 truncate">Pengaturan</span>
+        <div className="flex flex-col overflow-hidden text-left">
+          <span className="text-[13.5px] font-semibold text-honey-text-primary truncate leading-tight">{userProfile?.name || "kamu"}</span>
+          <span className="text-[11.5px] text-honey-text-muted truncate">Pengaturan</span>
         </div>
       </button>
     </div>
@@ -250,7 +260,7 @@ export default function Sidebar({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
             onClick={onCloseMobile}
-            className="fixed inset-0 z-[60] bg-black/30 md:hidden"
+            className="fixed inset-0 z-[60] bg-black/50 md:hidden"
           />
         )}
       </AnimatePresence>
@@ -258,7 +268,7 @@ export default function Sidebar({
       <AnimatePresence>
         {isOpenMobile && (
           <motion.div
-            className="fixed inset-y-0 left-0 z-[70] w-[280px] bg-honey-surface border-r border-honey-border/40 md:hidden"
+            className="fixed inset-y-0 left-0 z-[70] w-[280px] md:hidden"
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
@@ -276,7 +286,7 @@ export default function Sidebar({
         transition={{ duration: 0.25, ease: "easeOut" }}
         className={cn(
           "hidden",
-          isPinned && "md:flex flex-col h-full bg-honey-surface border-r border-honey-border/40 z-30 group shrink-0 relative"
+          isPinned && "md:flex flex-col h-full z-30 group shrink-0 relative"
         )}
         style={{ width: `${sidebarWidth}px` }}
       >

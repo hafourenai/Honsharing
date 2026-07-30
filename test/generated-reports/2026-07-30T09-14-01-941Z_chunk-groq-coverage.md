@@ -1,6 +1,6 @@
 # Coverage Report — RAG Chunks vs Test Scenarios
 
-**Generated:** 2026-06-04T07:40:10.388Z
+**Generated:** 2026-07-30T09:14:01.941Z
 
 ## Summary
 

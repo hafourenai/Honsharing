@@ -26,6 +26,7 @@ import { evaluateSimilarity } from "@test/evaluators/similarity-evaluator"
 import { evaluateEmpathy } from "@test/evaluators/empathy-evaluator"
 import { evaluateRelevance } from "@test/evaluators/relevance-evaluator"
 import { evaluateRetrievalAccuracy } from "@test/evaluators/retrieval-accuracy"
+import { evaluateWithLLM, LLMJudgeScore } from "@test/evaluators/llm-judge-evaluator"
 import type { Chunk } from "@/lib/rag/promptBuilder"
 
 export interface RunConfig {
@@ -96,7 +97,6 @@ export async function runEvaluation(
     const responseTimeMs = result.responseTimeMs
     const retrievedContext = result.retrievedChunks
     console.log(`[${scenario.id}] ${scenario.name}: ${responseTimeMs}ms`)
-    await new Promise((r) => setTimeout(r, MODE_DELAY_MS))
 
     const similarityResult = evaluateSimilarity(botResponse, scenario)
     const empathyResult = evaluateEmpathy(botResponse, scenario)
@@ -128,6 +128,15 @@ export async function runEvaluation(
       contributedToResponse: false,
     }))
 
+    let llmJudge: LLMJudgeScore | undefined
+    if (process.env.GEMINI_API_KEY) {
+      const contextStr = logRetrievedContext
+        .map(c => `[${c.rank}] ${c.topic}: ${c.situation}`)
+        .join("\n")
+      llmJudge = await evaluateWithLLM(botResponse, scenario.userInput, contextStr)
+      console.log(`  LLM Judge: faith=${llmJudge.faithfulness} rel=${llmJudge.answerRelevancy} emp=${llmJudge.empathyQuality} gnd=${llmJudge.groundedness}`)
+    }
+
     const entry = createLogEntry({
       sessionId,
       mode: cfg.mode,
@@ -143,6 +152,9 @@ export async function runEvaluation(
       retrievalScore,
       qualityLabel,
       responseTimeMs,
+      notes: llmJudge
+        ? `LLM-Judge | Faithfulness:${llmJudge.faithfulness} Relevancy:${llmJudge.answerRelevancy} Empathy:${llmJudge.empathyQuality} Groundedness:${llmJudge.groundedness} Overall:${llmJudge.overall}`
+        : "",
     })
     logEntries.push(entry)
 
@@ -157,6 +169,8 @@ export async function runEvaluation(
       failureAnalysis.scenarioName = scenario.name
       failures.push(failureAnalysis)
     }
+
+    await new Promise((r) => setTimeout(r, MODE_DELAY_MS))
   }
 
   const session = createEvaluationSession(

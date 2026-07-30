@@ -212,6 +212,13 @@ export function generateSessionMarkdown(session: EvaluationSession): string {
     lines.push(`| Empati | ${entry.empathyScore} |`);
     lines.push(`| Relevansi | ${entry.relevanceScore} |`);
     lines.push(`| Retrieval | ${entry.retrievalScore} |`);
+    if (entry.notes.includes("LLM-Judge")) {
+      const parts = entry.notes.split("|");
+      lines.push(`| LLM Faithfulness | ${parts[1]?.trim() || "-"} |`);
+      lines.push(`| LLM Relevancy | ${parts[2]?.trim() || "-"} |`);
+      lines.push(`| LLM Empathy | ${parts[3]?.trim() || "-"} |`);
+      lines.push(`| LLM Groundedness | ${parts[4]?.trim() || "-"} |`);
+    }
     lines.push(``);
 
     // Retrieved chunks

@@ -1,17 +1,17 @@
 import type { Metadata } from "next"
-import { Outfit, Playfair_Display } from "next/font/google"
+import { Plus_Jakarta_Sans, Fraunces } from "next/font/google"
 import "./globals.css"
 
-const outfit = Outfit({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-outfit",
-  weight: ["300", "400", "500", "600"],
+  variable: "--font-jakarta",
+  weight: ["400", "500", "600", "700"],
 })
 
-const playfair = Playfair_Display({
+const fraunces = Fraunces({
   subsets: ["latin"],
-  variable: "--font-playfair",
-  weight: ["400", "500", "600", "700"],
+  variable: "--font-fraunces",
+  weight: ["300", "400", "500"],
   style: ["normal", "italic"],
 })
 
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id">
-      <body className={`${outfit.variable} ${playfair.variable} bg-honey-bg text-honey-text-primary antialiased font-outfit h-screen w-screen overflow-hidden`}>
+      <body className={`${jakarta.variable} ${fraunces.variable} bg-honey-bg text-honey-text-primary antialiased font-sans h-screen w-screen overflow-hidden`}>
         {children}
       </body>
     </html>

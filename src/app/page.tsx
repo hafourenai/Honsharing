@@ -13,13 +13,14 @@ function HomeContent() {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-honey-bg">
         <div className="flex flex-col items-center gap-4">
-          <motion.div
-            animate={{ scale: [1, 1.04, 1], opacity: [0.6, 1, 0.6] }}
-            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-            className="w-12 h-12 rounded-xl bg-gradient-to-br from-honey-accent/10 to-honey-accent-glow/10 border border-honey-accent/10 flex items-center justify-center shadow-glow"
+          <div
+            className="w-16 h-16 rounded-[18px] flex items-center justify-center text-2xl animate-breathe"
+            style={{
+              background: "radial-gradient(circle at 35% 30%, #f2d4a3, #d99ba6 70%)",
+            }}
           >
-            <span className="text-xl font-playfair italic text-honey-accent/60">H</span>
-          </motion.div>
+            <span className="text-honey-bg font-semibold">H</span>
+          </div>
         </div>
       </div>
     )

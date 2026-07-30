@@ -337,7 +337,7 @@ async function tryRealEvaluation(): Promise<void> {
 
   // Cek apakah server lokal berjalan
   try {
-    const res = await fetch("http://localhost:3000", { signal: AbortSignal.timeout(3000) })
+    const res = await fetch("http://localhost:3001", { signal: AbortSignal.timeout(3000) })
     if (!res.ok) throw new Error("Server tidak merespon OK")
   } catch {
     console.log("\n⚠️  Server tidak terdeteksi di localhost:3000.")

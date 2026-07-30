@@ -53,38 +53,32 @@ console.log(`Relevance: ${relevance.finalScore}`)
 console.log(`Empathy: ${empathy.finalScore}`)
 ```
 
-## 4. Evaluasi dengan Groq API (REAL Mode)
+## 4. Evaluasi Real (API Asli)
 
-Memanggil chatbot asli menggunakan `GROQ_API_KEY` dari `.env`.
+Memanggil chatbot asli via **Gemini 2.0 Flash** (primary) dengan **Groq Llama 3.3-70b** sebagai fallback otomatis jika Gemini kena rate limit.
 
 ### Prasyarat
-- `GROQ_API_KEY` terisi di `.env`
+- `GEMINI_API_KEY` dan/atau `GROQ_API_KEY` terisi di `.env`
 - `npm install` sudah dijalankan
 
 ### Cara Jalankan
 
 **Terminal 1** — Jalankan server Next.js:
 ```bash
-npm run dev
+npm run dev     # default: http://localhost:3001
 ```
 
-**Terminal 2** — Jalankan evaluasi REAL:
+**Terminal 2** — Jalankan evaluasi REAL (chunk-driven, 19 skenario):
 ```bash
-npx tsx test/examples/usage-example.ts
+npx tsx test/examples/evaluate-chunks-with-groq.ts
 ```
 
-> **Sebelum jalan:** Buka `test/examples/usage-example.ts`, cari baris:
-> ```ts
-> // main().catch(console.error)
-> ```
-> Hapus `//` di depannya jadi:
-> ```ts
-> main().catch(console.error)
-> ```
->
-> **Setelah selesai**, comment lagi baris tersebut.
-
-Ubah `runMockEvaluation()` menjadi `runRealEvaluation()` di dalam fungsi `runRealEvaluationExample()` untuk menjalankan mode REAL.
+### Fallback Behavior
+| Skenario | Provider |
+|----------|----------|
+| Gemini available | ✅ `gemini-2.0-flash` |
+| Gemini 429 (quota) | ➡️ Fallback ke Groq `llama-3.3-70b-versatile` |
+| Keduanya gagal | ❌ Error response |
 
 ### Rate Limiting (Built-in)
 | Situasi | Penanganan |
@@ -98,6 +92,7 @@ Ubah `runMockEvaluation()` menjadi `runRealEvaluation()` di dalam fungsi `runRea
 
 - Report tersimpan di: `test/generated-reports/`
 - Format: Markdown (`.md`) dan JSON (`.json`)
+- Hanya menyisakan report dari sesi terbaru — file lama dihapus otomatis
 
 ## Struktur File Penting
 

@@ -42,6 +42,7 @@ Sistem testing ini dikembangkan untuk **evaluasi akademik skripsi** dengan tujua
 | Evaluasi empati | ✅ Emotional validation, understanding, supportiveness | ❌ |
 | Evaluasi retrieval | ✅ Precision, recall, avg relevance score | ❌ |
 | Mock system | ✅ Embedding, retrieval, LLM (lokal) | ❌ API asli |
+| Real evaluation | ✅ Groq (fallback), Gemini 2.0 Flash (primary) | ❌ |
 | CI/CD | ❌ | ✅ GitHub Actions, Docker |
 | E2E testing | ❌ | ✅ Playwright, Cypress |
 | Performance | ❌ | ✅ Benchmark berat |
@@ -190,7 +191,18 @@ Setiap evaluator menghasilkan skor **0–100** dengan kategori:
 | 40–54 | KURANG | Performa kurang, banyak kriteria tidak terpenuhi |
 | 0–39 | TIDAK_MEMADAI | Performa tidak memadai |
 
-### 3.3 Bobot Penilaian
+### 3.3 Provider AI
+
+Sistem mendukung **dua provider AI** dengan fallback otomatis:
+
+| Provider | Model | Peran | API Key |
+|----------|-------|-------|---------|
+| **Gemini** (primary) | `gemini-2.0-flash` | Chat default | `GEMINI_API_KEY` |
+| **Groq** (fallback) | `llama-3.3-70b-versatile` | Dipakai jika Gemini 429 (quota habis) | `GROQ_API_KEY` |
+
+Ketika kuota Gemini habis, `/api/chat` otomatis beralih ke Groq tanpa perubahan kode.
+
+### 3.5 Bobot Penilaian
 
 **Similarity Score:**
 - Cosine similarity: 40%
@@ -217,7 +229,7 @@ Setiap evaluator menghasilkan skor **0–100** dengan kategori:
 - Recall: 40%
 - Average relevance score: 20%
 
-### 3.4 Overall Score
+### 3.6 Overall Score
 
 Rata-rata dari kelima dimensi evaluasi:
 
@@ -327,23 +339,23 @@ const academicMarkdown = generateAcademicReport(report)
 console.log(academicMarkdown)
 ```
 
-### 4.5 Evaluasi dengan Respons Asli Groq
+### 4.5 Evaluasi dengan API Asli (Gemini + Groq Fallback)
 
-Untuk evaluasi dengan respons asli (bukan mock), ganti `getDeterministicResponse()` dengan:
+Untuk evaluasi dengan respons asli (bukan mock), pastikan server berjalan:
 
-```typescript
-// Panggil API chat asli (perlu Groq API key)
-const response = await fetch("/api/chat", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    messages: [{ role: "user", content: scenario.userInput }],
-    mode: "santai",
-  }),
-})
-const data = await response.json()
-const botResponse = data.reply || data.answer || ""
+```bash
+npm run dev     # default: http://localhost:3001
 ```
+
+Lalu jalankan evaluasi chunk-driven:
+
+```bash
+npx tsx test/examples/evaluate-chunks-with-groq.ts
+```
+
+Sistem akan otomatis:
+1. Coba Gemini 2.0 Flash sebagai primary provider
+2. Jika kena rate limit (429), fallback ke Groq Llama 3.3-70b
 
 ---
 

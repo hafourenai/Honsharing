@@ -5,7 +5,7 @@ import { ChatApiConfig, ChatApiResponse } from "@test/types";
 // DEFAULT CONFIGURATION
 
 const DEFAULT_CONFIG: ChatApiConfig = {
-  baseUrl: "http://localhost:3000",
+  baseUrl: "http://localhost:3001",
   timeout: 30000, // 30 detik
   maxRetries: 3,
   retryDelay: 1000, // 1 detik
@@ -359,6 +359,54 @@ export async function pingAPI(
     return response.ok;
   } catch {
     return false;
+  }
+}
+
+// CALL RETRIEVE API
+
+/**
+ * Memanggil endpoint /api/retrieve untuk mendapatkan chunk relevan.
+ *
+ * @param query - Query teks user
+ * @param topK - Jumlah chunk yang diminta
+ * @param config - Konfigurasi API
+ * @returns Array chunk dengan score, atau empty array jika gagal
+ */
+export async function callRetrieveApi(
+  query: string,
+  topK = 5,
+  config: ChatApiConfig = DEFAULT_CONFIG,
+): Promise<unknown[]> {
+  let sessionCookie: string | undefined | null = config.sessionCookie;
+  if (!sessionCookie) {
+    sessionCookie = await createSession(config);
+  }
+
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (sessionCookie) {
+      headers["Cookie"] = sessionCookie;
+    }
+
+    const response = await fetch(`${config.baseUrl}/api/retrieve`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ query, topK }),
+      signal: AbortSignal.timeout(15000),
+    });
+
+    if (!response.ok) {
+      console.warn(`[ChatAPI] Retrieve API error: ${response.status}`);
+      return [];
+    }
+
+    const data = await response.json();
+    return data.chunks || [];
+  } catch (error) {
+    console.warn(`[ChatAPI] Retrieve API error: ${error}`);
+    return [];
   }
 }
 

@@ -50,7 +50,13 @@ function ChatContent() {
 
   const [isSidebarOpen, setSidebarOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [isSidebarPinned, setIsSidebarPinned] = useState(false)
+  const [isSidebarPinned, setIsSidebarPinned] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('isSidebarPinned');
+      return saved ? JSON.parse(saved) : false;
+    }
+    return false;
+  });
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const [streamingText, setStreamingText] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -67,6 +73,10 @@ function ChatContent() {
   useEffect(() => {
     scrollToBottom()
   }, [activeConversation?.messages, streamingText, loading])
+
+  useEffect(() => {
+    localStorage.setItem('isSidebarPinned', JSON.stringify(isSidebarPinned));
+  }, [isSidebarPinned]);
 
   useEffect(() => {
     stopSpeaking()
@@ -112,7 +122,7 @@ function ChatContent() {
         showHistory={hasHistory}
         isSidebarPinned={isSidebarPinned}
         onToggleSidebarPinned={() => {
-          setIsSidebarPinned((v) => !v)
+              setIsSidebarPinned((v: boolean) => !v)
           setSidebarOpen(true) // On mobile, this will open the sidebar overlay
         }}
         onOpenHistory={() => setIsHistoryOpen((v) => !v)}

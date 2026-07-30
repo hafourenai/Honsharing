@@ -1,6 +1,6 @@
 "use client"
 
-import { Clock, PanelLeftClose, PanelLeftOpen } from "lucide-react"
+import { Clock, PanelLeftClose, PanelLeftOpen, Shield } from "lucide-react"
 import { motion } from "framer-motion"
 
 interface TopBarProps {
@@ -13,7 +13,6 @@ interface TopBarProps {
 }
 
 export default function TopBar({
-  currentChatTitle,
   showHistory,
   isSidebarPinned,
   onToggleSidebarPinned,
@@ -25,9 +24,9 @@ export default function TopBar({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
-      className="flex items-center px-3 h-[44px] z-40 bg-honey-surface border-b border-honey-border shrink-0 w-full select-none"
+      className="flex items-center justify-between px-6 h-[52px] z-30 shrink-0 w-full"
     >
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         {onToggleSidebarPinned && (
           <button
             onClick={onToggleSidebarPinned}
@@ -40,20 +39,16 @@ export default function TopBar({
             )}
           </button>
         )}
-        <span className="font-playfair italic text-[17px] text-honey-accent ml-1 leading-none">
-          honey
-        </span>
       </div>
 
-      <div className="flex-1 flex justify-center">
-        {currentChatTitle && currentChatTitle !== "Honey" && (
-          <span className="text-[13px] text-honey-text-muted truncate max-w-[300px]">
-            {currentChatTitle}
-          </span>
-        )}
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] border border-honey-border text-honey-text-muted/70">
+          <Shield className="h-[13px] w-[13px]" />
+          <span className="text-[11px] font-medium">cerita kamu tetap rahasia</span>
+        </div>
       </div>
 
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-1">
         {showHistory && onOpenHistory && (
           <button
             ref={clockRef}

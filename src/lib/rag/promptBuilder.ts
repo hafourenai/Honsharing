@@ -36,17 +36,20 @@ export function buildSystemPrompt(
   }
 
   const contextBlock =
-    `\n\n---\n[KONTEKS INTERNAL — jangan disebut, jangan dikutip]\n` +
+    `\n\n---\n[KONTEKS EMOSIONAL DARI DATABASE REFERENSI]\n` +
     relevantChunks
       .map(
         (c) =>
-          `Situasi mirip: ${c?.scenario?.situation || "Tidak spesifik"}\n` +
-          `Kemungkinan kebutuhan: ${c?.metadata?.need?.join(", ") || "Tidak diketahui"}\n` +
-          `Arah emosi: ${c?.metadata?.emotion?.join(", ") || "Tidak diketahui"}\n` +
-          `Intensitas: ${c?.metadata?.intensity || "Tidak diketahui"}`
+          `Topik Masalah: ${c?.scenario?.topic || "Umum"}\n` +
+          `Penjelasan Situasi: ${c?.scenario?.situation || "Tidak spesifik"}\n` +
+          `Kemungkinan Kebutuhan: ${c?.metadata?.need?.join(", ") || "Didengar"}\n` +
+          `Arah Pendekatan: ${c?.response_strategy?.approach?.join(", ") || "Dukung"}`
       )
       .join("\n\n") +
-    `\n\nGunakan ini hanya untuk membaca situasi — bukan untuk menentukan gaya, nada, atau kalimat. Baca konteks percakapan aktual, lalu respons seperti biasa.\n---`
+    `\n\nPETUNJUK PENGGUNAAN KONTEKS DI ATAS:\n` +
+    `- Hubungkan secara halus kata kunci atau esensi situasi dari "Penjelasan Situasi" di atas ke dalam kalimat responmu.\n` +
+    `- Gunakan pemahaman situasi tersebut untuk memvalidasi perasaan pengguna secara spesifik (misalnya, jika situasi menyebutkan "insecure penampilan" atau "konflik orang tua", sebutkan hal tersebut secara empati agar respon terasa sangat nyambung).\n` +
+    `- Tetap pertahankan gaya bicara yang hangat, mengalir, santai, dan alami layaknya teman dekat yang peduli.\n---`
 
   return basePrompt + contextBlock
 }

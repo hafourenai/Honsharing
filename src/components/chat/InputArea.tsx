@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
-import { Mic, MicOff, Plus, Send } from "lucide-react"
+import { Mic, MicOff, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useVoiceChat } from "@/hooks/useVoiceChat"
 
@@ -14,10 +14,8 @@ interface InputAreaProps {
 
 export default function InputArea({ onSend, disabled, stopAiSpeech }: InputAreaProps) {
   const [text, setText] = useState("")
-  const [isFocused, setIsFocused] = useState(false)
-  const [isSending, setIsSending] = useState(false)
   const [voiceActive, setVoiceActive] = useState(false)
-  const inputRef = useRef<HTMLTextAreaElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null) // Changed to HTMLTextAreaElement
 
   const {
     status: voiceStatus,
@@ -26,24 +24,21 @@ export default function InputArea({ onSend, disabled, stopAiSpeech }: InputAreaP
     stop: stopVad,
   } = useVoiceChat({ onSend, stopAiSpeech })
 
-  const voiceColor =
-    voiceStatus === "speaking" ? "#c46a6a" :
-    voiceStatus === "listening" ? "#d4a373" :
-    voiceStatus === "processing" ? "#d4a373" :
-    "#3a3a44"
-
+  // Function to adjust textarea height
   const adjustHeight = () => {
     const el = inputRef.current
     if (!el) return
     el.style.height = "auto"
-    el.style.height = `${Math.min(el.scrollHeight, 80)}px`
+    el.style.height = `${Math.min(el.scrollHeight, 120)}px` // Max height 120px
   }
 
   useEffect(() => {
     if (!disabled && inputRef.current && !voiceActive) inputRef.current.focus()
   }, [disabled, voiceActive])
 
-  useEffect(() => { adjustHeight() }, [text])
+  useEffect(() => {
+    adjustHeight() // Adjust height on text change
+  }, [text])
 
   useEffect(() => {
     if (voiceStatus === "error") setVoiceActive(false)
@@ -56,10 +51,21 @@ export default function InputArea({ onSend, disabled, stopAiSpeech }: InputAreaP
 
   const handleSend = () => {
     if (text.trim() && !disabled) {
-      setIsSending(true)
-      setTimeout(() => setIsSending(false), 200)
       onSend(text)
       setText("")
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter") {
+      if (e.shiftKey) {
+        // Shift + Enter for newline
+        // Default browser behavior for textarea already inserts newline
+      } else {
+        // Enter for send
+        e.preventDefault() // Prevent default newline
+        handleSend()
+      }
     }
   }
 
@@ -71,53 +77,38 @@ export default function InputArea({ onSend, disabled, stopAiSpeech }: InputAreaP
     : "tulis apa yang kamu rasakan..."
 
   return (
-    <div className="w-full pt-1 pb-[max(env(safe-area-inset-bottom,8px),8px)] px-3 z-40 border-t border-honey-border bg-honey-bg">
-      <motion.div
-        animate={{
-          borderColor: voiceActive ? voiceColor : isFocused ? "#d4a373" : "#2e2e38",
-        }}
-        transition={{ duration: 0.15, ease: "easeOut" }}
-        className={cn(
-          "flex w-full items-end gap-1.5 rounded-[10px] border bg-honey-input px-2 py-1 shadow-sm transition-shadow duration-150",
-          isFocused && "shadow-glow"
-        )}
-      >
-        <button className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg text-honey-text-muted/50 hover:text-honey-accent hover:bg-white/[0.06] transition-colors self-end">
-          <Plus className="h-[16px] w-[16px]" />
+    <div className="w-full max-w-[680px] mx-auto">
+      <div className="flex items-end gap-2 bg-honey-elevated border border-honey-border rounded-full px-2 py-1 shadow-glow">
+        <button className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-honey-text-muted hover:text-honey-accent hover:bg-white/[0.06] transition-colors">
+          <Plus className="h-[17px] w-[17px]" />
         </button>
 
-        <textarea
+        <textarea // Changed to textarea
           ref={inputRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          onInput={adjustHeight}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend() }
-          }}
+          onKeyDown={handleKeyDown} // New handler
           placeholder={placeholder}
           rows={1}
           readOnly={voiceActive && voiceStatus === "speaking"}
-          className="flex-1 bg-transparent px-1 text-[14px] text-honey-text-primary placeholder:text-honey-text-muted/50 focus:outline-none resize-none leading-relaxed py-1.5 max-h-[80px] font-outfit"
+          className="flex-1 bg-transparent px-2 text-[14.5px] text-honey-text-primary placeholder:text-honey-text-muted/60 focus:outline-none font-sans py-2.5 resize-none overflow-hidden" // Added resize-none and overflow-hidden
           disabled={disabled && !voiceActive}
         />
 
-        <motion.button
+        <button
           type="button"
           onClick={toggleVoice}
-          whileTap={{ scale: 0.9 }}
           className={cn(
-            "flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg transition-colors self-end",
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors",
             voiceActive && voiceStatus === "speaking"
               ? "bg-honey-danger-solid text-white"
               : voiceActive && (voiceStatus === "listening" || voiceStatus === "processing")
                 ? "bg-honey-accent text-honey-bg"
-                : "text-honey-text-muted/50 hover:text-honey-accent hover:bg-white/[0.06]"
+                : "text-honey-text-muted hover:text-honey-accent hover:bg-white/[0.06]"
           )}
         >
           {voiceActive && voiceStatus === "speaking" ? (
-            <Mic className="h-[15px] w-[15px]" />
+            <Mic className="h-[16px] w-[16px]" />
           ) : voiceActive && voiceStatus === "processing" ? (
             <motion.div
               className="h-[14px] w-[14px] rounded-full border-2 border-honey-bg border-t-transparent"
@@ -125,27 +116,34 @@ export default function InputArea({ onSend, disabled, stopAiSpeech }: InputAreaP
               transition={{ duration: 0.6, repeat: Infinity, ease: "linear" }}
             />
           ) : voiceActive && voiceStatus === "error" ? (
-            <MicOff className="h-[15px] w-[15px]" />
+            <MicOff className="h-[16px] w-[16px]" />
           ) : (
-            <Mic className="h-[15px] w-[15px]" />
+            <Mic className="h-[16px] w-[16px]" />
           )}
-        </motion.button>
+        </button>
 
-        <motion.button
+        <button
           onClick={handleSend}
-          animate={{ scale: isSending ? [1, 0.88, 1] : 1 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
           disabled={!text.trim() || disabled || voiceActive}
           className={cn(
-            "flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg transition-colors self-end",
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors",
             text.trim() && !disabled
               ? "bg-honey-accent text-honey-bg"
               : "text-honey-text-muted/50"
           )}
+          style={text.trim() && !disabled ? {
+            background: "linear-gradient(135deg, #f2d4a3, #e8b978)",
+          } : {}}
         >
-          <Send className="h-[14px] w-[14px]" />
-        </motion.button>
-      </motion.div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M4 12L20 4L13 20L11 13L4 12Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      <div className="text-center mt-2.5">
+        <span className="text-[11px] text-honey-text-muted/50">Honey bisa saja keliru. Untuk kondisi darurat, hubungi layanan profesional.</span>
+      </div>
 
       {voiceError && (
         <p className="text-xs text-honey-danger-text text-center mt-2">{voiceError}</p>

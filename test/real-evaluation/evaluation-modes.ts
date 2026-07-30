@@ -1,8 +1,8 @@
 ﻿
 
 import { TestScenario, EvaluationMode, ChatApiConfig } from "@test/types";
-import { callChatApi, DEFAULT_CONFIG } from "./chat-api-wrapper";
-import { mockRetrieve, getVariedResponse } from "@test/mocks";
+import { callChatApi, callRetrieveApi, DEFAULT_CONFIG } from "./chat-api-wrapper";
+import { getVariedResponse } from "@test/mocks";
 import type { ChatApiResponse } from "@test/types";
 
 // INTERFACE MODE EVALUATION
@@ -88,7 +88,7 @@ export class RealMode implements EvaluationModeHandler {
   }> {
     const startTime = Date.now();
 
-    const retrievedChunks = await mockRetrieve(userInput);
+    const retrievedChunks = await callRetrieveApi(userInput, 5, this.apiConfig);
 
     const apiResponse: ChatApiResponse = await callChatApi(
       userInput,

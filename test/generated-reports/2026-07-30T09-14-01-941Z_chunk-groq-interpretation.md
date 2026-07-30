@@ -1,9 +1,9 @@
 # Interpretasi Akademik
 
 ## Executive Summary
-Berdasarkan hasil evaluasi yang dilakukan dengan mode **REAL** terhadap 19 skenario pengujian, sistem RAG chatbot curhat "Honey" menunjukkan kinerja dengan rata-rata skor keseluruhan **19/100**. Dari seluruh skenario yang diuji, sebanyak **0 dari 19 skenario** (0%) memperoleh label GOOD atau ACCEPTABLE, yang menunjukkan bahwa sistem mampu memberikan respons dukungan emosional yang memadai untuk sebagian besar kondisi.
+Berdasarkan hasil evaluasi yang dilakukan dengan mode **REAL** terhadap 19 skenario pengujian, sistem RAG chatbot curhat "Honey" menunjukkan kinerja dengan rata-rata skor keseluruhan **18/100**. Dari seluruh skenario yang diuji, sebanyak **0 dari 19 skenario** (0%) memperoleh label GOOD atau ACCEPTABLE, yang menunjukkan bahwa sistem mampu memberikan respons dukungan emosional yang memadai untuk sebagian besar kondisi.
 
-Rata-rata skor per dimensi menunjukkan bahwa **empati** merupakan dimensi dengan performa terbaik (12/100), diikuti oleh **relevansi** (6/100), **similarity** (7/100), dan **retrieval** (49/100). Hasil ini mengindikasikan bahwa chatbot berhasil menciptakan respons yang hangat dan memvalidasi perasaan pengguna, meskipun masih terdapat ruang untuk peningkatan pada sistem retrieval.
+Rata-rata skor per dimensi menunjukkan bahwa **empati** merupakan dimensi dengan performa terbaik (20/100), diikuti oleh **relevansi** (10/100), **similarity** (16/100), dan **retrieval** (26/100). Hasil ini mengindikasikan bahwa chatbot berhasil menciptakan respons yang hangat dan memvalidasi perasaan pengguna, meskipun masih terdapat ruang untuk peningkatan pada sistem retrieval.
 
 ## Saran
 1. Perluas basis data chunk RAG terutama untuk kategori emosional dengan skor rendah, agar retrieval dapat mengambil konteks yang lebih relevan dan bervariasi.

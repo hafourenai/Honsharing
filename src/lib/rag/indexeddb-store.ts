@@ -205,8 +205,6 @@ export async function retrieve(
 
 
 
-// groq
-
 export interface ChatHistoryItem {
   role: "user" | "assistant"
   content: string
@@ -218,12 +216,35 @@ interface RagSource {
   score: string
 }
 
+async function retrieveFromServer(query: string, topK = 5): Promise<(Chunk & { score: number })[]> {
+  const res = await fetch("/api/retrieve", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query, topK }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data?.error || `Retrieve error ${res.status}`);
+  }
+  const data = await res.json();
+  return data.chunks || [];
+}
+
+async function doRetrieve(query: string, topK = 5): Promise<(Chunk & { score: number })[]> {
+  try {
+    return await retrieveFromServer(query, topK);
+  } catch (err) {
+    console.warn("[RAG] Server retrieve failed, falling back to client:", err);
+    return retrieve(query, topK);
+  }
+}
+
 export async function ragQuery(
   userQuery: string,
   chatHistory: ChatHistoryItem[] = [],
   options: { mode?: ChatMode; username?: string } = {}
 ): Promise<{ answer: string; sources: RagSource[] }> {
-  const relevantChunks = await retrieve(userQuery, 5);
+  const relevantChunks = await doRetrieve(userQuery, 5);
 
   const messages = [
     ...chatHistory,
@@ -272,7 +293,7 @@ export async function ragQueryStream(
   chatHistory: ChatHistoryItem[] = [],
   options: { mode?: ChatMode; username?: string; onToken?: (token: string) => void } = {}
 ): Promise<{ answer: string; sources: RagSource[] }> {
-  const relevantChunks = await retrieve(userQuery, 5);
+  const relevantChunks = await doRetrieve(userQuery, 5);
 
   const messages = [
     ...chatHistory,

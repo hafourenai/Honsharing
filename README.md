@@ -36,8 +36,8 @@ All conversations are stored locally and encrypted, ensuring that personal refle
 
 ### AI & Machine Learning
 
-![Llama](https://img.shields.io/badge/Llama_3.3-70B-purple)
-![Groq](https://img.shields.io/badge/Groq-SDK-orange)
+![Gemini](https://img.shields.io/badge/Gemini_2.0_Flash-Google-blue?logo=google)
+![Groq](https://img.shields.io/badge/Groq_Llama_3.3-Fallback-orange)
 ![Transformers.js](https://img.shields.io/badge/Transformers.js-HuggingFace-yellow?logo=huggingface)
 
 ### Storage
