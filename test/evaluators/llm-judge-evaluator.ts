@@ -86,7 +86,7 @@ Nilai respons ini berdasarkan 4 dimensi di atas. Output JSON.
 
   try {
     const completion = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-3.8-flash",
       contents: userPrompt,
       config: {
         systemInstruction: { role: "user", parts: [{ text: JUDGE_SYSTEM_PROMPT }] },

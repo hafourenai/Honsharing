@@ -1,7 +1,6 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { GoogleGenAI } from "@google/genai";
-import Groq from "groq-sdk";
 import { validateRequest } from "@/lib/auth/validateRequest";
 import { buildSystemPrompt } from "@/lib/rag/promptBuilder";
 import { ChatMode } from "@/lib/systemPrompt";
@@ -9,7 +8,7 @@ import type { Chunk } from "@/lib/rag/promptBuilder";
 import { checkRateLimit, extractIp } from "@/lib/rate-limiter";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const GEMINI_MODELS = ["gemini-3.8-flash", "gemini-flash-latest"] as const;
 
 const ChatMessageSchema = z.object({
   role: z.enum(["user", "assistant"]),
@@ -27,11 +26,12 @@ interface ErrorWithStatus extends Error {
   status: number;
 }
 
-function isQuotaError(error: unknown): boolean {
+function isRetryableModelError(error: unknown): boolean {
   return (
     error instanceof Error &&
     "status" in error &&
-    (error as ErrorWithStatus).status === 429
+    ((error as ErrorWithStatus).status === 429 ||
+      (error as ErrorWithStatus).status === 404)
   );
 }
 
@@ -73,102 +73,64 @@ export async function POST(request: NextRequest) {
 
     async function createRawStream(): Promise<{
       stream: ReadableStream;
-      provider: "gemini" | "groq";
+      provider: "gemini";
     }> {
       const contents = messages.map((m) => ({
         role: m.role === "assistant" ? "model" : "user",
         parts: [{ text: m.content }],
       }));
 
-      try {
-        const geminiStream = await ai.models.generateContentStream({
-          model: "gemini-2.0-flash",
-          contents,
-          config: {
-            systemInstruction: { role: "user", parts: [{ text: systemContent }] },
-            temperature: 0.55,
-            maxOutputTokens: 512,
-            seed: 42,
-          },
-        });
+      let lastError: unknown;
 
-        return {
-          provider: "gemini" as const,
-          stream: new ReadableStream({
-            async start(controller) {
-              try {
-                for await (const chunk of geminiStream) {
-                  const text = chunk.text;
-                  if (text) {
-                    controller.enqueue(
-                      encoder.encode(`data: ${JSON.stringify({ content: text })}\n\n`)
-                    );
-                  }
-                }
-                controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-              } catch (err) {
-                controller.enqueue(
-                  encoder.encode(
-                    `data: ${JSON.stringify({ error: err instanceof Error ? err.message : "Stream error" })}\n\n`
-                  )
-                );
-              } finally {
-                controller.close();
-              }
+      for (const model of GEMINI_MODELS) {
+        try {
+          const geminiStream = await ai.models.generateContentStream({
+            model,
+            contents,
+            config: {
+              systemInstruction: { role: "user", parts: [{ text: systemContent }] },
+              temperature: 0.55,
+              maxOutputTokens: 512,
+              seed: 42,
             },
-          }),
-        };
-      } catch (error) {
-        if (!isQuotaError(error)) throw error;
-        console.warn("Gemini quota exceeded, falling back to Groq");
-      }
+          });
 
-      const groqMessages: Array<{
-        role: "system" | "user" | "assistant";
-        content: string;
-      }> = [{ role: "system", content: systemContent }];
-
-      for (const m of messages) {
-        groqMessages.push({
-          role: m.role === "assistant" ? "assistant" : "user",
-          content: m.content,
-        });
-      }
-
-      const groqStream = await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
-        messages: groqMessages,
-        temperature: 0.55,
-        max_tokens: 512,
-        stream: true,
-      });
-
-      return {
-        provider: "groq" as const,
-        stream: new ReadableStream({
-          async start(controller) {
-            try {
-              for await (const chunk of groqStream) {
-                const text = chunk.choices[0]?.delta?.content || "";
-                if (text) {
+          return {
+            provider: "gemini" as const,
+            stream: new ReadableStream({
+              async start(controller) {
+                try {
+                  for await (const chunk of geminiStream) {
+                    const text = chunk.text;
+                    if (text) {
+                      controller.enqueue(
+                        encoder.encode(`data: ${JSON.stringify({ content: text })}\n\n`)
+                      );
+                    }
+                  }
+                  controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+                } catch (err) {
                   controller.enqueue(
-                    encoder.encode(`data: ${JSON.stringify({ content: text })}\n\n`)
+                    encoder.encode(
+                      `data: ${JSON.stringify({ error: err instanceof Error ? err.message : "Stream error" })}\n\n`
+                    )
                   );
+                } finally {
+                  controller.close();
                 }
-              }
-              controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-            } catch (err) {
-              controller.enqueue(
-                encoder.encode(
-                  `data: ${JSON.stringify({ error: err instanceof Error ? err.message : "Stream error" })}\n\n`
-                )
-              );
-            } finally {
-              controller.close();
-            }
-          },
-        }),
-      };
+              },
+            }),
+          };
+        } catch (error) {
+          lastError = error;
+          if (!isRetryableModelError(error)) throw error;
+          console.warn(`Gemini model ${model} unavailable, trying fallback`);
+        }
+      }
+
+      throw lastError instanceof Error
+        ? lastError
+        : new Error("Semua model Gemini sedang tidak tersedia");
     }
 
     const { stream } = await createRawStream();

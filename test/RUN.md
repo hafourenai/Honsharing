@@ -55,10 +55,10 @@ console.log(`Empathy: ${empathy.finalScore}`)
 
 ## 4. Evaluasi Real (API Asli)
 
-Memanggil chatbot asli via **Gemini 2.0 Flash** (primary) dengan **Groq Llama 3.3-70b** sebagai fallback otomatis jika Gemini kena rate limit.
+Memanggil chatbot asli via **Gemini 3.8 Flash** dengan alias **Gemini Flash Latest** sebagai fallback otomatis.
 
 ### Prasyarat
-- `GEMINI_API_KEY` dan/atau `GROQ_API_KEY` terisi di `.env`
+- `GEMINI_API_KEY` terisi di `.env`
 - `npm install` sudah dijalankan
 
 ### Cara Jalankan
@@ -76,9 +76,9 @@ npx tsx test/examples/evaluate-chunks-with-groq.ts
 ### Fallback Behavior
 | Skenario | Provider |
 |----------|----------|
-| Gemini available | ✅ `gemini-2.0-flash` |
-| Gemini 429 (quota) | ➡️ Fallback ke Groq `llama-3.3-70b-versatile` |
-| Keduanya gagal | ❌ Error response |
+| Gemini available | ✅ `gemini-3.8-flash` |
+| Gemini 3.8 terkena 404/429 | ➡️ Fallback ke `gemini-flash-latest` |
+| Semua model Gemini gagal | ❌ Error response |
 
 ### Rate Limiting (Built-in)
 | Situasi | Penanganan |

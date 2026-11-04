@@ -193,14 +193,14 @@ Setiap evaluator menghasilkan skor **0–100** dengan kategori:
 
 ### 3.3 Provider AI
 
-Sistem mendukung **dua provider AI** dengan fallback otomatis:
+Endpoint chat memakai Gemini dengan fallback model otomatis:
 
 | Provider | Model | Peran | API Key |
 |----------|-------|-------|---------|
-| **Gemini** (primary) | `gemini-2.0-flash` | Chat default | `GEMINI_API_KEY` |
-| **Groq** (fallback) | `llama-3.3-70b-versatile` | Dipakai jika Gemini 429 (quota habis) | `GROQ_API_KEY` |
+| **Gemini** (primary) | `gemini-3.8-flash` | Chat default | `GEMINI_API_KEY` |
+| **Gemini** (fallback) | `gemini-flash-latest` | Dipakai jika model utama terkena 404/429 | `GEMINI_API_KEY` |
 
-Ketika kuota Gemini habis, `/api/chat` otomatis beralih ke Groq tanpa perubahan kode.
+Ketika model utama tidak tersedia, `/api/chat` otomatis beralih ke alias Gemini Flash terbaru.
 
 ### 3.5 Bobot Penilaian
 
