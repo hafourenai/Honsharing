@@ -41,11 +41,14 @@ const nextConfig: NextConfig = {
 
 // Runtime Check: Ensure critical env vars are set in production
 if (process.env.NODE_ENV === "production") {
-  const required = ["GROQ_API_KEY", "SESSION_SECRET"];
-  const missing = required.filter((key) => !process.env[key]);
+  const missing: string[] = [];
+  if (!process.env.SESSION_SECRET) missing.push("SESSION_SECRET");
+  if (!process.env.GEMINI_API_KEY && !process.env.GROQ_API_KEY) {
+    missing.push("GEMINI_API_KEY or GROQ_API_KEY");
+  }
   if (missing.length > 0) {
     console.error(`\u001b[31m[CRITICAL] Missing required environment variables: ${missing.join(", ")}\u001b[0m`);
-    console.error(`\u001b[33mPlease set these in the Vercel dashboard.\u001b[0m`);
+    console.error(`\u001b[33mPlease set these in your deployment dashboard.\u001b[0m`);
   }
 }
 

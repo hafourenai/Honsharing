@@ -1,6 +1,21 @@
 import { GoogleGenAI } from "@google/genai";
+import Groq from "groq-sdk";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const ai = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }) : null;
+const groq = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null;
+
+const JUDGE_GEMINI_MODELS = [
+  "gemini-3.8-flash",
+  "gemini-3.6-flash",
+  "gemini-3.5-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-flash-latest",
+];
+
+const JUDGE_GROQ_MODELS = [
+  "openai/gpt-oss-120b",
+  "qwen/qwen3.8-27b",
+];
 
 export interface LLMJudgeScore {
   faithfulness: number;
@@ -84,21 +99,58 @@ ${retrievedContext || "(Tidak ada konteks)"}
 Nilai respons ini berdasarkan 4 dimensi di atas. Output JSON.
 `;
 
-  try {
-    const completion = await ai.models.generateContent({
-      model: "gemini-3.8-flash",
-      contents: userPrompt,
-      config: {
-        systemInstruction: { role: "user", parts: [{ text: JUDGE_SYSTEM_PROMPT }] },
-        temperature: 0.1,
-        maxOutputTokens: 600,
-        responseMimeType: "application/json",
-        seed: 42,
-      },
-    });
+  let rawJson = "";
 
-    const raw = completion.text || "{}";
-    const parsed = JSON.parse(raw);
+  if (ai) {
+    for (const model of JUDGE_GEMINI_MODELS) {
+      try {
+        const config: Record<string, unknown> = {
+          systemInstruction: { role: "user", parts: [{ text: JUDGE_SYSTEM_PROMPT }] },
+          temperature: 0.1,
+          maxOutputTokens: 600,
+          responseMimeType: "application/json",
+          seed: 42,
+        };
+        if (!model.includes("-lite")) {
+          config.thinkingConfig = { thinkingBudget: 0 };
+        }
+        const completion = await ai.models.generateContent({
+          model,
+          contents: userPrompt,
+          config,
+        });
+        rawJson = completion.text || "{}";
+        break;
+      } catch (e) {
+        console.warn(`[Judge Fallback] Gemini model ${model} failed, trying next candidate...`);
+      }
+    }
+  }
+
+  if (!rawJson && groq) {
+    for (const model of JUDGE_GROQ_MODELS) {
+      try {
+        const completion = await groq.chat.completions.create({
+          model,
+          messages: [
+            { role: "system", content: JUDGE_SYSTEM_PROMPT },
+            { role: "user", content: userPrompt },
+          ],
+          temperature: 0.1,
+          max_tokens: 600,
+          response_format: { type: "json_object" },
+        });
+        rawJson = completion.choices[0]?.message?.content || "{}";
+        break;
+      } catch (e) {
+        console.warn(`[Judge Fallback] Groq model ${model} failed, trying next candidate...`);
+      }
+    }
+  }
+
+  try {
+    if (!rawJson) throw new Error("Semua model judge tidak tersedia");
+    const parsed = JSON.parse(rawJson);
 
     const faithfulness = clamp(parsed.faithfulness ?? 50);
     const answerRelevancy = clamp(parsed.answerRelevancy ?? 50);

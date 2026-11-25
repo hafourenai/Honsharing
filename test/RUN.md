@@ -55,17 +55,17 @@ console.log(`Empathy: ${empathy.finalScore}`)
 
 ## 4. Evaluasi Real (API Asli)
 
-Memanggil chatbot asli via **Gemini 3.8 Flash** dengan alias **Gemini Flash Latest** sebagai fallback otomatis.
+Memanggil chatbot asli dengan multi-provider fallback otomatis (**Google AI Studio Gemini 3** dan **Groq Qwen / GPT-OSS**).
 
 ### Prasyarat
-- `GEMINI_API_KEY` terisi di `.env`
+- `GEMINI_API_KEY` dan/atau `GROQ_API_KEY` terisi di `.env`
 - `npm install` sudah dijalankan
 
 ### Cara Jalankan
 
 **Terminal 1** — Jalankan server Next.js:
 ```bash
-npm run dev     # default: http://localhost:3001
+npm run dev     # default: http://localhost:3000
 ```
 
 **Terminal 2** — Jalankan evaluasi REAL (chunk-driven, 19 skenario):
@@ -74,11 +74,13 @@ npx tsx test/examples/evaluate-chunks-with-groq.ts
 ```
 
 ### Fallback Behavior
-| Skenario | Provider |
-|----------|----------|
-| Gemini available | ✅ `gemini-3.8-flash` |
-| Gemini 3.8 terkena 404/429 | ➡️ Fallback ke `gemini-flash-latest` |
-| Semua model Gemini gagal | ❌ Error response |
+| Skenario | Provider / Model Aktif |
+|----------|------------------------|
+| Gemini available | ✅ `gemini-3.8-flash` / `gemini-3.6-flash` |
+| Gemini terkena 503 / 429 / 404 | ➡️ Otomatis beralih ke `gemini-3.5-flash` / `gemini-3.5-flash-lite` |
+| Semua model Gemini gagal / tanpa key | ➡️ Otomatis fallback ke Groq (`openai/gpt-oss-120b`, `qwen/qwen3.8-27b`, `openai/gpt-oss-20b`) |
+| Auto-title (`/api/title`) | ⚡ Groq `qwen/qwen3.8-27b` $\rightarrow$ Gemini `gemini-3.5-flash-lite` |
+| Speech-to-Text (`/api/stt`) | 🎙️ Groq `whisper-large-v3-turbo` $\rightarrow$ `whisper-large-v3` $\rightarrow$ Gemini |
 
 ### Rate Limiting (Built-in)
 | Situasi | Penanganan |

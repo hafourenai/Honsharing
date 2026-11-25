@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import Groq from "groq-sdk";
 import { validateRequest } from "@/lib/auth/validateRequest";
 import { checkRateLimit, extractIp } from "@/lib/rate-limiter";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+import { transcribeAudioFile } from "@/lib/llm/providers";
 
 export async function POST(request: NextRequest) {
   const auth = await validateRequest();
@@ -24,16 +22,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "File audio diperlukan" }, { status: 400 });
     }
 
-    const transcription = await groq.audio.transcriptions.create({
-      file: audioFile,
-      model: "whisper-large-v3-turbo",
-      language: "id",
-      response_format: "json",
-    });
+    const { transcript, provider, model } = await transcribeAudioFile(audioFile);
 
-    const transcript = transcription.text ?? "";
-
-    return NextResponse.json({ transcript });
+    return NextResponse.json(
+      { transcript },
+      {
+        headers: {
+          "X-LLM-Provider": provider,
+          "X-LLM-Model": model,
+        },
+      }
+    );
   } catch (error: unknown) {
     console.error("STT API error:", error);
     const msg = error instanceof Error ? error.message : "Gagal memproses audio";
